@@ -1,0 +1,6183 @@
+[
+  {
+    "id": "js-closures",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "technical",
+    "skills": [
+      "javascript"
+    ],
+    "question": "How do closures work in JavaScript, and what are some practical use cases where you would rely on them?",
+    "followUps": {
+      "strong": [
+        "js-closures-followup-strong"
+      ],
+      "neutral": [
+        "js-closures-followup-neutral"
+      ],
+      "weak": [
+        "js-closures-followup-weak"
+      ]
+    }
+  },
+  {
+    "id": "js-closures-followup-strong",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "If you use closures extensively, how do you prevent memory leaks associated with them?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "js-closures-followup-neutral",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "Can you write a brief example showing how a closure maintains access to its outer scope?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "js-closures-followup-weak",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What exactly is the scope chain, and how does it relate to the concept of a closure?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "js-eventloop",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "technical",
+    "skills": [
+      "javascript",
+      "node.js"
+    ],
+    "question": "Explain the JavaScript event loop. How do microtasks and macrotasks differ in execution priority?",
+    "followUps": {
+      "strong": [
+        "js-eventloop-followup-strong"
+      ],
+      "neutral": [
+        "js-eventloop-followup-neutral"
+      ],
+      "weak": [
+        "js-eventloop-followup-weak"
+      ]
+    }
+  },
+  {
+    "id": "js-eventloop-followup-strong",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How does this execution model impact CPU-intensive operations, and what architectural solutions mitigate this?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "js-eventloop-followup-neutral",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "Could you trace the execution order if we have a setTimeout and a Promise.resolve in the same block?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "js-eventloop-followup-weak",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "Why is JavaScript considered single-threaded if it can handle asynchronous operations?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "react-hooks",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "BEGINNER",
+    "category": "technical",
+    "skills": [
+      "react"
+    ],
+    "question": "What are React Hooks, and what problems do they solve compared to class components?",
+    "followUps": {
+      "strong": [
+        "react-hooks-followup-strong"
+      ],
+      "neutral": [
+        "react-hooks-followup-neutral"
+      ],
+      "weak": [
+        "react-hooks-followup-weak"
+      ]
+    }
+  },
+  {
+    "id": "react-hooks-followup-strong",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "BEGINNER",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How does React internally track the state of hooks between renders?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "react-hooks-followup-neutral",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "BEGINNER",
+    "category": "follow-up",
+    "skills": [],
+    "question": "Can you explain the rules of hooks and why they cannot be called conditionally?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "react-hooks-followup-weak",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "BEGINNER",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What is the primary difference between state and props in a React component?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "react-perf",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "technical",
+    "skills": [
+      "react",
+      "performance"
+    ],
+    "question": "Describe how you would identify and resolve unnecessary re-renders in a complex React application.",
+    "followUps": {
+      "strong": [
+        "react-perf-followup-strong"
+      ],
+      "neutral": [
+        "react-perf-followup-neutral"
+      ],
+      "weak": [
+        "react-perf-followup-weak"
+      ]
+    }
+  },
+  {
+    "id": "react-perf-followup-strong",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "When would you choose useMemo over React.memo, and what are the hidden costs of memoization?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "react-perf-followup-neutral",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "Can you provide an example of how you used the React Profiler to find a bottleneck?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "react-perf-followup-weak",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What exactly triggers a component to re-render in React by default?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "node-async",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "technical",
+    "skills": [
+      "node.js",
+      "backend"
+    ],
+    "question": "How does Node.js handle high-concurrency without creating a new OS thread per request?",
+    "followUps": {
+      "strong": [
+        "node-async-followup-strong"
+      ],
+      "neutral": [
+        "node-async-followup-neutral"
+      ],
+      "weak": [
+        "node-async-followup-weak"
+      ]
+    }
+  },
+  {
+    "id": "node-async-followup-strong",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "If your application is blocking the event loop with synchronous cryptography, how would you fix it using Worker Threads?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "node-async-followup-neutral",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "Can you explain how the libuv library contributes to Node.js asynchronous I/O?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "node-async-followup-weak",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What is a callback function and why is it used heavily in older Node APIs?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "mongo-schema",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "technical",
+    "skills": [
+      "mongodb",
+      "databases"
+    ],
+    "question": "When designing a schema in MongoDB, how do you decide between embedding documents versus referencing them?",
+    "followUps": {
+      "strong": [
+        "mongo-schema-followup-strong"
+      ],
+      "neutral": [
+        "mongo-schema-followup-neutral"
+      ],
+      "weak": [
+        "mongo-schema-followup-weak"
+      ]
+    }
+  },
+  {
+    "id": "mongo-schema-followup-strong",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How does document size limit affect your decision, and how do you handle unbounded arrays?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "mongo-schema-followup-neutral",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "Can you give an example of a relationship that is strictly better as a reference?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "mongo-schema-followup-weak",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What is the fundamental difference between a NoSQL database like MongoDB and a relational database?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "sql-joins",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "BEGINNER",
+    "category": "technical",
+    "skills": [
+      "sql",
+      "databases"
+    ],
+    "question": "Can you explain the difference between an INNER JOIN and a LEFT JOIN in SQL?",
+    "followUps": {
+      "strong": [
+        "sql-joins-followup-strong"
+      ],
+      "neutral": [
+        "sql-joins-followup-neutral"
+      ],
+      "weak": [
+        "sql-joins-followup-weak"
+      ]
+    }
+  },
+  {
+    "id": "sql-joins-followup-strong",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "BEGINNER",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How do you optimize join performance across tables containing millions of rows?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "sql-joins-followup-neutral",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "BEGINNER",
+    "category": "follow-up",
+    "skills": [],
+    "question": "Provide an example scenario where a FULL OUTER JOIN would be the only correct approach.",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "sql-joins-followup-weak",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "BEGINNER",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What is a primary key, and how does it relate to foreign keys when joining tables?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "oop-poly",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "technical",
+    "skills": [
+      "oop",
+      "architecture"
+    ],
+    "question": "What is polymorphism in Object-Oriented Programming, and how does it enhance code maintainability?",
+    "followUps": {
+      "strong": [
+        "oop-poly-followup-strong"
+      ],
+      "neutral": [
+        "oop-poly-followup-neutral"
+      ],
+      "weak": [
+        "oop-poly-followup-weak"
+      ]
+    }
+  },
+  {
+    "id": "oop-poly-followup-strong",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How does polymorphism interact with the Liskov Substitution Principle?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "oop-poly-followup-neutral",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "Can you provide a code example where you used interfaces to achieve polymorphic behavior?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "oop-poly-followup-weak",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What is the difference between overriding and overloading a method?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "sys-rate-limit",
+    "domain": "Software Engineering",
+    "type": "SYSTEM_DESIGN",
+    "difficulty": "ADVANCED",
+    "category": "technical",
+    "skills": [
+      "system design",
+      "rate limiting",
+      "distributed systems"
+    ],
+    "question": "How would you design a distributed rate limiter for a public-facing API?",
+    "followUps": {
+      "strong": [
+        "sys-rate-limit-followup-strong"
+      ],
+      "neutral": [
+        "sys-rate-limit-followup-neutral"
+      ],
+      "weak": [
+        "sys-rate-limit-followup-weak"
+      ]
+    }
+  },
+  {
+    "id": "sys-rate-limit-followup-strong",
+    "domain": "Software Engineering",
+    "type": "SYSTEM_DESIGN",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "If a Redis instance storing your rate limit counters fails, how does your system recover without allowing a flood of requests?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "sys-rate-limit-followup-neutral",
+    "domain": "Software Engineering",
+    "type": "SYSTEM_DESIGN",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "Compare the token bucket algorithm with the sliding window log algorithm for this use case.",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "sys-rate-limit-followup-weak",
+    "domain": "Software Engineering",
+    "type": "SYSTEM_DESIGN",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What is the basic purpose of rate limiting in a web architecture?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "beh-conflict",
+    "domain": "Software Engineering",
+    "type": "BEHAVIORAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "behavioral",
+    "skills": [
+      "conflict resolution",
+      "communication"
+    ],
+    "question": "Describe a time when you had a fundamental technical disagreement with a senior engineer. How did you handle it?",
+    "followUps": {
+      "strong": [
+        "beh-conflict-followup-strong"
+      ],
+      "neutral": [
+        "beh-conflict-followup-neutral"
+      ],
+      "weak": [
+        "beh-conflict-followup-weak"
+      ]
+    }
+  },
+  {
+    "id": "beh-conflict-followup-strong",
+    "domain": "Software Engineering",
+    "type": "BEHAVIORAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "If the decision ultimately went against your recommendation and later caused a production incident, how would you address it post-mortem?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "beh-conflict-followup-neutral",
+    "domain": "Software Engineering",
+    "type": "BEHAVIORAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What specific data or metrics did you bring to the discussion to support your view?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "beh-conflict-followup-weak",
+    "domain": "Software Engineering",
+    "type": "BEHAVIORAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "Why is it important to maintain professional communication during disagreements?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "js-event-loop-1",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "technical",
+    "skills": [
+      "javascript",
+      "performance"
+    ],
+    "question": "How does the JavaScript event loop handle promises differently than setTimeout callbacks?",
+    "followUps": {
+      "strong": [
+        "js-event-loop-1-s"
+      ],
+      "neutral": [
+        "js-event-loop-1-n"
+      ],
+      "weak": [
+        "js-event-loop-1-w"
+      ]
+    }
+  },
+  {
+    "id": "js-event-loop-1-s",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What happens if a microtask recursively queues another microtask?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "js-event-loop-1-n",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "Where do DOM events fit into the macrotask and microtask queues?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "js-event-loop-1-w",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What is the difference between synchronous and asynchronous code in JavaScript?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "js-hoisting-let",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "BEGINNER",
+    "category": "technical",
+    "skills": [
+      "javascript"
+    ],
+    "question": "Explain the Temporal Dead Zone in JavaScript and how it affects let and const declarations.",
+    "followUps": {
+      "strong": [
+        "js-hoisting-let-s"
+      ],
+      "neutral": [
+        "js-hoisting-let-n"
+      ],
+      "weak": [
+        "js-hoisting-let-w"
+      ]
+    }
+  },
+  {
+    "id": "js-hoisting-let-s",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "BEGINNER",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How does the Babel transpiler typically simulate block scoping for older browser targets?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "js-hoisting-let-n",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "BEGINNER",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What error is thrown when you access a let variable before its declaration?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "js-hoisting-let-w",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "BEGINNER",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What is hoisting and does it apply to var variables?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "js-this-context",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "technical",
+    "skills": [
+      "javascript",
+      "oop"
+    ],
+    "question": "How is the \"this\" keyword resolved in an arrow function compared to a standard function?",
+    "followUps": {
+      "strong": [
+        "js-this-context-s"
+      ],
+      "neutral": [
+        "js-this-context-n"
+      ],
+      "weak": [
+        "js-this-context-w"
+      ]
+    }
+  },
+  {
+    "id": "js-this-context-s",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "Can you use the bind method on an arrow function to change its context?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "js-this-context-n",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What happens to \"this\" when a standard class method is passed as a callback to an event listener?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "js-this-context-w",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How do you access the global window object in JavaScript?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "js-memory-leaks",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "technical",
+    "skills": [
+      "javascript",
+      "performance"
+    ],
+    "question": "Describe common patterns in Single Page Applications that lead to JavaScript memory leaks.",
+    "followUps": {
+      "strong": [
+        "js-memory-leaks-s"
+      ],
+      "neutral": [
+        "js-memory-leaks-n"
+      ],
+      "weak": [
+        "js-memory-leaks-w"
+      ]
+    }
+  },
+  {
+    "id": "js-memory-leaks-s",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How do weak references via WeakMap or WeakSet help mitigate cache-related memory leaks?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "js-memory-leaks-n",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What tools would you use in Chrome DevTools to trace a detached DOM node?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "js-memory-leaks-w",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What does the JavaScript garbage collector do?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "js-promises-concurrency",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "technical",
+    "skills": [
+      "javascript"
+    ],
+    "question": "When would you choose Promise.allSettled over Promise.all?",
+    "followUps": {
+      "strong": [
+        "js-promises-concurrency-s"
+      ],
+      "neutral": [
+        "js-promises-concurrency-n"
+      ],
+      "weak": [
+        "js-promises-concurrency-w"
+      ]
+    }
+  },
+  {
+    "id": "js-promises-concurrency-s",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How would you implement a concurrency limiter for an array of a thousand promise-returning functions?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "js-promises-concurrency-n",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What happens to the remaining promises in Promise.all if one of them rejects early?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "js-promises-concurrency-w",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How do you catch an error in a standard Promise chain?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "js-prototypal-inheritance",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "technical",
+    "skills": [
+      "javascript",
+      "oop"
+    ],
+    "question": "How does prototypal inheritance differ fundamentally from classical class-based inheritance in memory allocation?",
+    "followUps": {
+      "strong": [
+        "js-prototypal-inheritance-s"
+      ],
+      "neutral": [
+        "js-prototypal-inheritance-n"
+      ],
+      "weak": [
+        "js-prototypal-inheritance-w"
+      ]
+    }
+  },
+  {
+    "id": "js-prototypal-inheritance-s",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How does the Object.create method manipulate the prototype chain under the hood?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "js-prototypal-inheritance-n",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What is the practical difference between __proto__ and Object.getPrototypeOf?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "js-prototypal-inheritance-w",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How do you define a class in modern ES6 JavaScript?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "js-modules",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "BEGINNER",
+    "category": "technical",
+    "skills": [
+      "javascript",
+      "architecture"
+    ],
+    "question": "What are the key differences between CommonJS and ES Modules?",
+    "followUps": {
+      "strong": [
+        "js-modules-s"
+      ],
+      "neutral": [
+        "js-modules-n"
+      ],
+      "weak": [
+        "js-modules-w"
+      ]
+    }
+  },
+  {
+    "id": "js-modules-s",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "BEGINNER",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How do ES Modules handle cyclic dependencies compared to CommonJS?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "js-modules-n",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "BEGINNER",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What does it mean when a module is imported asynchronously using dynamic import()?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "js-modules-w",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "BEGINNER",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How do you export a function as a default export in ES6?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "js-event-delegation",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "BEGINNER",
+    "category": "technical",
+    "skills": [
+      "javascript",
+      "frontend"
+    ],
+    "question": "Why is event delegation often preferred over attaching listeners to individual child elements?",
+    "followUps": {
+      "strong": [
+        "js-event-delegation-s"
+      ],
+      "neutral": [
+        "js-event-delegation-n"
+      ],
+      "weak": [
+        "js-event-delegation-w"
+      ]
+    }
+  },
+  {
+    "id": "js-event-delegation-s",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "BEGINNER",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How does the event.stopPropagation method impact event delegation patterns?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "js-event-delegation-n",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "BEGINNER",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How can you determine which specific child element triggered the delegated event?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "js-event-delegation-w",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "BEGINNER",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What is the difference between event bubbling and event capturing?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "js-functional-purity",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "technical",
+    "skills": [
+      "javascript",
+      "immutability"
+    ],
+    "question": "What makes a JavaScript function \"pure\", and why is this concept valuable in modern frameworks?",
+    "followUps": {
+      "strong": [
+        "js-functional-purity-s"
+      ],
+      "neutral": [
+        "js-functional-purity-n"
+      ],
+      "weak": [
+        "js-functional-purity-w"
+      ]
+    }
+  },
+  {
+    "id": "js-functional-purity-s",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How do you handle necessary side effects, like API calls, in a strictly functional architecture?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "js-functional-purity-n",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What are the performance implications of heavily using spread syntax to maintain immutability?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "js-functional-purity-w",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What is the purpose of the Array.map method?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "js-generators",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "technical",
+    "skills": [
+      "javascript"
+    ],
+    "question": "In what scenarios would you utilize generator functions instead of standard async/await?",
+    "followUps": {
+      "strong": [
+        "js-generators-s"
+      ],
+      "neutral": [
+        "js-generators-n"
+      ],
+      "weak": [
+        "js-generators-w"
+      ]
+    }
+  },
+  {
+    "id": "js-generators-s",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How can a two-way communication channel be established using generator yield statements?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "js-generators-n",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How does the Redux Saga library leverage generators to manage side effects?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "js-generators-w",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What is the syntax used to declare a generator function in JavaScript?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "react-reconciliation",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "technical",
+    "skills": [
+      "react",
+      "performance"
+    ],
+    "question": "How does React reconcile changes in the virtual DOM when rendering lists of elements?",
+    "followUps": {
+      "strong": [
+        "react-reconciliation-s"
+      ],
+      "neutral": [
+        "react-reconciliation-n"
+      ],
+      "weak": [
+        "react-reconciliation-w"
+      ]
+    }
+  },
+  {
+    "id": "react-reconciliation-s",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "Why is using an array index as a key considered an anti-pattern in dynamic lists?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "react-reconciliation-n",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What heuristics does the diffing algorithm use to achieve O(N) complexity?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "react-reconciliation-w",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "Why does React require a key prop for list items?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "react-context-perf",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "technical",
+    "skills": [
+      "react",
+      "performance"
+    ],
+    "question": "How can placing frequently updating values in a global React Context cause performance bottlenecks?",
+    "followUps": {
+      "strong": [
+        "react-context-perf-s"
+      ],
+      "neutral": [
+        "react-context-perf-n"
+      ],
+      "weak": [
+        "react-context-perf-w"
+      ]
+    }
+  },
+  {
+    "id": "react-context-perf-s",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How would you split a unified context to prevent unnecessary re-renders of consuming components?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "react-context-perf-n",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "When would you choose a state management library over standard Context API for deeply nested state?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "react-context-perf-w",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How do you consume a context value using hooks?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "react-use-effect",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "BEGINNER",
+    "category": "technical",
+    "skills": [
+      "react"
+    ],
+    "question": "Explain the purpose of the dependency array in the useEffect hook.",
+    "followUps": {
+      "strong": [
+        "react-use-effect-s"
+      ],
+      "neutral": [
+        "react-use-effect-n"
+      ],
+      "weak": [
+        "react-use-effect-w"
+      ]
+    }
+  },
+  {
+    "id": "react-use-effect-s",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "BEGINNER",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What happens if you omit the dependency array entirely versus passing an empty array?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "react-use-effect-n",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "BEGINNER",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How do you properly clean up event listeners attached inside a useEffect?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "react-use-effect-w",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "BEGINNER",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What is the syntax for the useEffect hook?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "react-custom-hooks",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "technical",
+    "skills": [
+      "react",
+      "architecture"
+    ],
+    "question": "What are the architectural benefits of extracting component logic into custom React hooks?",
+    "followUps": {
+      "strong": [
+        "react-custom-hooks-s"
+      ],
+      "neutral": [
+        "react-custom-hooks-n"
+      ],
+      "weak": [
+        "react-custom-hooks-w"
+      ]
+    }
+  },
+  {
+    "id": "react-custom-hooks-s",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How do you ensure a custom hook does not violate the Rules of Hooks during conditional execution?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "react-custom-hooks-n",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "Describe a scenario where a custom hook returning a memoized callback is necessary.",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "react-custom-hooks-w",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What prefix must all custom hook names start with?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "react-ssr-hydration",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "technical",
+    "skills": [
+      "react",
+      "frontend",
+      "performance"
+    ],
+    "question": "Describe the hydration process in React Server-Side Rendering and common issues that disrupt it.",
+    "followUps": {
+      "strong": [
+        "react-ssr-hydration-s"
+      ],
+      "neutral": [
+        "react-ssr-hydration-n"
+      ],
+      "weak": [
+        "react-ssr-hydration-w"
+      ]
+    }
+  },
+  {
+    "id": "react-ssr-hydration-s",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How do React 18 Server Components differ from traditional SSR in terms of client bundle size?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "react-ssr-hydration-n",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What causes a \"hydration mismatch\" error between the server HTML and client render?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "react-ssr-hydration-w",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What is the main benefit of rendering React on the server?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "react-state-batching",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "technical",
+    "skills": [
+      "react"
+    ],
+    "question": "How does React batch state updates, and what changed regarding batching in React 18?",
+    "followUps": {
+      "strong": [
+        "react-state-batching-s"
+      ],
+      "neutral": [
+        "react-state-batching-n"
+      ],
+      "weak": [
+        "react-state-batching-w"
+      ]
+    }
+  },
+  {
+    "id": "react-state-batching-s",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "If you need to read the immediate DOM layout after a state change, which hook should you use?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "react-state-batching-n",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "Why might calling a state setter twice synchronously not increment a counter by two?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "react-state-batching-w",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How do you declare a state variable in a functional component?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "react-suspense",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "technical",
+    "skills": [
+      "react",
+      "frontend"
+    ],
+    "question": "How does React Suspense coordinate loading states for deeply nested asynchronous components?",
+    "followUps": {
+      "strong": [
+        "react-suspense-s"
+      ],
+      "neutral": [
+        "react-suspense-n"
+      ],
+      "weak": [
+        "react-suspense-w"
+      ]
+    }
+  },
+  {
+    "id": "react-suspense-s",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How do concurrent rendering features in React 18 interact with Suspense boundaries?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "react-suspense-n",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How would you handle deliberate fallback delays to avoid flashing loading spinners too quickly?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "react-suspense-w",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What component is used to wrap a lazy-loaded route in React?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "react-refs",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "BEGINNER",
+    "category": "technical",
+    "skills": [
+      "react"
+    ],
+    "question": "When is it appropriate to use useRef instead of useState in a React component?",
+    "followUps": {
+      "strong": [
+        "react-refs-s"
+      ],
+      "neutral": [
+        "react-refs-n"
+      ],
+      "weak": [
+        "react-refs-w"
+      ]
+    }
+  },
+  {
+    "id": "react-refs-s",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "BEGINNER",
+    "category": "follow-up",
+    "skills": [],
+    "question": "Why does mutating a ref current value not trigger a component re-render?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "react-refs-n",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "BEGINNER",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How do you attach a ref to a standard DOM element?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "react-refs-w",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "BEGINNER",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What does the useRef hook return?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "react-portals",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "technical",
+    "skills": [
+      "react",
+      "frontend"
+    ],
+    "question": "What architectural problem do React Portals solve when building UI components like modals?",
+    "followUps": {
+      "strong": [
+        "react-portals-s"
+      ],
+      "neutral": [
+        "react-portals-n"
+      ],
+      "weak": [
+        "react-portals-w"
+      ]
+    }
+  },
+  {
+    "id": "react-portals-s",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How does event bubbling behave for events originating inside a React Portal?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "react-portals-n",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "Why might you face z-index issues without using portals for floating elements?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "react-portals-w",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What DOM element is typically used as the mount point for a React application?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "react-memoization",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "technical",
+    "skills": [
+      "react",
+      "optimization"
+    ],
+    "question": "Explain the trade-offs of using useMemo and React.memo everywhere in a React application.",
+    "followUps": {
+      "strong": [
+        "react-memoization-s"
+      ],
+      "neutral": [
+        "react-memoization-n"
+      ],
+      "weak": [
+        "react-memoization-w"
+      ]
+    }
+  },
+  {
+    "id": "react-memoization-s",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How does passing inline arrow functions as props defeat the purpose of React.memo?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "react-memoization-n",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "In what specific scenarios does the memory overhead of memoization outweigh the rendering cost?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "react-memoization-w",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What hook is used to memoize a function definition?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "node-event-loop",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "technical",
+    "skills": [
+      "node.js",
+      "architecture"
+    ],
+    "question": "Describe the different phases of the Node.js event loop and what queues execute between them.",
+    "followUps": {
+      "strong": [
+        "node-event-loop-s"
+      ],
+      "neutral": [
+        "node-event-loop-n"
+      ],
+      "weak": [
+        "node-event-loop-w"
+      ]
+    }
+  },
+  {
+    "id": "node-event-loop-s",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "Why might process.nextTick starve the I/O polling phase if used recursively?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "node-event-loop-n",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How does the libuv thread pool handle file system operations asynchronously?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "node-event-loop-w",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What engine powers Node.js under the hood?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "node-streams",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "technical",
+    "skills": [
+      "node.js",
+      "performance"
+    ],
+    "question": "How do Node.js streams improve memory efficiency when processing massive files?",
+    "followUps": {
+      "strong": [
+        "node-streams-s"
+      ],
+      "neutral": [
+        "node-streams-n"
+      ],
+      "weak": [
+        "node-streams-w"
+      ]
+    }
+  },
+  {
+    "id": "node-streams-s",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "Explain the concept of backpressure in streams and how the pipe method handles it.",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "node-streams-n",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What is a Transform stream and where would you typically use one?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "node-streams-w",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How do you read a file synchronously in Node.js?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "node-worker-threads",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "technical",
+    "skills": [
+      "node.js",
+      "performance"
+    ],
+    "question": "A Node.js service performs CPU-heavy cryptographic operations and blocks requests. How do worker threads solve this?",
+    "followUps": {
+      "strong": [
+        "node-worker-threads-s"
+      ],
+      "neutral": [
+        "node-worker-threads-n"
+      ],
+      "weak": [
+        "node-worker-threads-w"
+      ]
+    }
+  },
+  {
+    "id": "node-worker-threads-s",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How does the SharedArrayBuffer enable efficient memory sharing between worker threads?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "node-worker-threads-n",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "Why are worker threads preferred over child processes for lightweight CPU-bound tasks?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "node-worker-threads-w",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What module do you import to use worker threads in Node?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "node-memory-leaks",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "technical",
+    "skills": [
+      "node.js",
+      "optimization"
+    ],
+    "question": "How would you diagnose a memory leak in a long-running Node.js production service?",
+    "followUps": {
+      "strong": [
+        "node-memory-leaks-s"
+      ],
+      "neutral": [
+        "node-memory-leaks-n"
+      ],
+      "weak": [
+        "node-memory-leaks-w"
+      ]
+    }
+  },
+  {
+    "id": "node-memory-leaks-s",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What specific heap snapshot patterns indicate a closure-based memory leak?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "node-memory-leaks-n",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How does monitoring the V8 garbage collection logs help identify latency spikes?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "node-memory-leaks-w",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What command line flag increases the memory limit for a Node process?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "node-error-handling",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "BEGINNER",
+    "category": "technical",
+    "skills": [
+      "node.js",
+      "express"
+    ],
+    "question": "How do you properly handle uncaught exceptions and unhandled promise rejections in a Node app?",
+    "followUps": {
+      "strong": [
+        "node-error-handling-s"
+      ],
+      "neutral": [
+        "node-error-handling-n"
+      ],
+      "weak": [
+        "node-error-handling-w"
+      ]
+    }
+  },
+  {
+    "id": "node-error-handling-s",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "BEGINNER",
+    "category": "follow-up",
+    "skills": [],
+    "question": "Why is it dangerous to leave a Node process running after an uncaught exception?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "node-error-handling-n",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "BEGINNER",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How do you structure a centralized error-handling middleware in Express?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "node-error-handling-w",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "BEGINNER",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What HTTP status code represents an Internal Server Error?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "node-cluster-module",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "technical",
+    "skills": [
+      "node.js",
+      "architecture"
+    ],
+    "question": "How does the Node.js cluster module enable scaling across multiple CPU cores?",
+    "followUps": {
+      "strong": [
+        "node-cluster-module-s"
+      ],
+      "neutral": [
+        "node-cluster-module-n"
+      ],
+      "weak": [
+        "node-cluster-module-w"
+      ]
+    }
+  },
+  {
+    "id": "node-cluster-module-s",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What are the limitations of the cluster module regarding shared memory and state?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "node-cluster-module-n",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How does the master process load balance incoming connections to the workers?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "node-cluster-module-w",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How do you get the number of CPU cores available on the system in Node?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "node-auth-jwt",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "technical",
+    "skills": [
+      "node.js",
+      "backend"
+    ],
+    "question": "What are the security implications of storing JWTs in localStorage versus HTTP-only cookies in a Node API?",
+    "followUps": {
+      "strong": [
+        "node-auth-jwt-s"
+      ],
+      "neutral": [
+        "node-auth-jwt-n"
+      ],
+      "weak": [
+        "node-auth-jwt-w"
+      ]
+    }
+  },
+  {
+    "id": "node-auth-jwt-s",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How do you handle JWT revocation if the token itself is stateless?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "node-auth-jwt-n",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How can short-lived access tokens combined with refresh tokens mitigate session hijacking?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "node-auth-jwt-w",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What does JWT stand for?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "node-db-connection",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "BEGINNER",
+    "category": "technical",
+    "skills": [
+      "node.js",
+      "databases"
+    ],
+    "question": "Why is connection pooling important when integrating Node.js with a relational database?",
+    "followUps": {
+      "strong": [
+        "node-db-connection-s"
+      ],
+      "neutral": [
+        "node-db-connection-n"
+      ],
+      "weak": [
+        "node-db-connection-w"
+      ]
+    }
+  },
+  {
+    "id": "node-db-connection-s",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "BEGINNER",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What happens if your Node application opens a new database connection for every incoming HTTP request?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "node-db-connection-n",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "BEGINNER",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How do you gracefully close database connections when a Node process receives a SIGTERM signal?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "node-db-connection-w",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "BEGINNER",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What environment variable is typically used to store database connection strings?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "node-async-hooks",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "technical",
+    "skills": [
+      "node.js",
+      "architecture"
+    ],
+    "question": "How does the AsyncLocalStorage API provide context tracking across asynchronous boundaries in Node?",
+    "followUps": {
+      "strong": [
+        "node-async-hooks-s"
+      ],
+      "neutral": [
+        "node-async-hooks-n"
+      ],
+      "weak": [
+        "node-async-hooks-w"
+      ]
+    }
+  },
+  {
+    "id": "node-async-hooks-s",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What are the performance overheads of enabling async hooks in a high-throughput microservice?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "node-async-hooks-n",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "Describe a scenario where AsyncLocalStorage replaces the need to pass a request object through every function.",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "node-async-hooks-w",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What does the term asynchronous mean in the context of Node?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "node-child-process",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "technical",
+    "skills": [
+      "node.js"
+    ],
+    "question": "When would you use spawn versus exec when creating child processes in Node.js?",
+    "followUps": {
+      "strong": [
+        "node-child-process-s"
+      ],
+      "neutral": [
+        "node-child-process-n"
+      ],
+      "weak": [
+        "node-child-process-w"
+      ]
+    }
+  },
+  {
+    "id": "node-child-process-s",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How do you handle the stdout and stderr streams returned by a spawned child process?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "node-child-process-n",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What security risks are associated with passing user input directly into child_process.exec?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "node-child-process-w",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "Which method is used to run a shell command directly in Node?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "sys-rate-limiting",
+    "domain": "Software Engineering",
+    "type": "SYSTEM_DESIGN",
+    "difficulty": "INTERMEDIATE",
+    "category": "technical",
+    "skills": [
+      "system design",
+      "rate limiting"
+    ],
+    "question": "How does a circuit breaker pattern protect downstream microservices during a cascading failure?",
+    "followUps": {
+      "strong": [
+        "sys-rate-limiting-s"
+      ],
+      "neutral": [
+        "sys-rate-limiting-n"
+      ],
+      "weak": [
+        "sys-rate-limiting-w"
+      ]
+    }
+  },
+  {
+    "id": "sys-rate-limiting-s",
+    "domain": "Software Engineering",
+    "type": "SYSTEM_DESIGN",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "Compare the token bucket algorithm with a sliding window log approach for rate limiting.",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "sys-rate-limiting-n",
+    "domain": "Software Engineering",
+    "type": "SYSTEM_DESIGN",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How do you handle rate limiter state synchronization across multiple geographic regions using Redis?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "sys-rate-limiting-w",
+    "domain": "Software Engineering",
+    "type": "SYSTEM_DESIGN",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What HTTP status code is returned when a client exceeds the rate limit?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "sys-caching-strategy",
+    "domain": "Software Engineering",
+    "type": "SYSTEM_DESIGN",
+    "difficulty": "INTERMEDIATE",
+    "category": "technical",
+    "skills": [
+      "system design",
+      "performance"
+    ],
+    "question": "Explain the differences between Cache-Aside and Write-Through caching strategies.",
+    "followUps": {
+      "strong": [
+        "sys-caching-strategy-s"
+      ],
+      "neutral": [
+        "sys-caching-strategy-n"
+      ],
+      "weak": [
+        "sys-caching-strategy-w"
+      ]
+    }
+  },
+  {
+    "id": "sys-caching-strategy-s",
+    "domain": "Software Engineering",
+    "type": "SYSTEM_DESIGN",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How do you mitigate the thundering herd problem when a highly requested cache key expires?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "sys-caching-strategy-n",
+    "domain": "Software Engineering",
+    "type": "SYSTEM_DESIGN",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What eviction policies would you use for a cache that stores volatile user session data?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "sys-caching-strategy-w",
+    "domain": "Software Engineering",
+    "type": "SYSTEM_DESIGN",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What in-memory database is commonly used for distributed caching?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "sys-microservices-data",
+    "domain": "Software Engineering",
+    "type": "SYSTEM_DESIGN",
+    "difficulty": "ADVANCED",
+    "category": "technical",
+    "skills": [
+      "system design",
+      "architecture",
+      "databases"
+    ],
+    "question": "How do you manage distributed transactions and data consistency across multiple microservices?",
+    "followUps": {
+      "strong": [
+        "sys-microservices-data-s"
+      ],
+      "neutral": [
+        "sys-microservices-data-n"
+      ],
+      "weak": [
+        "sys-microservices-data-w"
+      ]
+    }
+  },
+  {
+    "id": "sys-microservices-data-s",
+    "domain": "Software Engineering",
+    "type": "SYSTEM_DESIGN",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "Describe the Saga pattern and how it handles compensating transactions during a failure.",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "sys-microservices-data-n",
+    "domain": "Software Engineering",
+    "type": "SYSTEM_DESIGN",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "Why might eventual consistency be preferred over strict ACID guarantees in a distributed system?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "sys-microservices-data-w",
+    "domain": "Software Engineering",
+    "type": "SYSTEM_DESIGN",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What is the alternative to a microservices architecture?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "sys-message-queues",
+    "domain": "Software Engineering",
+    "type": "SYSTEM_DESIGN",
+    "difficulty": "INTERMEDIATE",
+    "category": "technical",
+    "skills": [
+      "system design",
+      "architecture"
+    ],
+    "question": "What architectural problems do message queues solve in a decoupled backend system?",
+    "followUps": {
+      "strong": [
+        "sys-message-queues-s"
+      ],
+      "neutral": [
+        "sys-message-queues-n"
+      ],
+      "weak": [
+        "sys-message-queues-w"
+      ]
+    }
+  },
+  {
+    "id": "sys-message-queues-s",
+    "domain": "Software Engineering",
+    "type": "SYSTEM_DESIGN",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How do you guarantee exactly-once message processing in a distributed queue?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "sys-message-queues-n",
+    "domain": "Software Engineering",
+    "type": "SYSTEM_DESIGN",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What happens to messages that repeatedly fail processing in a system like RabbitMQ or SQS?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "sys-message-queues-w",
+    "domain": "Software Engineering",
+    "type": "SYSTEM_DESIGN",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "Name a popular open-source message broker.",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "sys-database-scaling",
+    "domain": "Software Engineering",
+    "type": "SYSTEM_DESIGN",
+    "difficulty": "ADVANCED",
+    "category": "technical",
+    "skills": [
+      "system design",
+      "databases",
+      "sql"
+    ],
+    "question": "How do you decide between vertical scaling, read replicas, and horizontal sharding for a relational database?",
+    "followUps": {
+      "strong": [
+        "sys-database-scaling-s"
+      ],
+      "neutral": [
+        "sys-database-scaling-n"
+      ],
+      "weak": [
+        "sys-database-scaling-w"
+      ]
+    }
+  },
+  {
+    "id": "sys-database-scaling-s",
+    "domain": "Software Engineering",
+    "type": "SYSTEM_DESIGN",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What challenges arise when performing distributed JOIN operations across horizontally sharded databases?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "sys-database-scaling-n",
+    "domain": "Software Engineering",
+    "type": "SYSTEM_DESIGN",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How does consistent hashing prevent massive data movement when adding a new shard node?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "sys-database-scaling-w",
+    "domain": "Software Engineering",
+    "type": "SYSTEM_DESIGN",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What does the term \"sharding\" mean?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "sys-api-gateway",
+    "domain": "Software Engineering",
+    "type": "SYSTEM_DESIGN",
+    "difficulty": "INTERMEDIATE",
+    "category": "technical",
+    "skills": [
+      "system design",
+      "backend",
+      "rest apis"
+    ],
+    "question": "What is the role of an API Gateway in a microservices architecture?",
+    "followUps": {
+      "strong": [
+        "sys-api-gateway-s"
+      ],
+      "neutral": [
+        "sys-api-gateway-n"
+      ],
+      "weak": [
+        "sys-api-gateway-w"
+      ]
+    }
+  },
+  {
+    "id": "sys-api-gateway-s",
+    "domain": "Software Engineering",
+    "type": "SYSTEM_DESIGN",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How does an API Gateway handle authentication and authorization for downstream services?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "sys-api-gateway-n",
+    "domain": "Software Engineering",
+    "type": "SYSTEM_DESIGN",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "Can an API Gateway introduce a single point of failure, and how do you mitigate it?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "sys-api-gateway-w",
+    "domain": "Software Engineering",
+    "type": "SYSTEM_DESIGN",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What is a reverse proxy?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "sys-websockets",
+    "domain": "Software Engineering",
+    "type": "SYSTEM_DESIGN",
+    "difficulty": "INTERMEDIATE",
+    "category": "technical",
+    "skills": [
+      "system design",
+      "computer networks"
+    ],
+    "question": "How would you architect a real-time chat application that needs to scale to millions of concurrent WebSocket connections?",
+    "followUps": {
+      "strong": [
+        "sys-websockets-s"
+      ],
+      "neutral": [
+        "sys-websockets-n"
+      ],
+      "weak": [
+        "sys-websockets-w"
+      ]
+    }
+  },
+  {
+    "id": "sys-websockets-s",
+    "domain": "Software Engineering",
+    "type": "SYSTEM_DESIGN",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How do you route messages between users connected to entirely different WebSocket server instances?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "sys-websockets-n",
+    "domain": "Software Engineering",
+    "type": "SYSTEM_DESIGN",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "Why are standard HTTP load balancers sometimes problematic for long-lived WebSocket connections?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "sys-websockets-w",
+    "domain": "Software Engineering",
+    "type": "SYSTEM_DESIGN",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How does a WebSocket connection begin?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "sys-sql-vs-nosql",
+    "domain": "Software Engineering",
+    "type": "SYSTEM_DESIGN",
+    "difficulty": "BEGINNER",
+    "category": "technical",
+    "skills": [
+      "system design",
+      "databases",
+      "sql",
+      "mongodb"
+    ],
+    "question": "When designing a new system, what factors determine whether you choose a SQL database or a NoSQL database?",
+    "followUps": {
+      "strong": [
+        "sys-sql-vs-nosql-s"
+      ],
+      "neutral": [
+        "sys-sql-vs-nosql-n"
+      ],
+      "weak": [
+        "sys-sql-vs-nosql-w"
+      ]
+    }
+  },
+  {
+    "id": "sys-sql-vs-nosql-s",
+    "domain": "Software Engineering",
+    "type": "SYSTEM_DESIGN",
+    "difficulty": "BEGINNER",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How does schema flexibility in NoSQL impact data validation at the application layer?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "sys-sql-vs-nosql-n",
+    "domain": "Software Engineering",
+    "type": "SYSTEM_DESIGN",
+    "difficulty": "BEGINNER",
+    "category": "follow-up",
+    "skills": [],
+    "question": "Describe a scenario where a graph database would be superior to both SQL and document stores.",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "sys-sql-vs-nosql-w",
+    "domain": "Software Engineering",
+    "type": "SYSTEM_DESIGN",
+    "difficulty": "BEGINNER",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What does SQL stand for?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "sys-cdn-edge",
+    "domain": "Software Engineering",
+    "type": "SYSTEM_DESIGN",
+    "difficulty": "INTERMEDIATE",
+    "category": "technical",
+    "skills": [
+      "system design",
+      "computer networks",
+      "performance"
+    ],
+    "question": "How does a Content Delivery Network (CDN) reduce latency for global users?",
+    "followUps": {
+      "strong": [
+        "sys-cdn-edge-s"
+      ],
+      "neutral": [
+        "sys-cdn-edge-n"
+      ],
+      "weak": [
+        "sys-cdn-edge-w"
+      ]
+    }
+  },
+  {
+    "id": "sys-cdn-edge-s",
+    "domain": "Software Engineering",
+    "type": "SYSTEM_DESIGN",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How do you handle cache invalidation for frequently updated dynamic assets on a CDN?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "sys-cdn-edge-n",
+    "domain": "Software Engineering",
+    "type": "SYSTEM_DESIGN",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What is edge computing and how does it push backend logic closer to the user?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "sys-cdn-edge-w",
+    "domain": "Software Engineering",
+    "type": "SYSTEM_DESIGN",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What is the geographic location of a CDN server commonly called?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "sys-load-balancing",
+    "domain": "Software Engineering",
+    "type": "SYSTEM_DESIGN",
+    "difficulty": "BEGINNER",
+    "category": "technical",
+    "skills": [
+      "system design",
+      "architecture"
+    ],
+    "question": "Describe the role of a load balancer and the difference between Layer 4 and Layer 7 load balancing.",
+    "followUps": {
+      "strong": [
+        "sys-load-balancing-s"
+      ],
+      "neutral": [
+        "sys-load-balancing-n"
+      ],
+      "weak": [
+        "sys-load-balancing-w"
+      ]
+    }
+  },
+  {
+    "id": "sys-load-balancing-s",
+    "domain": "Software Engineering",
+    "type": "SYSTEM_DESIGN",
+    "difficulty": "BEGINNER",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How does round-robin load balancing fail when backend servers have vastly different processing capabilities?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "sys-load-balancing-n",
+    "domain": "Software Engineering",
+    "type": "SYSTEM_DESIGN",
+    "difficulty": "BEGINNER",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What is session stickiness and why is it generally discouraged in stateless architectures?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "sys-load-balancing-w",
+    "domain": "Software Engineering",
+    "type": "SYSTEM_DESIGN",
+    "difficulty": "BEGINNER",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What happens to traffic if a backend server fails health checks?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "java-jvm-gc",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "technical",
+    "skills": [
+      "java",
+      "performance"
+    ],
+    "question": "Explain the generational garbage collection process in the JVM and how objects transition from Eden to Old Generation.",
+    "followUps": {
+      "strong": [
+        "java-jvm-gc-s"
+      ],
+      "neutral": [
+        "java-jvm-gc-n"
+      ],
+      "weak": [
+        "java-jvm-gc-w"
+      ]
+    }
+  },
+  {
+    "id": "java-jvm-gc-s",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How does the G1 Garbage Collector differ from the CMS collector in terms of pausing and region management?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "java-jvm-gc-n",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What triggers a Minor GC versus a Major GC?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "java-jvm-gc-w",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What does the keyword \"new\" do in Java?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "java-concurrency",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "technical",
+    "skills": [
+      "java",
+      "performance"
+    ],
+    "question": "How does the volatile keyword in Java prevent thread caching of variables?",
+    "followUps": {
+      "strong": [
+        "java-concurrency-s"
+      ],
+      "neutral": [
+        "java-concurrency-n"
+      ],
+      "weak": [
+        "java-concurrency-w"
+      ]
+    }
+  },
+  {
+    "id": "java-concurrency-s",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "Why is the double-checked locking singleton pattern broken in older versions of Java without volatile?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "java-concurrency-n",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What is the difference between a synchronized block and a ReentrantLock?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "java-concurrency-w",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How do you start a new Thread in Java?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "java-interfaces",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "technical",
+    "skills": [
+      "java",
+      "oop"
+    ],
+    "question": "Since Java 8 introduced default methods in interfaces, how do interfaces now differ practically from abstract classes?",
+    "followUps": {
+      "strong": [
+        "java-interfaces-s"
+      ],
+      "neutral": [
+        "java-interfaces-n"
+      ],
+      "weak": [
+        "java-interfaces-w"
+      ]
+    }
+  },
+  {
+    "id": "java-interfaces-s",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How does Java resolve the diamond problem if a class implements two interfaces with the same default method signature?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "java-interfaces-n",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "Why can abstract classes hold state (instance variables) while interfaces cannot?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "java-interfaces-w",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What keyword is used to inherit from a class versus an interface?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "java-generics",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "technical",
+    "skills": [
+      "java"
+    ],
+    "question": "Describe type erasure in Java Generics and the limitations it imposes at runtime.",
+    "followUps": {
+      "strong": [
+        "java-generics-s"
+      ],
+      "neutral": [
+        "java-generics-n"
+      ],
+      "weak": [
+        "java-generics-w"
+      ]
+    }
+  },
+  {
+    "id": "java-generics-s",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How do wildcards (? extends T and ? super T) enforce covariance and contravariance in method signatures?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "java-generics-n",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "Why can you not instantiate a generic array like new T[] in Java?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "java-generics-w",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What is the syntax for defining a generic class?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "java-collections",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "BEGINNER",
+    "category": "technical",
+    "skills": [
+      "java",
+      "data structures"
+    ],
+    "question": "How does a HashMap handle hash collisions internally in modern Java?",
+    "followUps": {
+      "strong": [
+        "java-collections-s"
+      ],
+      "neutral": [
+        "java-collections-n"
+      ],
+      "weak": [
+        "java-collections-w"
+      ]
+    }
+  },
+  {
+    "id": "java-collections-s",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "BEGINNER",
+    "category": "follow-up",
+    "skills": [],
+    "question": "Why did Java 8 switch from linked lists to balanced trees for highly collided HashMap buckets?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "java-collections-n",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "BEGINNER",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What is the performance difference between ArrayList and LinkedList for random access vs insertion?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "java-collections-w",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "BEGINNER",
+    "category": "follow-up",
+    "skills": [],
+    "question": "Which Collection interface does not allow duplicate elements?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "py-generators",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "technical",
+    "skills": [
+      "python",
+      "performance"
+    ],
+    "question": "How do generators improve memory efficiency when processing large datasets in Python?",
+    "followUps": {
+      "strong": [
+        "py-generators-s"
+      ],
+      "neutral": [
+        "py-generators-n"
+      ],
+      "weak": [
+        "py-generators-w"
+      ]
+    }
+  },
+  {
+    "id": "py-generators-s",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "Can you explain the difference between yield and yield from in a generator function?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "py-generators-n",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How does a generator differ from a list comprehension in execution and syntax?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "py-generators-w",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What keyword defines a generator in Python?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "py-gil",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "technical",
+    "skills": [
+      "python",
+      "performance",
+      "architecture"
+    ],
+    "question": "Explain the Global Interpreter Lock (GIL) in CPython and how it affects multi-threaded applications.",
+    "followUps": {
+      "strong": [
+        "py-gil-s"
+      ],
+      "neutral": [
+        "py-gil-n"
+      ],
+      "weak": [
+        "py-gil-w"
+      ]
+    }
+  },
+  {
+    "id": "py-gil-s",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How does the multiprocessing module circumvent the GIL limitations for CPU-bound tasks?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "py-gil-n",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "Why are multi-threaded Python programs still effective for I/O-bound tasks despite the GIL?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "py-gil-w",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What is a thread?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "py-decorators",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "technical",
+    "skills": [
+      "python",
+      "oop"
+    ],
+    "question": "How do decorators work in Python under the hood, and how do they utilize higher-order functions?",
+    "followUps": {
+      "strong": [
+        "py-decorators-s"
+      ],
+      "neutral": [
+        "py-decorators-n"
+      ],
+      "weak": [
+        "py-decorators-w"
+      ]
+    }
+  },
+  {
+    "id": "py-decorators-s",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How would you write a parameterized decorator that accepts arguments before wrapping the target function?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "py-decorators-n",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What is the purpose of the functools.wraps decorator?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "py-decorators-w",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What symbol is used to apply a decorator to a function?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "py-hashing",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "technical",
+    "skills": [
+      "python",
+      "data structures"
+    ],
+    "question": "How are Python dictionaries implemented, and why are they considered unordered before Python 3.7?",
+    "followUps": {
+      "strong": [
+        "py-hashing-s"
+      ],
+      "neutral": [
+        "py-hashing-n"
+      ],
+      "weak": [
+        "py-hashing-w"
+      ]
+    }
+  },
+  {
+    "id": "py-hashing-s",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What happens if two different keys in a dictionary evaluate to the same hash value?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "py-hashing-n",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "Why can you use a tuple as a dictionary key but not a list?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "py-hashing-w",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How do you access the value associated with a key in a dictionary?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "py-magic-methods",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "BEGINNER",
+    "category": "technical",
+    "skills": [
+      "python",
+      "oop"
+    ],
+    "question": "What are magic methods (dunder methods) in Python, and how do they enable operator overloading?",
+    "followUps": {
+      "strong": [
+        "py-magic-methods-s"
+      ],
+      "neutral": [
+        "py-magic-methods-n"
+      ],
+      "weak": [
+        "py-magic-methods-w"
+      ]
+    }
+  },
+  {
+    "id": "py-magic-methods-s",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "BEGINNER",
+    "category": "follow-up",
+    "skills": [],
+    "question": "Explain the distinction between the __str__ and __repr__ magic methods.",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "py-magic-methods-n",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "BEGINNER",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How would you use the __init__ method to set up instance variables?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "py-magic-methods-w",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "BEGINNER",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What does the self parameter represent in a Python class?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "cpp-smart-pointers",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "technical",
+    "skills": [
+      "c++",
+      "performance"
+    ],
+    "question": "How do smart pointers (like std::unique_ptr and std::shared_ptr) prevent memory leaks using RAII?",
+    "followUps": {
+      "strong": [
+        "cpp-smart-pointers-s"
+      ],
+      "neutral": [
+        "cpp-smart-pointers-n"
+      ],
+      "weak": [
+        "cpp-smart-pointers-w"
+      ]
+    }
+  },
+  {
+    "id": "cpp-smart-pointers-s",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What is a circular reference issue with std::shared_ptr, and how does std::weak_ptr resolve it?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "cpp-smart-pointers-n",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "Why is std::unique_ptr preferred over std::shared_ptr when ownership is strictly exclusive?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "cpp-smart-pointers-w",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How do you allocate dynamic memory manually in C++ without smart pointers?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "cpp-virtual-functions",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "technical",
+    "skills": [
+      "c++",
+      "oop"
+    ],
+    "question": "Explain how C++ implements dynamic polymorphism using virtual functions and V-Tables.",
+    "followUps": {
+      "strong": [
+        "cpp-virtual-functions-s"
+      ],
+      "neutral": [
+        "cpp-virtual-functions-n"
+      ],
+      "weak": [
+        "cpp-virtual-functions-w"
+      ]
+    }
+  },
+  {
+    "id": "cpp-virtual-functions-s",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What is the runtime performance overhead associated with calling a virtual function?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "cpp-virtual-functions-n",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "Why is it critical to declare a base class destructor as virtual?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "cpp-virtual-functions-w",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What keyword specifies that a class inherits from another class?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "cpp-move-semantics",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "technical",
+    "skills": [
+      "c++",
+      "performance"
+    ],
+    "question": "How do move semantics and r-value references improve performance over deep copying in C++11?",
+    "followUps": {
+      "strong": [
+        "cpp-move-semantics-s"
+      ],
+      "neutral": [
+        "cpp-move-semantics-n"
+      ],
+      "weak": [
+        "cpp-move-semantics-w"
+      ]
+    }
+  },
+  {
+    "id": "cpp-move-semantics-s",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "Under what circumstances will the compiler silently fall back to a copy constructor instead of a move constructor?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "cpp-move-semantics-n",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What does std::move actually do to an l-value object?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "cpp-move-semantics-w",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What is the difference between pass-by-value and pass-by-reference?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "cpp-memory-management",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "technical",
+    "skills": [
+      "c++"
+    ],
+    "question": "Describe the differences between stack allocation and heap allocation in C++.",
+    "followUps": {
+      "strong": [
+        "cpp-memory-management-s"
+      ],
+      "neutral": [
+        "cpp-memory-management-n"
+      ],
+      "weak": [
+        "cpp-memory-management-w"
+      ]
+    }
+  },
+  {
+    "id": "cpp-memory-management-s",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What happens if you use delete instead of delete[] on an array allocated with new[]?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "cpp-memory-management-n",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "Why might frequent heap allocations lead to memory fragmentation?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "cpp-memory-management-w",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What error indicates that memory was accessed out of bounds?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "cpp-templates",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "technical",
+    "skills": [
+      "c++",
+      "oop"
+    ],
+    "question": "How do C++ templates achieve compile-time polymorphism compared to virtual functions?",
+    "followUps": {
+      "strong": [
+        "cpp-templates-s"
+      ],
+      "neutral": [
+        "cpp-templates-n"
+      ],
+      "weak": [
+        "cpp-templates-w"
+      ]
+    }
+  },
+  {
+    "id": "cpp-templates-s",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What causes the notorious \"code bloat\" issue when heavily relying on template metaprogramming?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "cpp-templates-n",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How does template specialization allow you to define custom behavior for specific data types?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "cpp-templates-w",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What keyword is used to define a template function?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "oop-composition",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "technical",
+    "skills": [
+      "oop",
+      "architecture"
+    ],
+    "question": "Why is \"composition over inheritance\" often recommended in modern software architecture?",
+    "followUps": {
+      "strong": [
+        "oop-composition-s"
+      ],
+      "neutral": [
+        "oop-composition-n"
+      ],
+      "weak": [
+        "oop-composition-w"
+      ]
+    }
+  },
+  {
+    "id": "oop-composition-s",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How does composition prevent the rigid hierarchy problem inherent in deep inheritance trees?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "oop-composition-n",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "Describe a scenario where inheritance is objectively the better choice over composition.",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "oop-composition-w",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What is inheritance?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "oop-solid-srp",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "BEGINNER",
+    "category": "technical",
+    "skills": [
+      "oop",
+      "architecture"
+    ],
+    "question": "Explain the Single Responsibility Principle and how it reduces coupling in a codebase.",
+    "followUps": {
+      "strong": [
+        "oop-solid-srp-s"
+      ],
+      "neutral": [
+        "oop-solid-srp-n"
+      ],
+      "weak": [
+        "oop-solid-srp-w"
+      ]
+    }
+  },
+  {
+    "id": "oop-solid-srp-s",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "BEGINNER",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How can you tell if a class has taken on too many responsibilities?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "oop-solid-srp-n",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "BEGINNER",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What is the difference between high cohesion and low coupling?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "oop-solid-srp-w",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "BEGINNER",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What does the acronym SOLID stand for?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "oop-encapsulation",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "technical",
+    "skills": [
+      "oop"
+    ],
+    "question": "What are the trade-offs of using strict encapsulation with private fields and getters/setters versus public properties?",
+    "followUps": {
+      "strong": [
+        "oop-encapsulation-s"
+      ],
+      "neutral": [
+        "oop-encapsulation-n"
+      ],
+      "weak": [
+        "oop-encapsulation-w"
+      ]
+    }
+  },
+  {
+    "id": "oop-encapsulation-s",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How does encapsulation protect the internal invariants of an object state?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "oop-encapsulation-n",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "When might making an immutable data transfer object (DTO) be better than a fully encapsulated class?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "oop-encapsulation-w",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What keyword makes a property hidden from outside access in most languages?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "oop-liskov",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "technical",
+    "skills": [
+      "oop",
+      "architecture"
+    ],
+    "question": "Explain the Liskov Substitution Principle and how violating it causes subtle runtime bugs.",
+    "followUps": {
+      "strong": [
+        "oop-liskov-s"
+      ],
+      "neutral": [
+        "oop-liskov-n"
+      ],
+      "weak": [
+        "oop-liskov-w"
+      ]
+    }
+  },
+  {
+    "id": "oop-liskov-s",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "Why is the classic \"Square inheriting from Rectangle\" example a violation of Liskov Substitution?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "oop-liskov-n",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How does ensuring preconditions are not strengthened in a subclass enforce this principle?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "oop-liskov-w",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What is polymorphism?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "oop-dependency-inversion",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "technical",
+    "skills": [
+      "oop",
+      "architecture"
+    ],
+    "question": "How does the Dependency Inversion Principle decouple high-level business logic from low-level infrastructure?",
+    "followUps": {
+      "strong": [
+        "oop-dependency-inversion-s"
+      ],
+      "neutral": [
+        "oop-dependency-inversion-n"
+      ],
+      "weak": [
+        "oop-dependency-inversion-w"
+      ]
+    }
+  },
+  {
+    "id": "oop-dependency-inversion-s",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How do Dependency Injection containers facilitate Inversion of Control at runtime?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "oop-dependency-inversion-n",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What is the structural difference between depending on an abstraction versus a concrete implementation?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "oop-dependency-inversion-w",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What is a class constructor?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "git-rebase",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "technical",
+    "skills": [
+      "git",
+      "collaboration"
+    ],
+    "question": "What are the fundamental differences between git rebase and git merge when integrating branches?",
+    "followUps": {
+      "strong": [
+        "git-rebase-s"
+      ],
+      "neutral": [
+        "git-rebase-n"
+      ],
+      "weak": [
+        "git-rebase-w"
+      ]
+    }
+  },
+  {
+    "id": "git-rebase-s",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "Why is it considered dangerous to rebase commits that have already been pushed to a shared public branch?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "git-rebase-n",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How does a squash merge differ from a standard rebase in terms of history presentation?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "git-rebase-w",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What command downloads the latest changes from a remote repository?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "git-conflicts",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "BEGINNER",
+    "category": "technical",
+    "skills": [
+      "git",
+      "collaboration"
+    ],
+    "question": "How does Git determine that a merge conflict has occurred, and how do you resolve it?",
+    "followUps": {
+      "strong": [
+        "git-conflicts-s"
+      ],
+      "neutral": [
+        "git-conflicts-n"
+      ],
+      "weak": [
+        "git-conflicts-w"
+      ]
+    }
+  },
+  {
+    "id": "git-conflicts-s",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "BEGINNER",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What does the >> and << conflict marker syntax represent inside a conflicted file?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "git-conflicts-n",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "BEGINNER",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How do you abort a merge process that has resulted in overly complex conflicts?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "git-conflicts-w",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "BEGINNER",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What command initiates the merge of another branch into your current branch?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "git-architecture",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "technical",
+    "skills": [
+      "git"
+    ],
+    "question": "Explain the differences between the working directory, the staging area (index), and the local repository in Git.",
+    "followUps": {
+      "strong": [
+        "git-architecture-s"
+      ],
+      "neutral": [
+        "git-architecture-n"
+      ],
+      "weak": [
+        "git-architecture-w"
+      ]
+    }
+  },
+  {
+    "id": "git-architecture-s",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How does Git internally store file snapshots differently from delta-based version control systems?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "git-architecture-n",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What is the purpose of the .git directory at the root of a project?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "git-architecture-w",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How do you add a modified file to the staging area?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "git-reset-revert",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "technical",
+    "skills": [
+      "git"
+    ],
+    "question": "What is the functional difference between git reset and git revert when undoing a commit?",
+    "followUps": {
+      "strong": [
+        "git-reset-revert-s"
+      ],
+      "neutral": [
+        "git-reset-revert-n"
+      ],
+      "weak": [
+        "git-reset-revert-w"
+      ]
+    }
+  },
+  {
+    "id": "git-reset-revert-s",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How does git reset --hard differ from git reset --soft regarding the staging area?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "git-reset-revert-n",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "Why is git revert preferred when undoing changes on a shared production branch?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "git-reset-revert-w",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How do you view the commit history of a repository?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "git-workflows",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "technical",
+    "skills": [
+      "git",
+      "architecture",
+      "collaboration"
+    ],
+    "question": "Compare the GitFlow branching strategy with Trunk-based development for CI/CD pipelines.",
+    "followUps": {
+      "strong": [
+        "git-workflows-s"
+      ],
+      "neutral": [
+        "git-workflows-n"
+      ],
+      "weak": [
+        "git-workflows-w"
+      ]
+    }
+  },
+  {
+    "id": "git-workflows-s",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How do feature flags complement trunk-based development to prevent incomplete features from deploying?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "git-workflows-n",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What are the scaling challenges of GitFlow when maintaining multiple long-running release branches?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "git-workflows-w",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What is a pull request?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "fe-css-specificity",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "BEGINNER",
+    "category": "technical",
+    "skills": [
+      "frontend",
+      "html/css"
+    ],
+    "question": "How does the browser calculate CSS specificity when multiple rules target the same element?",
+    "followUps": {
+      "strong": [
+        "fe-css-specificity-s"
+      ],
+      "neutral": [
+        "fe-css-specificity-n"
+      ],
+      "weak": [
+        "fe-css-specificity-w"
+      ]
+    }
+  },
+  {
+    "id": "fe-css-specificity-s",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "BEGINNER",
+    "category": "follow-up",
+    "skills": [],
+    "question": "Why is the use of the !important declaration generally discouraged in large stylesheets?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "fe-css-specificity-n",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "BEGINNER",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How do inline styles compare to ID selectors in the specificity hierarchy?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "fe-css-specificity-w",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "BEGINNER",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What is the difference between a class selector and an ID selector?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "fe-flex-grid",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "technical",
+    "skills": [
+      "frontend",
+      "html/css"
+    ],
+    "question": "When architecting a complex page layout, how do you decide between using CSS Flexbox and CSS Grid?",
+    "followUps": {
+      "strong": [
+        "fe-flex-grid-s"
+      ],
+      "neutral": [
+        "fe-flex-grid-n"
+      ],
+      "weak": [
+        "fe-flex-grid-w"
+      ]
+    }
+  },
+  {
+    "id": "fe-flex-grid-s",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How does CSS Grid handle two-dimensional layouts compared to Flexbox's one-dimensional model?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "fe-flex-grid-n",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What happens to flex items when flex-wrap is set to nowrap and they exceed the container width?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "fe-flex-grid-w",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How do you center an element vertically and horizontally using Flexbox?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "fe-accessibility",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "technical",
+    "skills": [
+      "frontend",
+      "html/css"
+    ],
+    "question": "Why is semantic HTML critical for Web Accessibility (a11y) and screen readers?",
+    "followUps": {
+      "strong": [
+        "fe-accessibility-s"
+      ],
+      "neutral": [
+        "fe-accessibility-n"
+      ],
+      "weak": [
+        "fe-accessibility-w"
+      ]
+    }
+  },
+  {
+    "id": "fe-accessibility-s",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How do ARIA attributes supplement semantic HTML when building custom interactive widgets?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "fe-accessibility-n",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What is the accessibility impact of using a generic div element with a click handler instead of a native button?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "fe-accessibility-w",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What attribute specifies alternative text for an image?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "fe-rendering-perf",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "technical",
+    "skills": [
+      "frontend",
+      "html/css",
+      "performance"
+    ],
+    "question": "Explain the difference between a DOM Reflow (layout) and a Repaint, and how they impact browser performance.",
+    "followUps": {
+      "strong": [
+        "fe-rendering-perf-s"
+      ],
+      "neutral": [
+        "fe-rendering-perf-n"
+      ],
+      "weak": [
+        "fe-rendering-perf-w"
+      ]
+    }
+  },
+  {
+    "id": "fe-rendering-perf-s",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How does leveraging the CSS transform property avoid triggering costly reflows during animations?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "fe-rendering-perf-n",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What is the Composite phase of the browser rendering pipeline?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "fe-rendering-perf-w",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "Where is the DOM tree constructed from?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "fe-responsive",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "BEGINNER",
+    "category": "technical",
+    "skills": [
+      "frontend",
+      "html/css"
+    ],
+    "question": "What are the core principles of responsive web design and mobile-first CSS development?",
+    "followUps": {
+      "strong": [
+        "fe-responsive-s"
+      ],
+      "neutral": [
+        "fe-responsive-n"
+      ],
+      "weak": [
+        "fe-responsive-w"
+      ]
+    }
+  },
+  {
+    "id": "fe-responsive-s",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "BEGINNER",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How do media queries utilize breakpoints to adapt layouts across different viewport sizes?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "fe-responsive-n",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "BEGINNER",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What role does the viewport meta tag play in mobile browser rendering?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "fe-responsive-w",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "BEGINNER",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How do you define a basic media query for a maximum width of 600px?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "fs-token-security",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "technical",
+    "skills": [
+      "full stack",
+      "frontend",
+      "backend"
+    ],
+    "question": "Compare the security risks of storing authentication tokens in localStorage versus HttpOnly cookies.",
+    "followUps": {
+      "strong": [
+        "fs-token-security-s"
+      ],
+      "neutral": [
+        "fs-token-security-n"
+      ],
+      "weak": [
+        "fs-token-security-w"
+      ]
+    }
+  },
+  {
+    "id": "fs-token-security-s",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How do HttpOnly cookies mitigate Cross-Site Scripting (XSS) vulnerabilities?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "fs-token-security-n",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How do you implement Cross-Site Request Forgery (CSRF) protection when using cookie-based authentication?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "fs-token-security-w",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What HTTP header contains the authorization token?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "fs-error-propagation",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "technical",
+    "skills": [
+      "full stack",
+      "frontend",
+      "backend",
+      "architecture"
+    ],
+    "question": "How do you ensure backend database failures are propagated gracefully to the frontend UI without exposing sensitive stack traces?",
+    "followUps": {
+      "strong": [
+        "fs-error-propagation-s"
+      ],
+      "neutral": [
+        "fs-error-propagation-n"
+      ],
+      "weak": [
+        "fs-error-propagation-w"
+      ]
+    }
+  },
+  {
+    "id": "fs-error-propagation-s",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What role does a global error handling middleware play in standardizing API error responses?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "fs-error-propagation-n",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How should the frontend react differently to a 401 Unauthorized versus a 503 Service Unavailable error?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "fs-error-propagation-w",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What HTTP status code indicates a generic bad request from the client?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "fs-api-design",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "technical",
+    "skills": [
+      "full stack",
+      "backend",
+      "architecture"
+    ],
+    "question": "When designing a RESTful API, how do you handle payload pagination and filtering efficiently?",
+    "followUps": {
+      "strong": [
+        "fs-api-design-s"
+      ],
+      "neutral": [
+        "fs-api-design-n"
+      ],
+      "weak": [
+        "fs-api-design-w"
+      ]
+    }
+  },
+  {
+    "id": "fs-api-design-s",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "Compare cursor-based pagination with offset-based pagination in terms of database performance on large datasets.",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "fs-api-design-n",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How should the API structure a response containing both the paginated data and the total metadata count?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "fs-api-design-w",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What HTTP method is typically used to retrieve data?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "fs-deployment",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "technical",
+    "skills": [
+      "full stack",
+      "architecture"
+    ],
+    "question": "Why is it crucial to maintain strict parity between staging and production deployment environments?",
+    "followUps": {
+      "strong": [
+        "fs-deployment-s"
+      ],
+      "neutral": [
+        "fs-deployment-n"
+      ],
+      "weak": [
+        "fs-deployment-w"
+      ]
+    }
+  },
+  {
+    "id": "fs-deployment-s",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How do environment variables help maintain configuration separation across different deployment stages?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "fs-deployment-n",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What is blue-green deployment and how does it minimize downtime during updates?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "fs-deployment-w",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What is a production environment?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "fs-data-flow",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "technical",
+    "skills": [
+      "full stack",
+      "architecture",
+      "performance"
+    ],
+    "question": "Describe the architectural trade-offs between synchronous REST calls and asynchronous message queues for backend-to-backend communication.",
+    "followUps": {
+      "strong": [
+        "fs-data-flow-s"
+      ],
+      "neutral": [
+        "fs-data-flow-n"
+      ],
+      "weak": [
+        "fs-data-flow-w"
+      ]
+    }
+  },
+  {
+    "id": "fs-data-flow-s",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How does a frontend client remain updated if the backend processes a task asynchronously over several minutes?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "fs-data-flow-n",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What are the failure modes of long-polling compared to Server-Sent Events (SSE)?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "fs-data-flow-w",
+    "domain": "Software Engineering",
+    "type": "TECHNICAL",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What does JSON stand for?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "behav-conflict",
+    "domain": "Behavioral",
+    "type": "BEHAVIORAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "technical",
+    "skills": [
+      "conflict resolution",
+      "communication"
+    ],
+    "question": "Describe a time you had a technical disagreement with a peer. How did you resolve the conflict?",
+    "followUps": {
+      "strong": [
+        "behav-conflict-s"
+      ],
+      "neutral": [
+        "behav-conflict-n"
+      ],
+      "weak": [
+        "behav-conflict-w"
+      ]
+    }
+  },
+  {
+    "id": "behav-conflict-s",
+    "domain": "Behavioral",
+    "type": "BEHAVIORAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How did you ensure the relationship remained positive after the disagreement was settled?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "behav-conflict-n",
+    "domain": "Behavioral",
+    "type": "BEHAVIORAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What objective data or metrics did you use to evaluate the competing technical proposals?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "behav-conflict-w",
+    "domain": "Behavioral",
+    "type": "BEHAVIORAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "Why is it important to listen to a teammate's perspective during a conflict?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "behav-outage",
+    "domain": "Behavioral",
+    "type": "BEHAVIORAL",
+    "difficulty": "ADVANCED",
+    "category": "technical",
+    "skills": [
+      "problem solving",
+      "leadership"
+    ],
+    "question": "Tell me about a time you caused a production outage or critical bug. How did you handle the immediate fallout?",
+    "followUps": {
+      "strong": [
+        "behav-outage-s"
+      ],
+      "neutral": [
+        "behav-outage-n"
+      ],
+      "weak": [
+        "behav-outage-w"
+      ]
+    }
+  },
+  {
+    "id": "behav-outage-s",
+    "domain": "Behavioral",
+    "type": "BEHAVIORAL",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How did you conduct the post-mortem to ensure the root cause was addressed systemically?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "behav-outage-n",
+    "domain": "Behavioral",
+    "type": "BEHAVIORAL",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "Did you face any pressure to hide the mistake, and how did you navigate transparency with stakeholders?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "behav-outage-w",
+    "domain": "Behavioral",
+    "type": "BEHAVIORAL",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What was the immediate first step you took when you realized the system was broken?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "behav-nontechnical",
+    "domain": "Behavioral",
+    "type": "BEHAVIORAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "technical",
+    "skills": [
+      "communication",
+      "collaboration"
+    ],
+    "question": "Explain how you communicate complex technical constraints to non-technical stakeholders (like product managers).",
+    "followUps": {
+      "strong": [
+        "behav-nontechnical-s"
+      ],
+      "neutral": [
+        "behav-nontechnical-n"
+      ],
+      "weak": [
+        "behav-nontechnical-w"
+      ]
+    }
+  },
+  {
+    "id": "behav-nontechnical-s",
+    "domain": "Behavioral",
+    "type": "BEHAVIORAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "Can you give an example of a time when a stakeholder pushed for an impossible deadline, and how you managed expectations?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "behav-nontechnical-n",
+    "domain": "Behavioral",
+    "type": "BEHAVIORAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How do you measure whether a non-technical person has truly understood the technical risks you presented?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "behav-nontechnical-w",
+    "domain": "Behavioral",
+    "type": "BEHAVIORAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "Why is it important to avoid jargon when speaking with clients?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "behav-mentoring",
+    "domain": "Behavioral",
+    "type": "BEHAVIORAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "technical",
+    "skills": [
+      "leadership",
+      "collaboration",
+      "learning"
+    ],
+    "question": "Describe a scenario where you had to mentor a junior engineer who was struggling to grasp a core concept.",
+    "followUps": {
+      "strong": [
+        "behav-mentoring-s"
+      ],
+      "neutral": [
+        "behav-mentoring-n"
+      ],
+      "weak": [
+        "behav-mentoring-w"
+      ]
+    }
+  },
+  {
+    "id": "behav-mentoring-s",
+    "domain": "Behavioral",
+    "type": "BEHAVIORAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How do you balance giving direct answers versus guiding someone to find the solution themselves?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "behav-mentoring-n",
+    "domain": "Behavioral",
+    "type": "BEHAVIORAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What signs indicate that your mentoring style isn't working for a specific individual, and how do you pivot?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "behav-mentoring-w",
+    "domain": "Behavioral",
+    "type": "BEHAVIORAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What is the main goal of mentoring a team member?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "behav-learning",
+    "domain": "Behavioral",
+    "type": "BEHAVIORAL",
+    "difficulty": "BEGINNER",
+    "category": "technical",
+    "skills": [
+      "learning",
+      "problem solving"
+    ],
+    "question": "Tell me about a time you were forced to use an unfamiliar technology stack under a tight deadline.",
+    "followUps": {
+      "strong": [
+        "behav-learning-s"
+      ],
+      "neutral": [
+        "behav-learning-n"
+      ],
+      "weak": [
+        "behav-learning-w"
+      ]
+    }
+  },
+  {
+    "id": "behav-learning-s",
+    "domain": "Behavioral",
+    "type": "BEHAVIORAL",
+    "difficulty": "BEGINNER",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How did you prioritize which parts of the new technology to learn deeply versus surface-level understanding?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "behav-learning-n",
+    "domain": "Behavioral",
+    "type": "BEHAVIORAL",
+    "difficulty": "BEGINNER",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What resources do you rely on when official documentation is sparse or outdated?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "behav-learning-w",
+    "domain": "Behavioral",
+    "type": "BEHAVIORAL",
+    "difficulty": "BEGINNER",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How do you start learning a new programming language?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "behav-deadlines",
+    "domain": "Behavioral",
+    "type": "BEHAVIORAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "technical",
+    "skills": [
+      "leadership",
+      "problem solving"
+    ],
+    "question": "Have you ever realized your team was going to miss a critical deadline? How did you communicate this and pivot?",
+    "followUps": {
+      "strong": [
+        "behav-deadlines-s"
+      ],
+      "neutral": [
+        "behav-deadlines-n"
+      ],
+      "weak": [
+        "behav-deadlines-w"
+      ]
+    }
+  },
+  {
+    "id": "behav-deadlines-s",
+    "domain": "Behavioral",
+    "type": "BEHAVIORAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How did you negotiate scope reduction with stakeholders rather than extending the timeline?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "behav-deadlines-n",
+    "domain": "Behavioral",
+    "type": "BEHAVIORAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How do you prevent developer burnout when approaching a severely constrained deadline?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "behav-deadlines-w",
+    "domain": "Behavioral",
+    "type": "BEHAVIORAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What is scope creep?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "behav-feedback",
+    "domain": "Behavioral",
+    "type": "BEHAVIORAL",
+    "difficulty": "ADVANCED",
+    "category": "technical",
+    "skills": [
+      "communication",
+      "conflict resolution",
+      "leadership"
+    ],
+    "question": "Describe a situation where you had to deliver difficult, critical feedback to a peer or manager.",
+    "followUps": {
+      "strong": [
+        "behav-feedback-s"
+      ],
+      "neutral": [
+        "behav-feedback-n"
+      ],
+      "weak": [
+        "behav-feedback-w"
+      ]
+    }
+  },
+  {
+    "id": "behav-feedback-s",
+    "domain": "Behavioral",
+    "type": "BEHAVIORAL",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How did you frame the feedback to ensure it was received constructively rather than defensively?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "behav-feedback-n",
+    "domain": "Behavioral",
+    "type": "BEHAVIORAL",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What was the long-term impact on your working relationship with that individual after the feedback session?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "behav-feedback-w",
+    "domain": "Behavioral",
+    "type": "BEHAVIORAL",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "Why should negative feedback generally be given in private?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "behav-techdebt",
+    "domain": "Behavioral",
+    "type": "BEHAVIORAL",
+    "difficulty": "ADVANCED",
+    "category": "technical",
+    "skills": [
+      "architecture",
+      "leadership",
+      "problem solving"
+    ],
+    "question": "How do you convince product management to prioritize paying down technical debt over shipping new features?",
+    "followUps": {
+      "strong": [
+        "behav-techdebt-s"
+      ],
+      "neutral": [
+        "behav-techdebt-n"
+      ],
+      "weak": [
+        "behav-techdebt-w"
+      ]
+    }
+  },
+  {
+    "id": "behav-techdebt-s",
+    "domain": "Behavioral",
+    "type": "BEHAVIORAL",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "Can you share an example where ignoring technical debt directly impacted a business outcome?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "behav-techdebt-n",
+    "domain": "Behavioral",
+    "type": "BEHAVIORAL",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What metrics do you use to quantify the cost of technical debt to non-engineering leadership?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "behav-techdebt-w",
+    "domain": "Behavioral",
+    "type": "BEHAVIORAL",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What is technical debt?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "behav-codereview",
+    "domain": "Behavioral",
+    "type": "BEHAVIORAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "technical",
+    "skills": [
+      "collaboration",
+      "communication"
+    ],
+    "question": "Tell me about a time you received a highly critical code review. How did you react and process the feedback?",
+    "followUps": {
+      "strong": [
+        "behav-codereview-s"
+      ],
+      "neutral": [
+        "behav-codereview-n"
+      ],
+      "weak": [
+        "behav-codereview-w"
+      ]
+    }
+  },
+  {
+    "id": "behav-codereview-s",
+    "domain": "Behavioral",
+    "type": "BEHAVIORAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How do you handle a situation where a reviewer is being pedantic about stylistic choices not covered by the linter?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "behav-codereview-n",
+    "domain": "Behavioral",
+    "type": "BEHAVIORAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What steps do you take to ensure your own code reviews are thorough but empathetic?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "behav-codereview-w",
+    "domain": "Behavioral",
+    "type": "BEHAVIORAL",
+    "difficulty": "INTERMEDIATE",
+    "category": "follow-up",
+    "skills": [],
+    "question": "What is the purpose of a pull request?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "behav-advocacy",
+    "domain": "Behavioral",
+    "type": "BEHAVIORAL",
+    "difficulty": "ADVANCED",
+    "category": "technical",
+    "skills": [
+      "leadership",
+      "architecture",
+      "communication"
+    ],
+    "question": "Describe a time you advocated for a major architectural change that faced significant resistance from the team.",
+    "followUps": {
+      "strong": [
+        "behav-advocacy-s"
+      ],
+      "neutral": [
+        "behav-advocacy-n"
+      ],
+      "weak": [
+        "behav-advocacy-w"
+      ]
+    }
+  },
+  {
+    "id": "behav-advocacy-s",
+    "domain": "Behavioral",
+    "type": "BEHAVIORAL",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "How did you build a proof of concept or prototype to demonstrate the value of your proposal?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "behav-advocacy-n",
+    "domain": "Behavioral",
+    "type": "BEHAVIORAL",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "If the team ultimately rejected your proposal, how did you commit to the chosen path without lingering resentment?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  },
+  {
+    "id": "behav-advocacy-w",
+    "domain": "Behavioral",
+    "type": "BEHAVIORAL",
+    "difficulty": "ADVANCED",
+    "category": "follow-up",
+    "skills": [],
+    "question": "Why do teams often resist adopting new architectural patterns?",
+    "followUps": {
+      "strong": [],
+      "neutral": [],
+      "weak": []
+    }
+  }
+]

@@ -1,0 +1,402 @@
+const mongoose = require('mongoose');
+const JobDescription = require('../models/JobDescription');
+const Resume = require('../models/Resume');
+const InterviewSession = require('../models/InterviewSession');
+const { extractSkills } = require('../utils/skillExtractor');
+
+// Utility to validate MongoDB ObjectId
+const isValidObjectId = (id) => mongoose.Types.ObjectId.isValid(id);
+
+// Max lengths to prevent abuse
+const MAX_TITLE_LENGTH = 200;
+const MAX_COMPANY_LENGTH = 200;
+const MAX_CONTENT_LENGTH = 50000;
+
+/**
+ * @desc    Create a new ATS Job Description
+ * @route   POST /api/ats/jobs
+ * @access  Private
+ */
+const createJobDescription = async (req, res, next) => {
+  try {
+    let { title, company, content } = req.body;
+
+    // Basic Validation
+    if (!title || !title.trim()) {
+      res.status(400);
+      throw new Error('Please provide a job title.');
+    }
+    if (!company || !company.trim()) {
+      res.status(400);
+      throw new Error('Please provide a company name.');
+    }
+    if (!content || !content.trim()) {
+      res.status(400);
+      throw new Error('Please provide the job description content.');
+    }
+
+    title = title.trim();
+    company = company.trim();
+    content = content.trim();
+
+    // Length Validation
+    if (title.length > MAX_TITLE_LENGTH) {
+      res.status(400);
+      throw new Error(`Title cannot exceed ${MAX_TITLE_LENGTH} characters.`);
+    }
+    if (company.length > MAX_COMPANY_LENGTH) {
+      res.status(400);
+      throw new Error(`Company cannot exceed ${MAX_COMPANY_LENGTH} characters.`);
+    }
+    if (content.length > MAX_CONTENT_LENGTH) {
+      res.status(400);
+      throw new Error(`Job description content cannot exceed ${MAX_CONTENT_LENGTH} characters.`);
+    }
+
+    const job = await JobDescription.create({
+      userId: req.user._id, // Strict ownership assertion
+      title,
+      company,
+      content
+    });
+
+    res.status(201).json({
+      success: true,
+      job: {
+        id: job._id,
+        title: job.title,
+        company: job.company,
+        content: job.content,
+        createdAt: job.createdAt,
+        updatedAt: job.updatedAt
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * @desc    Get all job descriptions for the authenticated user
+ * @route   GET /api/ats/jobs
+ * @access  Private
+ */
+const getJobDescriptions = async (req, res, next) => {
+  try {
+    // Strictly filter by authenticated user
+    const jobs = await JobDescription.find({ userId: req.user._id }).sort({ createdAt: -1 });
+
+    const safeJobs = jobs.map(j => ({
+      id: j._id,
+      title: j.title,
+      company: j.company,
+      createdAt: j.createdAt,
+      updatedAt: j.updatedAt
+    }));
+
+    res.json({
+      success: true,
+      count: safeJobs.length,
+      jobs: safeJobs
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * @desc    Get specific job description
+ * @route   GET /api/ats/jobs/:id
+ * @access  Private
+ */
+const getJobDescriptionById = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    if (!isValidObjectId(id)) {
+      res.status(400);
+      throw new Error('Invalid job description ID format.');
+    }
+
+    const job = await JobDescription.findOne({
+      _id: id,
+      userId: req.user._id // Strict ownership isolation
+    });
+
+    if (!job) {
+      res.status(404);
+      throw new Error('Job description not found.');
+    }
+
+    res.json({
+      success: true,
+      job: {
+        id: job._id,
+        title: job.title,
+        company: job.company,
+        content: job.content,
+        createdAt: job.createdAt,
+        updatedAt: job.updatedAt
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * @desc    Delete a job description
+ * @route   DELETE /api/ats/jobs/:id
+ * @access  Private
+ */
+const deleteJobDescription = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    if (!isValidObjectId(id)) {
+      res.status(400);
+      throw new Error('Invalid job description ID format.');
+    }
+
+    const job = await JobDescription.findOne({
+      _id: id,
+      userId: req.user._id // Strict ownership isolation
+    });
+
+    if (!job) {
+      res.status(404);
+      throw new Error('Job description not found.');
+    }
+
+    await job.deleteOne();
+
+    res.json({
+      success: true,
+      message: 'Job description deleted successfully.'
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * @desc    Get deterministic job readiness score
+ * @route   GET /api/ats/jobs/:id/readiness
+ * @access  Private
+ */
+const getJobReadiness = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    if (!isValidObjectId(id)) {
+      res.status(400);
+      throw new Error('Invalid job description ID format.');
+    }
+
+    // 1. Fetch Job
+    const job = await JobDescription.findOne({
+      _id: id,
+      userId: req.user._id
+    });
+
+    if (!job) {
+      res.status(404);
+      throw new Error('Job description not found.');
+    }
+
+    // 2. Fetch Most Recent Resume
+    const resume = await Resume.findOne({
+      userId: req.user._id,
+      parsingStatus: 'COMPLETED'
+    }).sort({ createdAt: -1 });
+
+    // 3. Fetch Completed Interview History
+    const sessions = await InterviewSession.find({
+      user: req.user._id,
+      status: 'COMPLETED'
+    })
+      .sort({ createdAt: -1 })
+      .lean()
+      .select('strengths weaknesses configuration.targetSkill createdAt');
+
+    // 4. Extract Skills
+    const jobSkills = extractSkills(job.content);
+    const resumeSkills = resume && resume.parsedText ? extractSkills(resume.parsedText) : [];
+
+    // Normalize historical signals
+    const allStrengths = new Set();
+    const practiceHistory = new Set();
+
+    sessions.forEach(session => {
+      if (session.strengths) {
+        session.strengths.forEach(s => {
+          extractSkills(s).forEach(extracted => allStrengths.add(extracted));
+        });
+      }
+      if (session.configuration && session.configuration.targetSkill) {
+        extractSkills(session.configuration.targetSkill).forEach(extracted => practiceHistory.add(extracted));
+      }
+    });
+
+    // Recent Weaknesses (e.g., last 3 interviews to prevent indefinite penalty stacking)
+    const recentSessions = sessions.slice(0, 3);
+    const recentWeaknesses = new Set();
+    recentSessions.forEach(session => {
+      if (session.weaknesses) {
+        session.weaknesses.forEach(w => {
+          extractSkills(w).forEach(extracted => recentWeaknesses.add(extracted));
+        });
+      }
+    });
+
+    const historicalStrengths = Array.from(allStrengths);
+    const historicalWeaknesses = Array.from(recentWeaknesses);
+    const practicedSkills = Array.from(practiceHistory);
+
+    // 5. Insufficient Data Check
+    if (jobSkills.length === 0) {
+      return res.json({
+        success: true,
+        data: {
+          readinessScore: 0,
+          readinessStatus: 'INSUFFICIENT_DATA',
+          scoreBreakdown: { resumeMatch: 0, interviewAlignment: 0, weaknessRisk: 0, practiceProgress: 0 },
+          matchedSkills: [],
+          missingSkills: [],
+          relevantStrengths: [],
+          relevantWeaknesses: [],
+          recommendedActions: [{
+            action: 'REVIEW_JOB_DESCRIPTION',
+            title: 'Review Job Description',
+            description: 'The job description did not contain recognizable canonical skills.',
+            targetSkill: null
+          }],
+          summary: 'The job description could not be mapped to supported skills. Ensure it contains recognizable technical or soft skills.'
+        }
+      });
+    }
+
+    // 6. Intersection Math
+    const resumeMatchedSkills = jobSkills.filter(s => resumeSkills.includes(s));
+    const missingJobSkills = jobSkills.filter(s => !resumeSkills.includes(s));
+    
+    const relevantStrengths = jobSkills.filter(s => historicalStrengths.includes(s));
+    const relevantWeaknesses = jobSkills.filter(s => historicalWeaknesses.includes(s));
+    const practicedRelevantSkills = jobSkills.filter(s => practicedSkills.includes(s));
+
+    // 7. Score Calculation
+    const totalJobSkills = jobSkills.length;
+    
+    const resumeContribution = (resumeMatchedSkills.length / totalJobSkills) * 50;
+    const interviewContribution = sessions.length > 0 ? (relevantStrengths.length / totalJobSkills) * 30 : 0;
+    const practiceContribution = (practicedRelevantSkills.length / totalJobSkills) * 20;
+    
+    const weaknessPenalty = relevantWeaknesses.length * 10;
+    
+    const baseScore = resumeContribution + interviewContribution + practiceContribution;
+    const finalScore = Math.max(0, Math.min(100, Math.round(baseScore - weaknessPenalty)));
+
+    // 8. Readiness Status
+    let readinessStatus = 'INSUFFICIENT_DATA';
+    if (finalScore >= 85) readinessStatus = 'EXCELLENT';
+    else if (finalScore >= 70) readinessStatus = 'STRONG';
+    else if (finalScore >= 50) readinessStatus = 'MODERATE';
+    else readinessStatus = 'NEEDS_PREPARATION';
+
+    // 9. Recommendation Engine
+    const recommendedActions = [];
+    let summaryText = '';
+
+    if (!resume) {
+      recommendedActions.push({
+        action: 'UPLOAD_RESUME',
+        title: 'Upload a Resume',
+        description: 'Upload your resume to evaluate how well your background aligns with this job.',
+        targetSkill: null
+      });
+      summaryText = 'Upload a parsed resume to receive a more complete readiness assessment.';
+    } else if (sessions.length === 0) {
+      recommendedActions.push({
+        action: 'COMPLETE_MORE_INTERVIEWS',
+        title: 'Start Practicing',
+        description: 'Complete practice interviews to assess your communication and technical alignment.',
+        targetSkill: null
+      });
+      summaryText = 'Your resume is ready, but we need interview data to assess your full readiness.';
+    } else if (missingJobSkills.length > 0) {
+      // Priority 1
+      const primaryMissing = missingJobSkills[0];
+      recommendedActions.push({
+        action: 'PRACTICE_TARGET_SKILL',
+        title: `Practice ${primaryMissing}`,
+        description: `This required skill is missing from your resume. Prove your capability in an interview.`,
+        targetSkill: primaryMissing
+      });
+      summaryText = 'You have relevant skills, but several required skills still need preparation.';
+    } else if (relevantWeaknesses.length > 0) {
+      // Priority 2
+      const primaryWeakness = relevantWeaknesses[0];
+      recommendedActions.push({
+        action: 'REVIEW_PERSISTENT_WEAKNESS',
+        title: `Improve ${primaryWeakness}`,
+        description: `This required skill appeared as a recent weakness. Target it in your next practice.`,
+        targetSkill: primaryWeakness
+      });
+      summaryText = 'Your resume aligns well, but a recent weakness poses a risk for this specific role.';
+    } else if (resumeContribution < 25) {
+      // Priority 3
+      recommendedActions.push({
+        action: 'IMPROVE_RESUME_SKILL',
+        title: 'Improve Resume Targeting',
+        description: 'Your resume is missing many core requirements. Consider tailoring it further.',
+        targetSkill: null
+      });
+      summaryText = 'Your interview performance is solid, but your resume lacks key keywords for this job.';
+    } else {
+      // Priority 5
+      recommendedActions.push({
+        action: 'READY_TO_APPLY',
+        title: 'Ready to Apply',
+        description: 'Your background and interview skills strongly align with this position.',
+        targetSkill: null
+      });
+      summaryText = 'Your resume and interview history strongly align with this role.';
+    }
+
+    // Build the format for ReadinessSkill[]
+    const mapToReadinessSkill = (skill) => ({
+      skill,
+      actionableSkillKey: skill // extractSkills always returns canonical keys
+    });
+
+    res.json({
+      success: true,
+      data: {
+        readinessScore: finalScore,
+        readinessStatus,
+        scoreBreakdown: {
+          resumeMatch: Number(resumeContribution.toFixed(2)),
+          interviewAlignment: Number(interviewContribution.toFixed(2)),
+          weaknessRisk: weaknessPenalty,
+          practiceProgress: Number(practiceContribution.toFixed(2))
+        },
+        matchedSkills: resumeMatchedSkills.map(mapToReadinessSkill),
+        missingSkills: missingJobSkills.map(mapToReadinessSkill),
+        relevantStrengths: relevantStrengths.map(mapToReadinessSkill),
+        relevantWeaknesses: relevantWeaknesses.map(mapToReadinessSkill),
+        recommendedActions,
+        summary: summaryText
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports = {
+  createJobDescription,
+  getJobDescriptions,
+  getJobDescriptionById,
+  deleteJobDescription,
+  getJobReadiness
+};

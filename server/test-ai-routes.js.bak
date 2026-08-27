@@ -1,0 +1,72 @@
+const fetch = require('node-fetch'); // If not available, use dynamic import or native fetch
+
+const BASE_URL = 'http://localhost:5001/api';
+
+async function runTests() {
+  console.log('--- PHASE 3 API TESTING ---');
+  
+  // 1. Unauthenticated Request
+  let res = await fetch(`${BASE_URL}/ai/generate`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ promptId: 'TEST_CONNECTION', payload: { ping: 'pong' } })
+  });
+  console.log('Test 1 (Unauthenticated):', res.status === 401 ? 'PASS (401)' : `FAIL (${res.status})`);
+
+  // Log in to get session
+  res = await fetch(`${BASE_URL}/auth/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: 'amrit17612@gmail.com', password: 'Password123!' })
+  });
+  if (!res.ok) throw new Error('Login failed for test');
+  const cookieHeader = res.headers.get('set-cookie');
+  const activeCookie = cookieHeader ? cookieHeader.split(';')[0] : '';
+
+  // 2. Authenticated, Malformed Request (Missing payload)
+  res = await fetch(`${BASE_URL}/ai/generate`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Cookie': activeCookie },
+    body: JSON.stringify({ promptId: 'TEST_CONNECTION' }) // missing payload
+  });
+  console.log('Test 2 (Malformed Request):', res.status === 400 ? 'PASS (400)' : `FAIL (${res.status})`);
+
+  // 3. Authenticated, Invalid promptId
+  res = await fetch(`${BASE_URL}/ai/generate`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Cookie': activeCookie },
+    body: JSON.stringify({ promptId: 'UNAUTHORIZED_PROMPT', payload: {} })
+  });
+  console.log('Test 3 (Invalid Prompt ID):', res.status === 400 ? 'PASS (400)' : `FAIL (${res.status})`);
+
+  // 4 & 5: Valid request + Rate Limit spam
+  console.log('\nTesting Rate Limit (5 req/min allowed)...');
+  let rateLimitHit = false;
+  let serviceErrorHit = false;
+
+  for (let i = 1; i <= 6; i++) {
+    const start = Date.now();
+    const result = await fetch(`${BASE_URL}/ai/generate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Cookie': activeCookie },
+      body: JSON.stringify({ promptId: 'TEST_CONNECTION', payload: { attempt: i } })
+    });
+    
+    if (result.status === 429) {
+      rateLimitHit = true;
+      console.log(`Req ${i}: 429 Rate Limit Hit!`);
+    } else if (result.status === 503) {
+      serviceErrorHit = true; // Expected because API key is dummy
+      console.log(`Req ${i}: 503 Service Unavailable (Expected for dummy API key)`);
+    } else {
+      console.log(`Req ${i}: ${result.status}`);
+    }
+  }
+
+  console.log('Test 4 (Rate Limit):', rateLimitHit ? 'PASS (429)' : 'FAIL');
+  console.log('Test 5 (Invalid Config):', serviceErrorHit ? 'PASS (503)' : 'FAIL');
+  
+  process.exit(0);
+}
+
+runTests().catch(console.error);
