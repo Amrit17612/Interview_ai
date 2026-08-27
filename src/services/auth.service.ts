@@ -12,6 +12,7 @@ export interface AuthUser {
 export interface AuthResponse {
   success: boolean;
   message?: string;
+  warning?: string;
   user?: AuthUser;
 }
 

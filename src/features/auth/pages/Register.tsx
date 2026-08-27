@@ -20,12 +20,17 @@ export function Register() {
     try {
       setAuthError(null);
       setSuccessMsg(null);
-      await registerAuth(data);
-      // Wait for session state (if backend auto-logs in) or show verification message
-      setSuccessMsg('Account created successfully. If email verification is required, please check your inbox.');
+      const response = await registerAuth(data);
+      
+      if (response.warning) {
+        setSuccessMsg(response.warning);
+      } else {
+        setSuccessMsg('Account created successfully. Please check your email to verify your account.');
+      }
+      
       setTimeout(() => {
         navigate(ROUTES.LOGIN);
-      }, 3000);
+      }, 5000);
     } catch (err: any) {
       setAuthError(err.message || 'Registration failed. Please try again.');
     }

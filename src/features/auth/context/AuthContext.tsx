@@ -10,7 +10,7 @@ interface AuthContextType {
   error: string | null;
   login: (credentials: any) => Promise<void>;
   logout: () => Promise<void>;
-  register: (data: any) => Promise<void>;
+  register: (data: any) => Promise<import('../../../services/auth.service').AuthResponse>;
   refreshUser: () => Promise<void>;
 }
 
@@ -62,14 +62,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       setError(null);
       const response = await authService.register(data);
-      // Wait for backend authoritative session state.
-      // If the backend auto-logs in the user and sets the cookie, refreshing user will sync state.
-      // Alternatively, we just set user if it's returned.
       if (response.success && response.user && !response.message?.toLowerCase().includes('verify')) {
-         // Some architectures log in automatically, some require verification.
-         // We simply attempt to refresh user to let the backend dictate session state securely via HTTP-only cookie.
          await refreshUser();
       }
+      return response;
     } catch (err: any) {
       setError(err.message || 'Registration failed');
       throw err;
