@@ -1,24 +1,15 @@
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
 
-// Initialize nodemailer transport if credentials exist
-let transporter = null;
-if (process.env.SMTP_HOST && process.env.SMTP_USER) {
-  transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: parseInt(process.env.SMTP_PORT || '587', 10),
-    secure: process.env.SMTP_PORT === '465',
-    auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS
-    }
-  });
+let resend = null;
+if (process.env.RESEND_API_KEY) {
+  resend = new Resend(process.env.RESEND_API_KEY);
 }
 
 const sendVerificationEmail = async (email, token) => {
   const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
   const verificationUrl = `${clientUrl}/verify-email?token=${token}`;
   
-  if (!transporter) {
+  if (!resend) {
     console.warn('\n============================================================');
     console.warn('DEVELOPMENT ONLY: EMAIL PROVIDER NOT CONFIGURED');
     console.warn(`To: ${email}`);
@@ -29,8 +20,8 @@ const sendVerificationEmail = async (email, token) => {
   }
 
   try {
-    await transporter.sendMail({
-      from: process.env.EMAIL_FROM_ADDRESS || 'noreply@interviu.ai',
+    const { data, error } = await resend.emails.send({
+      from: process.env.EMAIL_FROM_ADDRESS || 'Interviu AI <noreply@interviu.ai>',
       to: email,
       subject: 'Verify your Interviu AI account',
       html: `
@@ -43,6 +34,12 @@ const sendVerificationEmail = async (email, token) => {
         </div>
       `
     });
+
+    if (error) {
+      console.error('[EMAIL SERVICE] Resend API error:', error);
+      throw new Error('Email delivery failed');
+    }
+
     return true;
   } catch (error) {
     console.error('[EMAIL SERVICE] Failed to send verification email:', error.message);
@@ -54,7 +51,7 @@ const sendPasswordResetEmail = async (email, token) => {
   const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
   const resetUrl = `${clientUrl}/reset-password?token=${token}`;
   
-  if (!transporter) {
+  if (!resend) {
     console.warn('\n============================================================');
     console.warn('DEVELOPMENT ONLY: EMAIL PROVIDER NOT CONFIGURED');
     console.warn(`To: ${email}`);
@@ -65,8 +62,8 @@ const sendPasswordResetEmail = async (email, token) => {
   }
 
   try {
-    await transporter.sendMail({
-      from: process.env.EMAIL_FROM_ADDRESS || 'noreply@interviu.ai',
+    const { data, error } = await resend.emails.send({
+      from: process.env.EMAIL_FROM_ADDRESS || 'Interviu AI <noreply@interviu.ai>',
       to: email,
       subject: 'Reset your Interviu AI password',
       html: `
@@ -78,6 +75,12 @@ const sendPasswordResetEmail = async (email, token) => {
         </div>
       `
     });
+
+    if (error) {
+      console.error('[EMAIL SERVICE] Resend API error:', error);
+      throw new Error('Email delivery failed');
+    }
+
     return true;
   } catch (error) {
     console.error('[EMAIL SERVICE] Failed to send password reset email:', error.message);
