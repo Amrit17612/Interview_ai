@@ -49,11 +49,18 @@ const registerUser = async (req, res, next) => {
       await user.save();
 
       // Attempt to send email
-      await emailService.sendVerificationEmail(user.email, verificationToken);
+      let emailWarning = null;
+      try {
+        await emailService.sendVerificationEmail(user.email, verificationToken);
+      } catch (emailError) {
+        console.error('[AUTH] Email verification sending failed:', emailError.message);
+        emailWarning = 'Account created successfully, but the verification email failed to send. You may need to request a new verification link later.';
+      }
 
       res.status(201).json({
         success: true,
         message: 'User registered successfully',
+        warning: emailWarning,
         user: {
           id: user._id,
           firstName: user.firstName,
