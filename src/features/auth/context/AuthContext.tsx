@@ -101,12 +101,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       
       // 3. Force token refresh and get token
       const token = await userCredential.user.getIdToken(true);
+      
+      console.log('[Auth Debug] Token exists:', !!token);
+      console.log('[Auth Debug] Token length:', token?.length);
 
       // 4. Sync to Mongo DB via backend /register
-      const response = await authService.register({
+      const payload = {
         firstName: data.firstName,
         lastName: data.lastName
-      }, token);
+      };
+      console.log('[Auth Debug] Sending payload to authService:', Object.keys(payload));
+      
+      const response = await authService.register(payload, token);
 
       if (response.success && response.user) {
          await refreshUser();

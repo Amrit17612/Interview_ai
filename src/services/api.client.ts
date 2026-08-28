@@ -20,6 +20,14 @@ import { auth } from '../config/firebase';
 
 // Request interceptor to attach Firebase ID Token
 apiClient.interceptors.request.use(async (config) => {
+  if (config.url === '/auth/register' || config.url === 'auth/register') {
+    console.log('[Auth Debug] apiClient request interceptor running for:', config.url);
+    console.log('[Auth Debug] config.data type:', typeof config.data);
+    if (config.data && typeof config.data === 'object') {
+      console.log('[Auth Debug] config.data keys:', Object.keys(config.data));
+    }
+  }
+
   if (config.url && config.url.startsWith('/')) {
     config.url = config.url.substring(1);
   }

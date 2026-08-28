@@ -18,7 +18,10 @@ export interface AuthResponse {
 
 export const authService = {
   async register(data: any, token: string): Promise<AuthResponse> {
-    const response = await apiClient.post<AuthResponse>('/auth/register', { ...data, firebaseToken: token });
+    const payload = { ...data, firebaseToken: token };
+    console.log('[Auth Debug] authService.register payload keys:', Object.keys(payload));
+    console.log('[Auth Debug] firebaseToken present in payload:', !!payload.firebaseToken);
+    const response = await apiClient.post<AuthResponse>('/auth/register', payload);
     return response.data;
   },
 

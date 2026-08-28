@@ -4,6 +4,10 @@ const User = require('../models/User');
 
 const registerUser = async (req, res, next) => {
   try {
+    console.log('[Register Debug] req.body keys:', Object.keys(req.body || {}));
+    console.log('[Register Debug] firebaseToken present:', !!req.body?.firebaseToken);
+    console.log('[Register Debug] content-type:', req.headers['content-type']);
+    
     const { firstName, lastName, firebaseToken } = req.body;
     
     if (!firebaseToken) {
