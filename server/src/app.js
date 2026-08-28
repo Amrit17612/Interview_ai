@@ -12,9 +12,18 @@ const app = express();
 // Usually set to 1 if behind a single reverse proxy layer.
 app.set('trust proxy', 1);
 
-const allowedOrigins = (process.env.CLIENT_URL || 'http://localhost:5173')
-  .split(',')
-  .map(url => url.trim().replace(/\/$/, ''));
+const defaultOrigins = [
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'https://interview-2kvdm3xps-amrit17612s-projects.vercel.app',
+  'https://interview-mocbs5h61-amrit17612s-projects.vercel.app'
+];
+
+const envOrigins = process.env.CLIENT_URL
+  ? process.env.CLIENT_URL.split(',').map(url => url.trim().replace(/\/$/, ''))
+  : [];
+
+const allowedOrigins = [...new Set([...defaultOrigins, ...envOrigins])];
 
 app.use(cors({
   origin: function (origin, callback) {
