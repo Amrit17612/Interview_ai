@@ -15,8 +15,7 @@ app.set('trust proxy', 1);
 const defaultOrigins = [
   'http://localhost:5173',
   'http://localhost:3000',
-  'https://interview-2kvdm3xps-amrit17612s-projects.vercel.app',
-  'https://interview-mocbs5h61-amrit17612s-projects.vercel.app'
+  'https://interview-ai-production.vercel.app' // Fallback production URL if needed
 ];
 
 const envOrigins = process.env.CLIENT_URL
@@ -25,13 +24,19 @@ const envOrigins = process.env.CLIENT_URL
 
 const allowedOrigins = [...new Set([...defaultOrigins, ...envOrigins])];
 
+// Pattern for Vercel deployment URLs specific to this project
+// Matches origins like: https://interview-gupf4hq20-amrit17612s-projects.vercel.app
+const vercelPreviewRegex = /^https:\/\/interview-[a-zA-Z0-9-]+-amrit17612s-projects\.vercel\.app$/;
+
 app.use(cors({
   origin: function (origin, callback) {
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
     
     const normalizedOrigin = origin.replace(/\/$/, '');
-    if (allowedOrigins.includes(normalizedOrigin)) {
+    
+    // Check against exact matches or the Vercel preview regex
+    if (allowedOrigins.includes(normalizedOrigin) || vercelPreviewRegex.test(normalizedOrigin)) {
       callback(null, true);
     } else {
       console.warn(`[CORS] Blocked request from unauthorized origin: ${origin}`);
