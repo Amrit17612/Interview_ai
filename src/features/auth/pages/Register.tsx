@@ -21,12 +21,7 @@ export function Register() {
     try {
       setAuthError(null);
       await registerAuth(data);
-      
-      if (auth.currentUser) {
-        await sendEmailVerification(auth.currentUser);
-      }
-      
-      setSuccessMsg("Account created successfully. Please check your inbox and verify your email address to get started.");
+      setSuccessMsg("Verification email sent. Please check Inbox, Spam, and Promotions.");
     } catch (err: any) {
       setAuthError(err.message || 'Registration failed');
     }

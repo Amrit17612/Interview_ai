@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 import { authService } from '../../../services/auth.service';
 import type { AuthUser, AuthResponse } from '../../../services/auth.service';
 import { auth } from '../../../config/firebase';
-import { onAuthStateChanged, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
+import { onAuthStateChanged, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification } from 'firebase/auth';
 
 interface AuthContextType {
   user: AuthUser | null;
@@ -14,6 +14,7 @@ interface AuthContextType {
   logout: () => Promise<void>;
   register: (data: any) => Promise<AuthResponse>;
   refreshUser: () => Promise<void>;
+  resendVerificationEmail: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -27,6 +28,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const refreshUser = async () => {
     try {
+      if (auth.currentUser) {
+        await auth.currentUser.reload();
+      }
       const response = await authService.getCurrentUser();
       if (response.success && response.user) {
         if (!response.user.emailVerified) {
@@ -88,11 +92,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       // 1. Create in Firebase
       const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
       
-      // 2. Force token refresh
+      // 2. Send Verification Email
+      try {
+        await sendEmailVerification(userCredential.user);
+      } catch (emailErr: any) {
+        console.error('Failed to send verification email:', emailErr.code, emailErr.message);
+        throw new Error(`Account created, but verification email failed: ${emailErr.message}`);
+      }
+      
+      // 3. Force token refresh
       await userCredential.user.getIdToken(true);
       const token = await userCredential.user.getIdToken();
 
-      // 3. Sync to Mongo DB via backend /register
+      // 4. Sync to Mongo DB via backend /register
       const response = await authService.register({
         firstName: data.firstName,
         lastName: data.lastName
@@ -106,6 +118,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       // Clean up firebase user if backend sync fails? Not strictly necessary, but good practice.
       // For now, just throw
       setError(err.message || 'Registration failed');
+      throw err;
+    }
+  };
+
+  const resendVerificationEmail = async () => {
+    try {
+      setError(null);
+      if (auth.currentUser) {
+        await sendEmailVerification(auth.currentUser);
+      } else {
+        throw new Error('No authenticated user found to send verification email.');
+      }
+    } catch (err: any) {
+      console.error('Failed to resend verification email:', err.code, err.message);
+      setError(err.message || 'Failed to resend verification email');
       throw err;
     }
   };

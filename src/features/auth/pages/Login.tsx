@@ -10,7 +10,7 @@ import { useAuth } from '../hooks/useAuth';
 import { useState } from 'react';
 
 export function Login() {
-  const { login } = useAuth();
+  const { login, resendVerificationEmail } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [authError, setAuthError] = useState<string | null>(null);
@@ -48,8 +48,24 @@ export function Login() {
               </div>
             )}
             {isVerifying && (
-              <div className="p-3 bg-amber-50 border border-amber-200 text-amber-700 text-sm rounded-md">
-                Please verify your email address before logging in.
+              <div className="p-3 bg-amber-50 border border-amber-200 text-amber-700 text-sm rounded-md flex flex-col gap-2">
+                <span>Please verify your email address before logging in.</span>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={async () => {
+                    try {
+                      await resendVerificationEmail();
+                      setAuthError(null);
+                      alert('Verification email resent! Please check your inbox.');
+                    } catch (err: any) {
+                      setAuthError(err.message || 'Failed to resend verification email.');
+                    }
+                  }}
+                  className="w-full text-xs"
+                >
+                  Resend verification email
+                </Button>
               </div>
             )}
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
