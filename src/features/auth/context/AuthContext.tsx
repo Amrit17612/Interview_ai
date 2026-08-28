@@ -149,7 +149,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, isAuthenticated, error, login, logout, register, refreshUser }}>
+    <AuthContext.Provider value={{ user, isLoading, isAuthenticated, error, login, logout, register, refreshUser, resendVerificationEmail }}>
       {isLoading ? (
         <div className="flex h-screen w-full items-center justify-center">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-gray-900"></div>

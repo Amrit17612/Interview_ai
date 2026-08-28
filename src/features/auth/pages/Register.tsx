@@ -8,9 +8,6 @@ import { motion } from 'framer-motion';
 import { useForm } from 'react-hook-form';
 import { useAuth } from '../hooks/useAuth';
 import { useState } from 'react';
-import { auth } from '../../../config/firebase';
-import { sendEmailVerification } from 'firebase/auth';
-
 export function Register() {
   const { register: registerAuth } = useAuth();
   const [authError, setAuthError] = useState<string | null>(null);
