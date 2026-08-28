@@ -2,16 +2,17 @@ import { Container } from '../../../components/ui/Container';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../../../components/ui/Card';
 import { Input } from '../../../components/ui/Input';
 import { Button } from '../../../components/ui/Button';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import { ROUTES } from '../../../constants/routes';
 import { motion } from 'framer-motion';
 import { useForm } from 'react-hook-form';
 import { useAuth } from '../hooks/useAuth';
 import { useState } from 'react';
+import { auth } from '../../../config/firebase';
+import { sendEmailVerification } from 'firebase/auth';
 
 export function Register() {
   const { register: registerAuth } = useAuth();
-  const navigate = useNavigate();
   const [authError, setAuthError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm();
@@ -19,20 +20,15 @@ export function Register() {
   const onSubmit = async (data: any) => {
     try {
       setAuthError(null);
-      setSuccessMsg(null);
-      const response = await registerAuth(data);
+      await registerAuth(data);
       
-      if (response.warning) {
-        setSuccessMsg(response.warning);
-      } else {
-        setSuccessMsg('Account created successfully. Please check your email to verify your account.');
+      if (auth.currentUser) {
+        await sendEmailVerification(auth.currentUser);
       }
       
-      setTimeout(() => {
-        navigate(ROUTES.LOGIN);
-      }, 5000);
+      setSuccessMsg("Account created successfully. Please check your inbox and verify your email address to get started.");
     } catch (err: any) {
-      setAuthError(err.message || 'Registration failed. Please try again.');
+      setAuthError(err.message || 'Registration failed');
     }
   };
 

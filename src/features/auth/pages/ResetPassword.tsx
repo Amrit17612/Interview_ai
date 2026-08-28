@@ -8,11 +8,12 @@ import { useForm } from 'react-hook-form';
 import { useState } from 'react';
 import { useSearchParams, NavLink, useNavigate } from 'react-router-dom';
 import { ROUTES } from '../../../constants/routes';
-import { authService } from '../../../services/auth.service';
+import { auth } from '../../../config/firebase';
+import { confirmPasswordReset } from 'firebase/auth';
 
 export function ResetPassword() {
   const [searchParams] = useSearchParams();
-  const token = searchParams.get('token');
+  const token = searchParams.get('oobCode') || searchParams.get('token');
   const navigate = useNavigate();
 
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
@@ -29,8 +30,8 @@ export function ResetPassword() {
     try {
       setErrorMsg(null);
       setSuccessMsg(null);
-      const res = await authService.resetPassword({ token, password: data.password });
-      setSuccessMsg(res.message || 'Password reset successfully.');
+      await confirmPasswordReset(auth, token, data.password);
+      setSuccessMsg('Password reset successfully.');
       setTimeout(() => {
         navigate(ROUTES.LOGIN);
       }, 3000);

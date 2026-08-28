@@ -18,12 +18,11 @@
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "express-rate-limit": "^8.6.2",
+    "firebase-admin": "^14.3.0",
     "jsonwebtoken": "^9.0.3",
     "mammoth": "^1.12.1",
     "mongoose": "^9.9.2",
     "multer": "^2.2.0",
-    "nodemailer": "^9.0.5",
-    "pdf-parse": "^1.1.1",
-    "resend": "^6.24.0"
+    "pdf-parse": "^1.1.1"
   }
 }

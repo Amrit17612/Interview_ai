@@ -11,6 +11,23 @@ export const apiClient = axios.create({
   timeout: 10000,
 });
 
+import { auth } from '../config/firebase';
+
+// Request interceptor to attach Firebase ID Token
+apiClient.interceptors.request.use(async (config) => {
+  if (auth.currentUser) {
+    try {
+      const token = await auth.currentUser.getIdToken();
+      config.headers.Authorization = `Bearer ${token}`;
+    } catch (error) {
+      console.error('Failed to get Firebase token', error);
+    }
+  }
+  return config;
+}, (error) => {
+  return Promise.reject(error);
+});
+
 // Interceptor to normalize errors or handle generic 401s if needed
 apiClient.interceptors.response.use(
   (response) => response,

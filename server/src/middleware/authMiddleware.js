@@ -1,27 +1,61 @@
-const jwt = require('jsonwebtoken');
+const admin = require('../config/firebase');
 const User = require('../models/User');
 
 const protect = async (req, res, next) => {
-  let token = req.cookies.jwt;
+  let token;
+  
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith('Bearer')
+  ) {
+    try {
+      token = req.headers.authorization.split(' ')[1];
+      
+      const decodedToken = await admin.auth().verifyIdToken(token);
+      
+      // Attempt to find by firebaseUid or email
+      req.user = await User.findOne({
+        $or: [
+          { firebaseUid: decodedToken.uid },
+          { email: decodedToken.email }
+        ]
+      }).select('-passwordHash');
+
+      if (!req.user) {
+        res.status(401);
+        return next(new Error('Not authorized, user not found in database'));
+      }
+      
+      next();
+    } catch (error) {
+      console.error(error);
+      res.status(401);
+      return next(new Error('Not authorized, token failed'));
+    }
+  }
 
   if (!token) {
     res.status(401);
     return next(new Error('Not authorized, no token'));
   }
+};
 
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    // Attach user to request, excluding passwordHash
-    req.user = await User.findById(decoded.userId).select('-passwordHash');
-    if (!req.user) {
+const decodeFirebaseToken = async (req, res, next) => {
+  let token;
+  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+    try {
+      token = req.headers.authorization.split(' ')[1];
+      req.decodedToken = await admin.auth().verifyIdToken(token);
+      next();
+    } catch (error) {
+      console.error(error);
       res.status(401);
-      return next(new Error('Not authorized, user not found'));
+      return next(new Error('Not authorized, token failed'));
     }
-    next();
-  } catch {
+  } else {
     res.status(401);
-    return next(new Error('Not authorized, token failed'));
+    return next(new Error('Not authorized, no token'));
   }
 };
 
-module.exports = { protect };
+module.exports = { protect, decodeFirebaseToken };

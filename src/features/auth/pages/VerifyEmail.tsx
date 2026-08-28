@@ -6,13 +6,15 @@ import { ROUTES } from '../../../constants/routes';
 import { motion } from 'framer-motion';
 import { MailCheck, CheckCircle, XCircle } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { authService } from '../../../services/auth.service';
 import { useAuth } from '../hooks/useAuth';
 import { Input } from '../../../components/ui/Input';
+import { auth } from '../../../config/firebase';
+import { applyActionCode, sendEmailVerification } from 'firebase/auth';
 
 export function VerifyEmail() {
   const [searchParams] = useSearchParams();
-  const token = searchParams.get('token');
+  const token = searchParams.get('oobCode') || searchParams.get('token');
+  const mode = searchParams.get('mode');
   const navigate = useNavigate();
   const { user, refreshUser } = useAuth();
   
@@ -22,13 +24,20 @@ export function VerifyEmail() {
   const [resendStatus, setResendStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle');
 
   useEffect(() => {
-    if (token) {
+    // Make sure we are verifying email if mode is present, or just trust the token if no mode (legacy/custom)
+    if (token && (!mode || mode === 'verifyEmail')) {
       const verifyToken = async () => {
         setStatus('verifying');
         try {
-          const res = await authService.verifyEmail(token);
+          // Attempt Firebase verification
+          await applyActionCode(auth, token);
           setStatus('success');
-          setMessage(res.message || 'Email verified successfully!');
+          setMessage('Email verified successfully!');
+          
+          // Force reload the current user so emailVerified is true
+          if (auth.currentUser) {
+            await auth.currentUser.reload();
+          }
           await refreshUser(); // sync backend session
           setTimeout(() => {
             navigate(ROUTES.DASHBOARD);
@@ -40,15 +49,21 @@ export function VerifyEmail() {
       };
       verifyToken();
     }
-  }, [token, navigate, refreshUser]);
+  }, [token, mode, navigate, refreshUser]);
 
   const handleResend = async () => {
     if (!resendEmail) return;
     setResendStatus('sending');
     try {
-      await authService.resendVerification(resendEmail);
+      if (auth.currentUser && auth.currentUser.email === resendEmail) {
+        await sendEmailVerification(auth.currentUser);
+      } else {
+        // Technically we can't easily resend an email verification to an arbitrary email in Firebase Client SDK 
+        // if they are not logged in. If they are not logged in, we throw error or ask them to login.
+        throw new Error('Please login to resend verification.');
+      }
       setResendStatus('success');
-    } catch {
+    } catch (err: any) {
       setResendStatus('error');
     }
   };

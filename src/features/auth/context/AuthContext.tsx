@@ -1,16 +1,18 @@
 import { createContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import { authService } from '../../../services/auth.service';
-import type { AuthUser } from '../../../services/auth.service';
+import type { AuthUser, AuthResponse } from '../../../services/auth.service';
+import { auth } from '../../../config/firebase';
+import { onAuthStateChanged, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 
 interface AuthContextType {
   user: AuthUser | null;
   isLoading: boolean;
   isAuthenticated: boolean;
   error: string | null;
-  login: (credentials: any) => Promise<void>;
+  login: (credentials: any) => Promise<AuthResponse>;
   logout: () => Promise<void>;
-  register: (data: any) => Promise<import('../../../services/auth.service').AuthResponse>;
+  register: (data: any) => Promise<AuthResponse>;
   refreshUser: () => Promise<void>;
 }
 
@@ -27,7 +29,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       const response = await authService.getCurrentUser();
       if (response.success && response.user) {
-        setUser(response.user);
+        if (!response.user.emailVerified) {
+          setUser(null);
+        } else {
+          setUser(response.user);
+        }
       } else {
         setUser(null);
       }
@@ -37,21 +43,38 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   useEffect(() => {
-    const initAuth = async () => {
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       setIsLoading(true);
-      await refreshUser();
+      if (firebaseUser) {
+        // Fetch MongoDB user data using the valid Bearer token now attached via interceptor
+        await refreshUser();
+      } else {
+        setUser(null);
+      }
       setIsLoading(false);
-    };
-    initAuth();
+    });
+
+    return () => unsubscribe();
   }, []);
 
   const login = async (credentials: any) => {
     try {
       setError(null);
-      const response = await authService.login(credentials);
+      // Firebase Login
+      await signInWithEmailAndPassword(auth, credentials.email, credentials.password);
+      // Wait for auth interceptor to pick up the new token
+      await auth.currentUser?.getIdToken(true);
+      
+      // We still call backend /login to sync verification state or handle any legacy logic
+      // But the main auth is Firebase
+      const response = await authService.login();
       if (response.success && response.user) {
+        if (!response.user.emailVerified) {
+          throw new Error('Please verify your email address before logging in');
+        }
         setUser(response.user);
       }
+      return response;
     } catch (err: any) {
       setError(err.message || 'Login failed');
       throw err;
@@ -61,12 +84,25 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const register = async (data: any) => {
     try {
       setError(null);
-      const response = await authService.register(data);
-      if (response.success && response.user && !response.message?.toLowerCase().includes('verify')) {
+      // 1. Create in Firebase
+      const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
+      
+      // 2. Force token refresh to make sure interceptor works
+      await userCredential.user.getIdToken(true);
+
+      // 3. Sync to Mongo DB via backend /register
+      const response = await authService.register({
+        firstName: data.firstName,
+        lastName: data.lastName
+      });
+
+      if (response.success && response.user) {
          await refreshUser();
       }
       return response;
     } catch (err: any) {
+      // Clean up firebase user if backend sync fails? Not strictly necessary, but good practice.
+      // For now, just throw
       setError(err.message || 'Registration failed');
       throw err;
     }
@@ -76,8 +112,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       await authService.logout();
     } catch (err) {
-      console.warn('Logout request failed, proceeding to clear local state', err);
+      console.warn('Backend logout failed', err);
     } finally {
+      await signOut(auth);
       setUser(null);
     }
   };
@@ -85,7 +122,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   return (
     <AuthContext.Provider value={{ user, isLoading, isAuthenticated, error, login, logout, register, refreshUser }}>
       {isLoading ? (
-        // Render a basic loader while restoring session to prevent flashing unauthenticated states
         <div className="flex h-screen w-full items-center justify-center">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-gray-900"></div>
         </div>

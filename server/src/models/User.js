@@ -8,9 +8,14 @@ const userSchema = new mongoose.Schema({
     trim: true,
     lowercase: true,
   },
+  firebaseUid: {
+    type: String,
+    unique: true,
+    sparse: true,
+  },
   passwordHash: {
     type: String,
-    required: true,
+    required: false, // Optional now that Firebase handles passwords
   },
   firstName: {
     type: String,

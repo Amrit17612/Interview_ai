@@ -8,7 +8,8 @@ import { motion } from 'framer-motion';
 import { KeyRound } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { useState } from 'react';
-import { authService } from '../../../services/auth.service';
+import { auth } from '../../../config/firebase';
+import { sendPasswordResetEmail } from 'firebase/auth';
 
 export function ForgotPassword() {
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
@@ -19,8 +20,8 @@ export function ForgotPassword() {
     try {
       setErrorMsg(null);
       setSuccessMsg(null);
-      const res = await authService.forgotPassword(data.email);
-      setSuccessMsg(res.message || 'If an account exists for this email, a password reset link has been sent.');
+      await sendPasswordResetEmail(auth, data.email);
+      setSuccessMsg('If an account exists for this email, a password reset link has been sent.');
     } catch (err: any) {
       setErrorMsg(err.message || 'Failed to request password reset. Please try again.');
     }
