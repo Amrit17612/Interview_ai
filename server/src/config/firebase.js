@@ -1,20 +1,28 @@
 const admin = require('firebase-admin');
 
+// Validate environment variables
+const projectId = process.env.FIREBASE_PROJECT_ID;
+const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
+const privateKey = process.env.FIREBASE_PRIVATE_KEY;
+
+if (projectId && clientEmail) {
+  console.log(`[Firebase Admin] Initializing with project ID: ${projectId} and client email: ${clientEmail}`);
+} else {
+  console.warn('[Firebase Admin] Missing FIREBASE_PROJECT_ID or FIREBASE_CLIENT_EMAIL environment variables. Initialization may fail.');
+}
+
 if (!admin.getApps().length) {
-  // Use default application credentials if FIREBASE_CONFIG or GOOGLE_APPLICATION_CREDENTIALS is set
-  // Alternatively, parse them from environment variables explicitly
-  
-  if (process.env.FIREBASE_PROJECT_ID) {
+  if (projectId && clientEmail && privateKey) {
     admin.initializeApp({
       credential: admin.cert({
-        projectId: process.env.FIREBASE_PROJECT_ID,
-        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-        // Handle escaped newlines in private keys
-        privateKey: process.env.FIREBASE_PRIVATE_KEY ? process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n') : undefined,
+        projectId,
+        clientEmail,
+        // Handle escaped newlines in private keys safely
+        privateKey: privateKey.replace(/\\n/g, '\n'),
       })
     });
   } else {
-    // Fallback for development if env variables are not fully set, will throw if missing
+    console.warn('[Firebase Admin] Missing credentials, attempting default initialization');
     admin.initializeApp();
   }
 }
