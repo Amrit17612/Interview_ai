@@ -15,6 +15,14 @@ import { auth } from '../config/firebase';
 
 // Request interceptor to attach Firebase ID Token
 apiClient.interceptors.request.use(async (config) => {
+  if (config.url && config.url.startsWith('/')) {
+    config.url = config.url.substring(1);
+  }
+  // Ensure baseURL ends with a trailing slash so relative paths append correctly
+  if (config.baseURL && !config.baseURL.endsWith('/')) {
+    config.baseURL += '/';
+  }
+
   if (auth.currentUser) {
     try {
       const token = await auth.currentUser.getIdToken();
