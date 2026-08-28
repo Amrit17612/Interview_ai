@@ -1,15 +1,17 @@
+const admin = require('../config/firebase');
 const User = require('../models/User');
 
 const registerUser = async (req, res, next) => {
   try {
-    const { firstName, lastName } = req.body;
+    const { firstName, lastName, firebaseToken } = req.body;
     
-    if (!req.decodedToken) {
+    if (!firebaseToken) {
       res.status(401);
-      throw new Error('Not authorized, missing Firebase token');
+      throw new Error('Not authorized, missing Firebase token in request body');
     }
 
-    const { email, uid, email_verified } = req.decodedToken;
+    const decodedToken = await admin.auth().verifyIdToken(firebaseToken);
+    const { email, uid, email_verified } = decodedToken;
 
     if (!firstName || !lastName || !email) {
       res.status(400);
@@ -58,12 +60,15 @@ const registerUser = async (req, res, next) => {
 
 const loginUser = async (req, res, next) => {
   try {
-    if (!req.decodedToken) {
+    const { firebaseToken } = req.body;
+
+    if (!firebaseToken) {
       res.status(401);
-      throw new Error('Not authorized, missing Firebase token');
+      throw new Error('Not authorized, missing Firebase token in request body');
     }
 
-    const { email, uid, email_verified } = req.decodedToken;
+    const decodedToken = await admin.auth().verifyIdToken(firebaseToken);
+    const { email, uid, email_verified } = decodedToken;
     const normalizedEmail = email.toLowerCase().trim();
     
     let user = await User.findOne({ $or: [{ firebaseUid: uid }, { email: normalizedEmail }] });

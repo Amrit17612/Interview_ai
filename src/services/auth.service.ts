@@ -17,13 +17,13 @@ export interface AuthResponse {
 }
 
 export const authService = {
-  async register(data: any): Promise<AuthResponse> {
-    const response = await apiClient.post<AuthResponse>('/auth/register', data);
+  async register(data: any, token: string): Promise<AuthResponse> {
+    const response = await apiClient.post<AuthResponse>('/auth/register', { ...data, firebaseToken: token });
     return response.data;
   },
 
-  async login(): Promise<AuthResponse> {
-    const response = await apiClient.post<AuthResponse>('/auth/login');
+  async login(token: string): Promise<AuthResponse> {
+    const response = await apiClient.post<AuthResponse>('/auth/login', { firebaseToken: token });
     return response.data;
   },
 

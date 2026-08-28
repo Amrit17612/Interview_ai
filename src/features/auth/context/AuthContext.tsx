@@ -62,12 +62,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setError(null);
       // Firebase Login
       await signInWithEmailAndPassword(auth, credentials.email, credentials.password);
-      // Wait for auth interceptor to pick up the new token
+      // Force token refresh
       await auth.currentUser?.getIdToken(true);
+      const token = await auth.currentUser?.getIdToken();
       
       // We still call backend /login to sync verification state or handle any legacy logic
       // But the main auth is Firebase
-      const response = await authService.login();
+      const response = await authService.login(token as string);
       if (response.success && response.user) {
         if (!response.user.emailVerified) {
           throw new Error('Please verify your email address before logging in');
@@ -87,14 +88,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       // 1. Create in Firebase
       const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
       
-      // 2. Force token refresh to make sure interceptor works
+      // 2. Force token refresh
       await userCredential.user.getIdToken(true);
+      const token = await userCredential.user.getIdToken();
 
       // 3. Sync to Mongo DB via backend /register
       const response = await authService.register({
         firstName: data.firstName,
         lastName: data.lastName
-      });
+      }, token);
 
       if (response.success && response.user) {
          await refreshUser();
