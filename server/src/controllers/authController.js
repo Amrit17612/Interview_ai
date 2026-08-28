@@ -1,8 +1,4 @@
-const bcrypt = require('bcryptjs');
-const crypto = require('crypto');
 const User = require('../models/User');
-const generateTokenAndSetCookie = require('../utils/generateToken');
-const emailService = require('../services/emailService');
 
 const registerUser = async (req, res, next) => {
   try {

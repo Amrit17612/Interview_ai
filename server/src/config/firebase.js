@@ -1,12 +1,12 @@
 const admin = require('firebase-admin');
 
-if (!admin.apps.length) {
+if (!admin.getApps().length) {
   // Use default application credentials if FIREBASE_CONFIG or GOOGLE_APPLICATION_CREDENTIALS is set
   // Alternatively, parse them from environment variables explicitly
   
   if (process.env.FIREBASE_PROJECT_ID) {
     admin.initializeApp({
-      credential: admin.credential.cert({
+      credential: admin.cert({
         projectId: process.env.FIREBASE_PROJECT_ID,
         clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
         // Handle escaped newlines in private keys
