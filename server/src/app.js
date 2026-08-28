@@ -15,7 +15,8 @@ app.set('trust proxy', 1);
 const defaultOrigins = [
   'http://localhost:5173',
   'http://localhost:3000',
-  'https://interview-ai-production.vercel.app' // Fallback production URL if needed
+  'https://interview-ai-production.vercel.app',
+  'https://interview-ai-two-gamma.vercel.app' // Explicitly added production Vercel domain
 ];
 
 const envOrigins = process.env.CLIENT_URL
