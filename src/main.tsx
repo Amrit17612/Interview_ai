@@ -12,7 +12,7 @@ declare global {
   }
 }
 
-window.__APP_BUILD_ID__ = "AUTH-PROD-FIX-16c2d6d";
+window.__APP_BUILD_ID__ = "AUTH-PROD-FIX-527699e";
 console.log("[APP VERSION] " + window.__APP_BUILD_ID__);
 
 createRoot(document.getElementById('root')!).render(
