@@ -52,18 +52,30 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     let mounted = true;
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      console.log(`[AUTH STATE] callback fired`);
+      console.log(`[AUTH STATE] Firebase user exists: ${!!firebaseUser}`);
+      console.log(`[AUTH STATE] isAuthInProgress value: ${isAuthInProgress.current}`);
+      
       if (!mounted) return;
       if (isAuthInProgress.current) {
         console.log("[AUTH CONTEXT] onAuthStateChanged ignored because manual auth is in progress");
         return;
       }
+      
+      console.log(`[AUTH STATE] loading before: ${isLoading}`);
       setIsLoading(true);
+      
       if (firebaseUser) {
+        console.log(`[AUTH STATE] /auth/me started`);
         await refreshUser();
+        console.log(`[AUTH STATE] /auth/me finished`);
       } else {
         setUser(null);
       }
+      
       if (mounted) {
+        console.log(`[AUTH STATE] final context user: ${!!user}`);
+        console.log(`[AUTH STATE] final loading: false`);
         setIsLoading(false);
       }
     });
@@ -77,36 +89,40 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const login = async (credentials: any) => {
     isAuthInProgress.current = true;
     const requestId = crypto.randomUUID();
-    console.log(`[LOGIN] requestId: ${requestId}`);
+    console.log(`[AUTH FLOW] email login started, requestId: ${requestId}`);
     try {
       setError(null);
       
       const userCredential = await signInWithEmailAndPassword(auth, credentials.email, credentials.password);
       const firebaseUser = userCredential.user;
       
-      console.log(`[LOGIN] Firebase UID exists: ${Boolean(firebaseUser?.uid)}`);
+      console.log(`[AUTH FLOW] Firebase credential received`);
       
       await firebaseUser.reload();
       const firebaseToken = await firebaseUser.getIdToken(true);
       
-      console.log(`[LOGIN] token exists: ${Boolean(firebaseToken)}`);
+      console.log(`[AUTH FLOW] token received`);
       
       if (typeof firebaseToken !== "string" || firebaseToken.length === 0) {
         throw new Error("Firebase token generation failed");
       }
       
-      console.log(`[LOGIN] token length: ${firebaseToken.length}`);
-      
+      console.log(`[AUTH FLOW] backend login started`);
       const response = await authService.login(firebaseToken, requestId);
+      console.log(`[AUTH FLOW] backend login response received`);
       
       if (response.success && response.user) {
         if (!response.user.emailVerified) {
           throw new Error('Please verify your email address before logging in');
         }
+        console.log(`[AUTH FLOW] profile loaded`);
         setUser(response.user);
+        console.log(`[AUTH FLOW] context state updated`);
       }
+      console.log(`[AUTH FLOW] navigating`);
       return response;
     } catch (err: any) {
+      console.error(`[AUTH FLOW] Error:`, err);
       setError(err.message || 'Login failed');
       throw err;
     } finally {
@@ -117,44 +133,48 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const register = async (data: any) => {
     isAuthInProgress.current = true;
     const requestId = crypto.randomUUID();
-    console.log(`[REGISTER] requestId: ${requestId}`);
+    console.log(`[AUTH FLOW] registration started, requestId: ${requestId}`);
     try {
       setError(null);
       
       const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
       const firebaseUser = userCredential.user;
       
-      console.log(`[REGISTER] Firebase UID exists: ${Boolean(firebaseUser?.uid)}`);
+      console.log(`[AUTH FLOW] Firebase user created`);
       
       try {
         await sendEmailVerification(firebaseUser);
+        console.log(`[AUTH FLOW] verification sent`);
       } catch (emailErr: any) {
         console.error('Failed to send verification email:', emailErr.code, emailErr.message);
         throw new Error(`Account created, but verification email failed: ${emailErr.message}`);
       }
       
       const firebaseToken = await firebaseUser.getIdToken(true);
-      
-      console.log(`[REGISTER] token exists: ${Boolean(firebaseToken)}`);
+      console.log(`[AUTH FLOW] token received`);
       
       if (typeof firebaseToken !== "string" || firebaseToken.length === 0) {
         throw new Error("Firebase token generation failed");
       }
-      
-      console.log(`[REGISTER] token length: ${firebaseToken.length}`);
       
       const payload = {
         firstName: data.firstName,
         lastName: data.lastName
       };
       
+      console.log(`[AUTH FLOW] backend registration started`);
       const response = await authService.register(payload, firebaseToken, requestId);
+      console.log(`[AUTH FLOW] backend registration response received`);
 
       if (response.success && response.user) {
+         console.log(`[AUTH FLOW] fetching profile...`);
          await refreshUser();
+         console.log(`[AUTH FLOW] context state updated`);
       }
+      console.log(`[AUTH FLOW] redirecting`);
       return response;
     } catch (err: any) {
+      console.error(`[AUTH FLOW] Error:`, err);
       setError(err.message || 'Registration failed');
       throw err;
     } finally {
@@ -190,43 +210,40 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const googleAuth = async () => {
     isAuthInProgress.current = true;
-    console.log("[GOOGLE AUTH] Button handler started");
+    console.log("[AUTH FLOW] Google button clicked");
 
     try {
       setError(null);
       setIsLoading(true);
 
-      console.log("[GOOGLE AUTH] Diagnosing environment:");
-      console.log("[GOOGLE AUTH] window.origin:", window.location.origin);
-      console.log("[GOOGLE AUTH] Firebase AuthDomain:", auth.config.authDomain || "NOT_SET (Check VITE_FIREBASE_AUTH_DOMAIN)");
-
       const provider = new GoogleAuthProvider();
-      console.log("[GOOGLE AUTH] Opening Google popup...");
+      console.log("[AUTH FLOW] popup opened");
 
       const result = await signInWithPopup(auth, provider);
       const firebaseUser = result.user;
 
-      console.log("[GOOGLE AUTH] Firebase user received", {
-        uidPresent: !!firebaseUser?.uid,
-        emailPresent: !!firebaseUser?.email
-      });
+      console.log("[AUTH FLOW] popup credential received");
+      console.log("[AUTH FLOW] Firebase user received");
 
       const firebaseToken = await firebaseUser.getIdToken(true);
-
       if (!firebaseToken) {
         throw new Error("Firebase token was not generated");
       }
+      console.log("[AUTH FLOW] Firebase token received");
 
-      console.log("[GOOGLE AUTH] Firebase token generated successfully");
-
+      console.log("[AUTH FLOW] backend Google sync started");
       const response = await authService.googleAuth(firebaseToken);
+      console.log("[AUTH FLOW] backend Google sync succeeded");
       
       if (response.success && response.user) {
+         console.log("[AUTH FLOW] profile loaded");
          await refreshUser();
+         console.log("[AUTH FLOW] context state updated");
       }
+      console.log("[AUTH FLOW] navigating to dashboard");
       return response;
     } catch (error: any) {
-      console.error("[GOOGLE AUTH] Authentication failed:", error?.code, error?.message, error);
+      console.error("[AUTH FLOW] Error:", error);
       setError(`[${error?.code || 'auth/error'}] ${error?.message || "Google authentication failed"}`);
       throw error;
     } finally {

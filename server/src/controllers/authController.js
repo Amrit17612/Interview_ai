@@ -87,8 +87,8 @@ const loginUser = async (req, res, next) => {
     }
 
     const decodedToken = await getAuth().verifyIdToken(firebaseToken);
-    const { email, uid, email_verified } = decodedToken;
-    const normalizedEmail = email.toLowerCase().trim();
+    const { email: decodedEmail, uid, email_verified } = decodedToken;
+    const normalizedEmail = decodedEmail.toLowerCase().trim();
     
     let user = await User.findOne({ $or: [{ firebaseUid: uid }, { email: normalizedEmail }] });
 
@@ -249,6 +249,7 @@ const completeOnboarding = async (req, res, next) => {
 module.exports = {
   registerUser,
   loginUser,
+  googleAuthUser,
   getMe,
   logoutUser,
   completeOnboarding
