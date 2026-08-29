@@ -14,6 +14,9 @@ export function GuestRoute() {
   }
 
   if (user) {
+    if (user.role === 'admin') {
+      return <Navigate to={ROUTES.ADMIN_DASHBOARD} replace />;
+    }
     if (!user.onboardingCompleted) {
       return <Navigate to={ROUTES.ONBOARDING_WELCOME} replace />;
     }

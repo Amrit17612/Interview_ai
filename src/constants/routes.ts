@@ -27,6 +27,7 @@ export const ROUTES = {
   DASHBOARD: '/dashboard',
 
   // Admin Routes
+  ADMIN: '/admin',
   ADMIN_DASHBOARD: '/admin/dashboard',
   ADMIN_PAYMENTS: '/admin/payments',
   ADMIN_QUESTIONS: '/admin/questions',

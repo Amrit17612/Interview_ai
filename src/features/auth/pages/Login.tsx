@@ -23,8 +23,11 @@ export function Login() {
       setAuthError(null);
       setSuccessMsg(null);
       setIsVerifying(false);
-      await login(data);
-      const from = (location.state as any)?.from?.pathname || ROUTES.DASHBOARD;
+      const response = await login(data);
+      let from = (location.state as any)?.from?.pathname;
+      if (!from || from === ROUTES.DASHBOARD) {
+        from = response?.user?.role === 'admin' ? ROUTES.ADMIN_DASHBOARD : ROUTES.DASHBOARD;
+      }
       navigate(from, { replace: true });
     } catch (err: any) {
       if (err.message?.toLowerCase().includes('verify')) {
@@ -46,7 +49,10 @@ export function Login() {
       setAuthError(null);
       setSuccessMsg(null);
       const response = await googleAuth();
-      const from = (location.state as any)?.from?.pathname || ROUTES.DASHBOARD;
+      let from = (location.state as any)?.from?.pathname;
+      if (!from || from === ROUTES.DASHBOARD) {
+        from = response?.user?.role === 'admin' ? ROUTES.ADMIN_DASHBOARD : ROUTES.DASHBOARD;
+      }
       navigate(from, { 
         replace: true, 
         state: response?.isNewUser ? { message: "Account created successfully! Welcome to Interview AI." } : undefined 

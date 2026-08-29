@@ -34,7 +34,11 @@ export function Register() {
 
     try {
       const response = await googleAuth();
-      navigate(ROUTES.DASHBOARD, { 
+      let from = ROUTES.DASHBOARD;
+      if (response?.user?.role === 'admin') {
+        from = ROUTES.ADMIN_DASHBOARD;
+      }
+      navigate(from, { 
         replace: true, 
         state: response?.isNewUser ? { message: "Account created successfully! Welcome to Interview AI." } : undefined 
       });

@@ -1,4 +1,4 @@
-import { createBrowserRouter } from 'react-router-dom';
+import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { lazy, Suspense } from 'react';
 import { ROUTES } from '../constants/routes';
 import { PublicLayout } from '../layouts/PublicLayout';
@@ -208,6 +208,7 @@ export const router = createBrowserRouter([
       {
         element: <AdminLayout />,
         children: [
+          { path: ROUTES.ADMIN, element: <Navigate to={ROUTES.ADMIN_DASHBOARD} replace /> },
           { path: ROUTES.ADMIN_DASHBOARD, element: <AdminDashboard /> },
           { path: ROUTES.ADMIN_PAYMENTS, element: <TransactionList /> },
           { path: ROUTES.ADMIN_USERS, element: <UserManagement /> },

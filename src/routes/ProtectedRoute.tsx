@@ -22,12 +22,16 @@ export function ProtectedRoute({ requireOnboarding = true }: ProtectedRouteProps
     return <Navigate to={ROUTES.LOGIN} state={{ from: location }} replace />;
   }
 
+  if (user.role === 'admin' && location.pathname === ROUTES.DASHBOARD) {
+    return <Navigate to={ROUTES.ADMIN_DASHBOARD} replace />;
+  }
+
   if (requireOnboarding && !user.onboardingCompleted) {
     return <Navigate to={ROUTES.ONBOARDING_WELCOME} replace />;
   }
 
   if (!requireOnboarding && user.onboardingCompleted) {
-    return <Navigate to={ROUTES.DASHBOARD} replace />;
+    return <Navigate to={user.role === 'admin' ? ROUTES.ADMIN_DASHBOARD : ROUTES.DASHBOARD} replace />;
   }
 
   return <Outlet />;
