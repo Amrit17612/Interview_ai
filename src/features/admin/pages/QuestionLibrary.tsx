@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { apiClient } from '../../../services/api.client';
-import { Search, Loader2, Plus, Edit2, Archive, ArchiveRestore } from 'lucide-react';
+import { Search, Loader2, Plus, Edit2, Archive, ArchiveRestore, Download, Upload, CheckCircle, Tag } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '../../../constants/routes';
+import { ImportReviewModal } from './ImportReviewModal';
 
 export function QuestionLibrary() {
   const [questions, setQuestions] = useState<any[]>([]);
@@ -17,6 +18,12 @@ export function QuestionLibrary() {
   const [statusFilter, setStatusFilter] = useState('');
   const [typeFilter, setTypeFilter] = useState('');
   const [difficultyFilter, setDifficultyFilter] = useState('');
+
+  // Bulk Operations & Import
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+  const [bulkLoading, setBulkLoading] = useState(false);
 
   const fetchQuestions = async (p = 1) => {
     try {
@@ -58,6 +65,86 @@ export function QuestionLibrary() {
     }
   };
 
+  const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.checked) {
+      setSelectedIds(new Set(questions.map(q => q._id)));
+    } else {
+      setSelectedIds(new Set());
+    }
+  };
+
+  const handleSelectOne = (id: string) => {
+    const newSet = new Set(selectedIds);
+    if (newSet.has(id)) newSet.delete(id);
+    else newSet.add(id);
+    setSelectedIds(newSet);
+  };
+
+  const handleBulkStatus = async (status: string) => {
+    if (selectedIds.size === 0) return;
+    if (!window.confirm(`Are you sure you want to change ${selectedIds.size} questions to ${status}?`)) return;
+    try {
+      setBulkLoading(true);
+      const res = await apiClient.post('/api/admin/questions/bulk/status', {
+        questionIds: Array.from(selectedIds),
+        status
+      });
+      if (res.data.success) {
+        setSelectedIds(new Set());
+        fetchQuestions(page);
+      }
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Bulk status update failed');
+    } finally {
+      setBulkLoading(false);
+    }
+  };
+
+  const handleBulkTags = async () => {
+    if (selectedIds.size === 0) return;
+    const tagStr = window.prompt('Enter tags to add (comma separated):');
+    if (!tagStr) return;
+    const tags = tagStr.split(',').map(t => t.trim()).filter(Boolean);
+    if (tags.length === 0) return;
+
+    try {
+      setBulkLoading(true);
+      const res = await apiClient.post('/api/admin/questions/bulk/tags', {
+        questionIds: Array.from(selectedIds),
+        tags
+      });
+      if (res.data.success) {
+        setSelectedIds(new Set());
+        fetchQuestions(page);
+      }
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Bulk tag update failed');
+    } finally {
+      setBulkLoading(false);
+    }
+  };
+
+  const handleExport = async (format: 'csv' | 'json') => {
+    try {
+      setIsExporting(true);
+      const res = await apiClient.get(`/api/admin/questions/export?format=${format}`, {
+        responseType: 'blob'
+      });
+      
+      const url = window.URL.createObjectURL(new Blob([res.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `questions_export.${format}`);
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode?.removeChild(link);
+    } catch (err) {
+      alert('Failed to export questions');
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   return (
     <div className="space-y-6 pb-12">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -66,13 +153,38 @@ export function QuestionLibrary() {
           <p className="text-sm text-gray-500 mt-1">Manage reusable questions for templates and mock interviews.</p>
         </div>
         
-        <button
-          onClick={() => navigate(`${ROUTES.ADMIN_QUESTIONS}/new`)}
-          className="bg-brand-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-brand-700 flex items-center shadow-sm"
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          Create Question
-        </button>
+        <div className="flex gap-2">
+          <div className="flex bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <button
+              onClick={() => setShowImportModal(true)}
+              className="px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 flex items-center border-r"
+            >
+              <Upload className="h-4 w-4 mr-2 text-gray-500" />
+              Import
+            </button>
+            <div className="relative group flex">
+              <button
+                disabled={isExporting}
+                className="px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 flex items-center disabled:opacity-50"
+              >
+                <Download className="h-4 w-4 mr-2 text-gray-500" />
+                {isExporting ? 'Exporting...' : 'Export ▼'}
+              </button>
+              <div className="absolute right-0 top-full mt-1 w-32 bg-white rounded-md shadow-lg border border-gray-100 hidden group-hover:block z-20">
+                <button onClick={() => handleExport('csv')} className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50">CSV</button>
+                <button onClick={() => handleExport('json')} className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50">JSON</button>
+              </div>
+            </div>
+          </div>
+          
+          <button
+            onClick={() => navigate(`${ROUTES.ADMIN_QUESTIONS}/new`)}
+            className="bg-brand-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-brand-700 flex items-center shadow-sm"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Create
+          </button>
+        </div>
       </div>
 
       <div className="flex flex-wrap gap-3 bg-white p-4 rounded-xl shadow-sm border border-gray-200">
@@ -120,6 +232,25 @@ export function QuestionLibrary() {
         </select>
       </div>
 
+      {selectedIds.size > 0 && (
+        <div className="bg-brand-50 border border-brand-200 rounded-lg p-3 flex items-center justify-between shadow-sm animate-in fade-in slide-in-from-top-2">
+          <div className="flex items-center text-brand-800">
+            <span className="font-bold mr-2">{selectedIds.size}</span> questions selected
+          </div>
+          <div className="flex items-center gap-2">
+            <button onClick={() => handleBulkStatus('ACTIVE')} disabled={bulkLoading} className="text-xs font-semibold bg-white border border-gray-300 text-gray-700 hover:bg-green-50 hover:text-green-700 hover:border-green-300 px-3 py-1.5 rounded flex items-center shadow-sm">
+              <CheckCircle className="h-3 w-3 mr-1" /> Publish Active
+            </button>
+            <button onClick={() => handleBulkStatus('ARCHIVED')} disabled={bulkLoading} className="text-xs font-semibold bg-white border border-gray-300 text-gray-700 hover:bg-gray-100 px-3 py-1.5 rounded flex items-center shadow-sm">
+              <Archive className="h-3 w-3 mr-1" /> Archive
+            </button>
+            <button onClick={handleBulkTags} disabled={bulkLoading} className="text-xs font-semibold bg-white border border-gray-300 text-gray-700 hover:bg-brand-50 hover:text-brand-700 px-3 py-1.5 rounded flex items-center shadow-sm">
+              <Tag className="h-3 w-3 mr-1" /> Add Tags
+            </button>
+          </div>
+        </div>
+      )}
+
       {error && (
         <div className="bg-red-50 text-red-600 p-4 rounded-md text-sm">{error}</div>
       )}
@@ -135,6 +266,14 @@ export function QuestionLibrary() {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
+                <th className="px-6 py-3 text-left w-12">
+                  <input 
+                    type="checkbox" 
+                    className="rounded border-gray-300 text-brand-600 focus:ring-brand-500"
+                    onChange={handleSelectAll}
+                    checked={questions.length > 0 && selectedIds.size === questions.length}
+                  />
+                </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[40%]">Question</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Classification</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
@@ -144,7 +283,15 @@ export function QuestionLibrary() {
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {questions.map((q) => (
-                <tr key={q._id} className={`hover:bg-gray-50 ${q.status === 'ARCHIVED' ? 'opacity-60 bg-gray-50/50' : ''}`}>
+                <tr key={q._id} className={`hover:bg-gray-50 ${q.status === 'ARCHIVED' ? 'opacity-60 bg-gray-50/50' : ''} ${selectedIds.has(q._id) ? 'bg-brand-50/30' : ''}`}>
+                  <td className="px-6 py-4">
+                    <input 
+                      type="checkbox" 
+                      className="rounded border-gray-300 text-brand-600 focus:ring-brand-500"
+                      checked={selectedIds.has(q._id)}
+                      onChange={() => handleSelectOne(q._id)}
+                    />
+                  </td>
                   <td className="px-6 py-4">
                     <div className="text-sm font-medium text-gray-900 line-clamp-2" title={q.text}>{q.text}</div>
                     {q.tags?.length > 0 && (
@@ -212,7 +359,7 @@ export function QuestionLibrary() {
               ))}
               {questions.length === 0 && !loading && (
                 <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center text-gray-500">
+                  <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
                     No questions found matching your criteria.
                   </td>
                 </tr>
@@ -268,6 +415,16 @@ export function QuestionLibrary() {
           </div>
         )}
       </div>
+      
+      {showImportModal && (
+        <ImportReviewModal 
+          onClose={() => setShowImportModal(false)} 
+          onSuccess={() => {
+            fetchQuestions(1);
+            setStatusFilter('DRAFT'); // Automatically filter to see new imports
+          }} 
+        />
+      )}
     </div>
   );
 }
