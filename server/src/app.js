@@ -47,7 +47,7 @@ app.use(cors({
   credentials: true
 }));
 
-app.use(express.json());
+app.use(express.json({ verify: (req, res, buf) => { req.rawBody = buf; } }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
@@ -56,6 +56,7 @@ const resumeRoutes = require('./routes/resumeRoutes');
 const atsRoutes = require('./routes/atsRoutes');
 const aiRoutes = require('./routes/aiRoutes');
 const interviewRoutes = require('./routes/interviewRoutes');
+const paymentRoutes = require('./routes/paymentRoutes');
 const { globalLimiter } = require('./middleware/rateLimiter');
 
 // Apply global rate limiter to all /api routes
@@ -67,6 +68,7 @@ app.use('/api/resumes', resumeRoutes);
 app.use('/api/ats', atsRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/interviews', interviewRoutes);
+app.use('/api/payments', paymentRoutes);
 
 const mongoose = require('mongoose');
 

@@ -9,9 +9,10 @@ interface BundleCardProps {
   bundle: BundleMetadata;
   onPreviewClick: (bundleId: string) => void;
   onPurchaseClick: (bundleId: string) => void;
+  isProcessing?: boolean;
 }
 
-export function BundleCard({ bundle, onPreviewClick, onPurchaseClick }: BundleCardProps) {
+export function BundleCard({ bundle, onPreviewClick, onPurchaseClick, isProcessing = false }: BundleCardProps) {
   const { hasAccessToBundle } = useAccess();
   const hasAccess = hasAccessToBundle(bundle.id, bundle.type);
 
@@ -103,8 +104,13 @@ export function BundleCard({ bundle, onPreviewClick, onPurchaseClick }: BundleCa
             <Button 
               className="flex-1 bg-gray-900 hover:bg-gray-800 text-white"
               onClick={() => onPurchaseClick(bundle.id)}
+              disabled={isProcessing}
             >
-              <Lock className="mr-2 h-4 w-4" /> Unlock
+              {isProcessing ? (
+                <>Securing...</>
+              ) : (
+                <><Lock className="mr-2 h-4 w-4" /> Unlock</>
+              )}
             </Button>
           </>
         )}

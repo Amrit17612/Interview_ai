@@ -3,16 +3,18 @@ import { PageHeader } from '../../../components/ui/PageHeader';
 import { MOCK_COMPANY_BUNDLES } from '../../../types/bundle.types';
 import { BundleCard } from '../components/BundleCard';
 import { motion } from 'framer-motion';
+import { useCheckout } from '../hooks/useCheckout';
 
 export function CompanyBundles() {
+  const { handleCheckout, isProcessing } = useCheckout();
+
   const handlePreview = (bundleId: string) => {
     // In a real app, open a modal with detailed preview
     alert(`Preview modal for bundle: ${bundleId} would open here.`);
   };
 
   const handlePurchase = (bundleId: string) => {
-    // In a real app, open checkout flow
-    alert(`Checkout flow for bundle: ${bundleId} would open here.`);
+    handleCheckout(bundleId, 'COMPANY');
   };
 
   return (
@@ -34,6 +36,7 @@ export function CompanyBundles() {
               bundle={bundle}
               onPreviewClick={handlePreview}
               onPurchaseClick={handlePurchase}
+              isProcessing={isProcessing === bundle.id}
             />
           ))}
         </div>
