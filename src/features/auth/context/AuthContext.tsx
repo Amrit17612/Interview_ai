@@ -183,8 +183,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setError(null);
       setIsLoading(true);
 
+      console.log("[GOOGLE AUTH] Diagnosing environment:");
+      console.log("[GOOGLE AUTH] window.origin:", window.location.origin);
+      console.log("[GOOGLE AUTH] Firebase AuthDomain:", auth.config.authDomain || "NOT_SET (Check VITE_FIREBASE_AUTH_DOMAIN)");
+
       const provider = new GoogleAuthProvider();
-      console.log("[GOOGLE AUTH] Opening Google popup");
+      console.log("[GOOGLE AUTH] Opening Google popup...");
 
       const result = await signInWithPopup(auth, provider);
       const firebaseUser = result.user;
@@ -209,7 +213,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
     } catch (error: any) {
       console.error("[GOOGLE AUTH] Authentication failed:", error?.code, error?.message, error);
-      setError(error?.message || "Google authentication failed");
+      setError(`[${error?.code || 'auth/error'}] ${error?.message || "Google authentication failed"}`);
       throw error;
     } finally {
       setIsLoading(false);
