@@ -25,6 +25,22 @@ export function Register() {
     }
   };
 
+  const handleGoogleAuth = async (event?: React.MouseEvent<HTMLButtonElement>) => {
+    event?.preventDefault();
+    event?.stopPropagation();
+
+    console.log("[GOOGLE AUTH] DIRECT BUTTON CLICK");
+    console.log("[GOOGLE AUTH] CLICK HANDLER REACHED");
+
+    try {
+      await googleAuth();
+      navigate(ROUTES.DASHBOARD, { replace: true });
+    } catch (err: any) {
+      console.error("[GOOGLE AUTH] Failed in component:", err);
+      setAuthError(err.message || 'Google authentication failed. Please try again.');
+    }
+  };
+
   return (
     <Container className="py-12 flex justify-center items-center min-h-[calc(100vh-8rem)]">
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-md">
@@ -86,16 +102,7 @@ export function Register() {
               type="button" 
               variant="outline" 
               className="w-full font-medium text-gray-700" 
-              onClick={async () => {
-                console.log("[GOOGLE AUTH] Button clicked");
-                try {
-                  await googleAuth();
-                  navigate(ROUTES.DASHBOARD, { replace: true });
-                } catch (err: any) {
-                  console.error("[GOOGLE AUTH] Failed in component:", err);
-                  setAuthError(err.message || 'Google authentication failed. Please try again.');
-                }
-              }}
+              onClick={handleGoogleAuth}
               disabled={isSubmitting}
             >
               <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
