@@ -17,7 +17,8 @@ import {
   Settings,
   Shield,
   HelpCircle,
-  Lock
+  Lock,
+  ShoppingBag
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { useState } from 'react';
@@ -51,6 +52,7 @@ const SIDEBAR_CATEGORIES: SidebarCategory[] = [
   {
     title: 'PREMIUM PRACTICE',
     items: [
+      { name: 'My Purchases', path: ROUTES.MY_PURCHASES, icon: ShoppingBag },
       { name: 'Company Bundles', path: ROUTES.COMPANY_PACKS, icon: Building, isPremium: true },
       { name: 'Domain Bundles', path: ROUTES.DOMAIN_PACKS, icon: Code2, isPremium: true },
     ]

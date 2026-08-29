@@ -4,13 +4,20 @@ import { MOCK_COMPANY_BUNDLES } from '../../../types/bundle.types';
 import { BundleCard } from '../components/BundleCard';
 import { motion } from 'framer-motion';
 import { useCheckout } from '../hooks/useCheckout';
+import { useNavigate } from 'react-router-dom';
+import { ROUTES } from '../../../constants/routes';
 
 export function CompanyBundles() {
   const { handleCheckout, isProcessing } = useCheckout();
 
+  const navigate = useNavigate();
+
   const handlePreview = (bundleId: string) => {
-    // In a real app, open a modal with detailed preview
     alert(`Preview modal for bundle: ${bundleId} would open here.`);
+  };
+
+  const handleStartPracticing = (bundleId: string) => {
+    navigate(ROUTES.COMPANY_PACK_DETAILS.replace(':id', bundleId));
   };
 
   const handlePurchase = (bundleId: string) => {
@@ -35,6 +42,7 @@ export function CompanyBundles() {
               key={bundle.id}
               bundle={bundle}
               onPreviewClick={handlePreview}
+              onStartPracticing={handleStartPracticing}
               onPurchaseClick={handlePurchase}
               isProcessing={isProcessing === bundle.id}
             />

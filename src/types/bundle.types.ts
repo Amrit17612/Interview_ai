@@ -12,6 +12,13 @@ export interface BundleMetadata {
   interviewsCount: number;
   iconType: string;
   isPopular?: boolean;
+  interviewConfig: {
+    company?: string;
+    domain: string;
+    role: string;
+    difficulty?: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED' | 'EXPERT';
+    allowedTypes: Array<'TECHNICAL' | 'BEHAVIORAL' | 'SYSTEM_DESIGN' | 'GENERAL'>;
+  };
 }
 
 export const MOCK_COMPANY_BUNDLES: BundleMetadata[] = [
@@ -31,7 +38,14 @@ export const MOCK_COMPANY_BUNDLES: BundleMetadata[] = [
     ],
     interviewsCount: 15,
     iconType: 'google',
-    isPopular: true
+    isPopular: true,
+    interviewConfig: {
+      company: 'GOOGLE',
+      domain: 'Software Engineering',
+      role: 'Software Engineer',
+      difficulty: 'INTERMEDIATE',
+      allowedTypes: ['TECHNICAL', 'BEHAVIORAL', 'SYSTEM_DESIGN']
+    }
   },
   {
     id: 'comp_amazon_01',
@@ -46,7 +60,14 @@ export const MOCK_COMPANY_BUNDLES: BundleMetadata[] = [
       'STAR method strict evaluation'
     ],
     interviewsCount: 12,
-    iconType: 'amazon'
+    iconType: 'amazon',
+    interviewConfig: {
+      company: 'AMAZON',
+      domain: 'Leadership & Behavioral',
+      role: 'Any',
+      difficulty: 'ADVANCED',
+      allowedTypes: ['BEHAVIORAL', 'SYSTEM_DESIGN']
+    }
   },
   {
     id: 'comp_meta_01',
@@ -61,7 +82,14 @@ export const MOCK_COMPANY_BUNDLES: BundleMetadata[] = [
       'Behavioral evaluation'
     ],
     interviewsCount: 12,
-    iconType: 'meta'
+    iconType: 'meta',
+    interviewConfig: {
+      company: 'META',
+      domain: 'Software Engineering',
+      role: 'Software Engineer',
+      difficulty: 'ADVANCED',
+      allowedTypes: ['TECHNICAL', 'SYSTEM_DESIGN', 'BEHAVIORAL']
+    }
   }
 ];
 
@@ -81,7 +109,13 @@ export const MOCK_DOMAIN_BUNDLES: BundleMetadata[] = [
     ],
     interviewsCount: 10,
     iconType: 'frontend',
-    isPopular: true
+    isPopular: true,
+    interviewConfig: {
+      domain: 'Frontend Development',
+      role: 'Senior Frontend Engineer',
+      difficulty: 'ADVANCED',
+      allowedTypes: ['TECHNICAL', 'SYSTEM_DESIGN']
+    }
   },
   {
     id: 'dom_backend_01',
@@ -98,7 +132,13 @@ export const MOCK_DOMAIN_BUNDLES: BundleMetadata[] = [
       'API design and rate limiting'
     ],
     interviewsCount: 12,
-    iconType: 'backend'
+    iconType: 'backend',
+    interviewConfig: {
+      domain: 'Backend Architecture',
+      role: 'Backend Engineer',
+      difficulty: 'ADVANCED',
+      allowedTypes: ['TECHNICAL', 'SYSTEM_DESIGN']
+    }
   },
   {
     id: 'dom_pm_01',
@@ -114,6 +154,12 @@ export const MOCK_DOMAIN_BUNDLES: BundleMetadata[] = [
       'Case studies'
     ],
     interviewsCount: 8,
-    iconType: 'product'
+    iconType: 'product',
+    interviewConfig: {
+      domain: 'Product Management',
+      role: 'Product Manager',
+      difficulty: 'INTERMEDIATE',
+      allowedTypes: ['GENERAL', 'BEHAVIORAL', 'SYSTEM_DESIGN']
+    }
   }
 ];

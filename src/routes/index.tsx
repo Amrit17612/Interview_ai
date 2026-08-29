@@ -73,6 +73,8 @@ const JobReadiness = Loadable(lazy(() => import('../features/ats/pages/JobReadin
 // Premium Bundles
 const CompanyBundles = Loadable(lazy(() => import('../features/premium/pages/CompanyBundles').then(m => ({ default: m.CompanyBundles }))));
 const DomainBundles = Loadable(lazy(() => import('../features/premium/pages/DomainBundles').then(m => ({ default: m.DomainBundles }))));
+const MyPurchases = Loadable(lazy(() => import('../features/premium/pages/MyPurchases').then(m => ({ default: m.MyPurchases }))));
+const BundlePractice = Loadable(lazy(() => import('../features/premium/pages/BundlePractice').then(m => ({ default: m.BundlePractice }))));
 
 // Analytics & Progress
 const ReportsAnalytics = Loadable(lazy(() => import('../features/dashboard/pages/ReportsAnalytics').then(m => ({ default: m.ReportsAnalytics }))));
@@ -157,10 +159,11 @@ export const router = createBrowserRouter([
       { path: ROUTES.ATS, element: <ATSDashboard /> },
       { path: ROUTES.ATS_DETAILS, element: <JobReadiness /> },
       { path: ROUTES.COMPANY_PACKS, element: <CompanyBundles /> },
-      { path: ROUTES.COMPANY_PACK_DETAILS, element: <ComingSoon /> },
+      { path: ROUTES.MY_PURCHASES, element: <MyPurchases /> },
+      { path: ROUTES.COMPANY_PACK_DETAILS, element: <BundlePractice /> },
       { path: ROUTES.COMPANY_PACK_READINESS, element: <ComingSoon /> },
       { path: ROUTES.DOMAIN_PACKS, element: <DomainBundles /> },
-      { path: ROUTES.DOMAIN_PACK_DETAILS, element: <ComingSoon /> },
+      { path: ROUTES.DOMAIN_PACK_DETAILS, element: <BundlePractice /> },
       { path: ROUTES.LEARNING, element: <ComingSoon /> },
       { path: ROUTES.LEARNING_ROADMAP, element: <LearningRoadmap /> },
       { path: ROUTES.LEARNING_SKILLS, element: <ComingSoon /> },

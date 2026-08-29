@@ -57,6 +57,7 @@ export const ROUTES = {
 
   // Company Packs
   COMPANY_PACKS: '/company-packs',
+  MY_PURCHASES: '/my-purchases',
   COMPANY_PACK_DETAILS: '/company-packs/:id',
   COMPANY_PACK_READINESS: '/company-packs/:id/readiness',
 

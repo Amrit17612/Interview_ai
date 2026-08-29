@@ -8,11 +8,12 @@ import { cn } from '../../../utils/cn';
 interface BundleCardProps {
   bundle: BundleMetadata;
   onPreviewClick: (bundleId: string) => void;
+  onStartPracticing?: (bundleId: string) => void;
   onPurchaseClick: (bundleId: string) => void;
   isProcessing?: boolean;
 }
 
-export function BundleCard({ bundle, onPreviewClick, onPurchaseClick, isProcessing = false }: BundleCardProps) {
+export function BundleCard({ bundle, onPreviewClick, onStartPracticing, onPurchaseClick, isProcessing = false }: BundleCardProps) {
   const { hasAccessToBundle } = useAccess();
   const hasAccess = hasAccessToBundle(bundle.id, bundle.type);
 
@@ -88,7 +89,7 @@ export function BundleCard({ bundle, onPreviewClick, onPurchaseClick, isProcessi
         {hasAccess ? (
           <Button 
             className="w-full bg-brand-600 hover:bg-brand-700 text-white shadow-sm"
-            onClick={() => onPreviewClick(bundle.id)}
+            onClick={() => onStartPracticing ? onStartPracticing(bundle.id) : onPreviewClick(bundle.id)}
           >
             <Play className="mr-2 h-4 w-4" /> Start Practicing
           </Button>
