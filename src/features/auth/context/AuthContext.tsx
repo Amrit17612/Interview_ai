@@ -68,20 +68,28 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const login = async (credentials: any) => {
+    const requestId = crypto.randomUUID();
+    console.log(`[LOGIN] requestId: ${requestId}`);
     try {
       setError(null);
       
       const userCredential = await signInWithEmailAndPassword(auth, credentials.email, credentials.password);
       const firebaseUser = userCredential.user;
       
+      console.log(`[LOGIN] Firebase UID exists: ${Boolean(firebaseUser?.uid)}`);
+      
       await firebaseUser.reload();
       const firebaseToken = await firebaseUser.getIdToken(true);
       
-      if (!firebaseToken || firebaseToken.length === 0) {
-        throw new Error("Failed to generate Firebase authentication token");
+      console.log(`[LOGIN] token exists: ${Boolean(firebaseToken)}`);
+      
+      if (typeof firebaseToken !== "string" || firebaseToken.length === 0) {
+        throw new Error("Firebase token generation failed");
       }
       
-      const response = await authService.login(firebaseToken);
+      console.log(`[LOGIN] token length: ${firebaseToken.length}`);
+      
+      const response = await authService.login(firebaseToken, requestId);
       
       if (response.success && response.user) {
         if (!response.user.emailVerified) {
@@ -97,11 +105,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const register = async (data: any) => {
+    const requestId = crypto.randomUUID();
+    console.log(`[REGISTER] requestId: ${requestId}`);
     try {
       setError(null);
       
       const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
       const firebaseUser = userCredential.user;
+      
+      console.log(`[REGISTER] Firebase UID exists: ${Boolean(firebaseUser?.uid)}`);
       
       try {
         await sendEmailVerification(firebaseUser);
@@ -112,16 +124,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       
       const firebaseToken = await firebaseUser.getIdToken(true);
       
-      if (!firebaseToken || firebaseToken.length === 0) {
-        throw new Error("Failed to generate Firebase authentication token");
+      console.log(`[REGISTER] token exists: ${Boolean(firebaseToken)}`);
+      
+      if (typeof firebaseToken !== "string" || firebaseToken.length === 0) {
+        throw new Error("Firebase token generation failed");
       }
+      
+      console.log(`[REGISTER] token length: ${firebaseToken.length}`);
       
       const payload = {
         firstName: data.firstName,
         lastName: data.lastName
       };
       
-      const response = await authService.register(payload, firebaseToken);
+      const response = await authService.register(payload, firebaseToken, requestId);
 
       if (response.success && response.user) {
          await refreshUser();

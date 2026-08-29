@@ -17,21 +17,43 @@ export interface AuthResponse {
 }
 
 export const authService = {
-  async register(data: any, firebaseToken: string): Promise<AuthResponse> {
+  async register(data: any, firebaseToken: string, requestId?: string): Promise<AuthResponse> {
+    if (!firebaseToken) { 
+      throw new Error("authService.register received an empty Firebase token"); 
+    }
     const payload = {
       firstName: data.firstName,
       lastName: data.lastName,
       firebaseToken: firebaseToken
     };
-    const response = await apiClient.post<AuthResponse>('/auth/register', payload);
+    
+    console.log("[REGISTER SERVICE] Payload keys:", Object.keys(payload));
+    console.log("[REGISTER SERVICE] Token exists:", Boolean(payload.firebaseToken));
+    console.log("[REGISTER SERVICE] Token length:", payload.firebaseToken.length);
+    
+    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    if (requestId) headers['X-Debug-Request-ID'] = requestId;
+    
+    const response = await apiClient.post<AuthResponse>('/auth/register', payload, { headers });
     return response.data;
   },
 
-  async login(firebaseToken: string): Promise<AuthResponse> {
+  async login(firebaseToken: string, requestId?: string): Promise<AuthResponse> {
+    if (!firebaseToken) { 
+      throw new Error("authService.login received an empty Firebase token"); 
+    }
     const payload = {
       firebaseToken: firebaseToken
     };
-    const response = await apiClient.post<AuthResponse>('/auth/login', payload);
+    
+    console.log("[LOGIN SERVICE] Payload keys:", Object.keys(payload));
+    console.log("[LOGIN SERVICE] Token exists:", Boolean(payload.firebaseToken));
+    console.log("[LOGIN SERVICE] Token length:", payload.firebaseToken.length);
+    
+    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    if (requestId) headers['X-Debug-Request-ID'] = requestId;
+    
+    const response = await apiClient.post<AuthResponse>('/auth/login', payload, { headers });
     return response.data;
   },
 
