@@ -5,7 +5,15 @@ import { router } from './routes';
 import { AuthProvider } from './features/auth/context/AuthContext';
 import './index.css';
 
-console.log("[APP VERSION] AUTH FIX VERSION DIFF-DEBUG-1040");
+// Type definition for the window object extension
+declare global {
+  interface Window {
+    __APP_BUILD_ID__: string;
+  }
+}
+
+window.__APP_BUILD_ID__ = "AUTH-PROD-FIX-16c2d6d";
+console.log("[APP VERSION] " + window.__APP_BUILD_ID__);
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

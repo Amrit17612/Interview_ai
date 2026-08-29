@@ -33,7 +33,9 @@ export const authService = {
     
     const headers: Record<string, string> = { 
       "Content-Type": "application/json",
-      "X-Login-Path": "FINAL-FIREBASE-FLOW"
+      "X-Login-Path": "FINAL-FIREBASE-FLOW",
+      "X-Auth-Flow-Version": "FIREBASE-TOKEN-ONLY-V2",
+      "X-App-Build-ID": typeof window !== 'undefined' ? window.__APP_BUILD_ID__ : "AUTH-PROD-FIX-16c2d6d"
     };
     if (requestId) headers['X-Debug-Request-ID'] = requestId;
     
@@ -55,7 +57,9 @@ export const authService = {
     
     const headers: Record<string, string> = { 
       "Content-Type": "application/json",
-      "X-Login-Path": "FINAL-FIREBASE-FLOW"
+      "X-Login-Path": "FINAL-FIREBASE-FLOW",
+      "X-Auth-Flow-Version": "FIREBASE-TOKEN-ONLY-V2",
+      "X-App-Build-ID": typeof window !== 'undefined' ? window.__APP_BUILD_ID__ : "AUTH-PROD-FIX-16c2d6d"
     };
     if (requestId) headers['X-Debug-Request-ID'] = requestId;
     
