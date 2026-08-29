@@ -16,6 +16,7 @@ interface AuthContextType {
   refreshUser: () => Promise<void>;
   resendVerificationEmail: () => Promise<void>;
   googleAuth: () => Promise<AuthResponse>;
+  completeOnboarding: (data: any) => Promise<AuthResponse>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -255,8 +256,28 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const completeOnboarding = async (data: any) => {
+    isAuthInProgress.current = true;
+    try {
+      setError(null);
+      setIsLoading(true);
+      const response = await authService.completeOnboarding(data);
+      if (response.success && response.user) {
+        setUser(response.user);
+      }
+      return response;
+    } catch (err: any) {
+      console.error("[AUTH FLOW] Complete Onboarding Error:", err);
+      setError(err.message || 'Failed to complete onboarding');
+      throw err;
+    } finally {
+      setIsLoading(false);
+      isAuthInProgress.current = false;
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, isLoading, isAuthenticated, error, login, logout, register, refreshUser, resendVerificationEmail, googleAuth }}>
+    <AuthContext.Provider value={{ user, isLoading, isAuthenticated, error, login, logout, register, refreshUser, resendVerificationEmail, googleAuth, completeOnboarding }}>
       {isLoading ? (
         <div className="flex h-screen w-full items-center justify-center">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-gray-900"></div>

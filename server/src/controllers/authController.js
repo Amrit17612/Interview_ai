@@ -226,7 +226,31 @@ const completeOnboarding = async (req, res, next) => {
       throw new Error('User not found');
     }
 
+    const {
+      currentRole,
+      experienceLevel,
+      interviewGoals,
+      difficulty,
+      primaryTechnology,
+      targetCompanyType
+    } = req.body;
+
+    if (!currentRole || !experienceLevel || !interviewGoals || !interviewGoals.length || !difficulty || !primaryTechnology || !targetCompanyType) {
+      res.status(400);
+      throw new Error('Please provide all required onboarding fields');
+    }
+
     user.onboardingCompleted = true;
+    user.onboarding = {
+      currentRole,
+      experienceLevel,
+      interviewGoals,
+      difficulty,
+      primaryTechnology,
+      targetCompanyType,
+      completedAt: new Date()
+    };
+    
     await user.save();
 
     res.json({

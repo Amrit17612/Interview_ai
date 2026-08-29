@@ -17,7 +17,17 @@ export interface AuthResponse {
   user?: AuthUser;
 }
 
+export interface OnboardingData {
+  currentRole: string;
+  experienceLevel: string;
+  interviewGoals: string[];
+  difficulty: string;
+  primaryTechnology: string;
+  targetCompanyType: string;
+}
+
 export const authService = {
+  // ... existing methods
   async register(data: any, firebaseToken: string, requestId?: string): Promise<AuthResponse> {
     if (!firebaseToken) { 
       throw new Error("authService.register received an empty Firebase token"); 
@@ -36,7 +46,7 @@ export const authService = {
       "Content-Type": "application/json",
       "X-Login-Path": "FINAL-FIREBASE-FLOW",
       "X-Auth-Flow-Version": "FIREBASE-TOKEN-ONLY-V2",
-      "X-App-Build-ID": typeof window !== 'undefined' ? window.__APP_BUILD_ID__ : "AUTH-PROD-FIX-527699e"
+      "X-App-Build-ID": typeof window !== 'undefined' ? (window as any).__APP_BUILD_ID__ : "AUTH-PROD-FIX-527699e"
     };
     if (requestId) headers['X-Debug-Request-ID'] = requestId;
     
@@ -60,7 +70,7 @@ export const authService = {
       "Content-Type": "application/json",
       "X-Login-Path": "FINAL-FIREBASE-FLOW",
       "X-Auth-Flow-Version": "FIREBASE-TOKEN-ONLY-V2",
-      "X-App-Build-ID": typeof window !== 'undefined' ? window.__APP_BUILD_ID__ : "AUTH-PROD-FIX-527699e"
+      "X-App-Build-ID": typeof window !== 'undefined' ? (window as any).__APP_BUILD_ID__ : "AUTH-PROD-FIX-527699e"
     };
     if (requestId) headers['X-Debug-Request-ID'] = requestId;
     
@@ -84,7 +94,7 @@ export const authService = {
       "Content-Type": "application/json",
       "X-Login-Path": "FINAL-FIREBASE-FLOW",
       "X-Auth-Flow-Version": "FIREBASE-TOKEN-ONLY-V2",
-      "X-App-Build-ID": typeof window !== 'undefined' ? window.__APP_BUILD_ID__ : "AUTH-PROD-FIX-527699e"
+      "X-App-Build-ID": typeof window !== 'undefined' ? (window as any).__APP_BUILD_ID__ : "AUTH-PROD-FIX-527699e"
     };
     
     const response = await apiClient.post<AuthResponse>('/auth/google', payload, { headers });
@@ -121,8 +131,8 @@ export const authService = {
     return response.data;
   },
 
-  async completeOnboarding(): Promise<AuthResponse> {
-    const response = await apiClient.patch<AuthResponse>('/auth/onboarding');
+  async completeOnboarding(data: OnboardingData): Promise<AuthResponse> {
+    const response = await apiClient.patch<AuthResponse>('/auth/onboarding', data);
     return response.data;
   },
 };

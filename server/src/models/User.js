@@ -31,6 +31,15 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  onboarding: {
+    currentRole: String,
+    experienceLevel: String,
+    interviewGoals: [String],
+    difficulty: String,
+    primaryTechnology: String,
+    targetCompanyType: String,
+    completedAt: Date
+  },
   emailVerified: {
     type: Boolean,
     default: false,
