@@ -1,11 +1,12 @@
 const TRUSTED_CATALOG = {
+  // TEMPORARY LIVE PAYMENT TEST PRICE - RESTORE ORIGINAL PRICES BEFORE LAUNCH
   // Company Bundles
   comp_google_01: {
     bundleId: 'comp_google_01',
     bundleType: 'COMPANY',
     title: 'Google SWE Prep',
     description: 'Master the Google software engineering interview with real past questions and system design scenarios.',
-    amount: 4900, // Amount in paise (49 INR)
+    amount: 100, // Amount in paise (1 INR) - TEMPORARY
     currency: 'INR',
     active: true
   },
@@ -14,7 +15,7 @@ const TRUSTED_CATALOG = {
     bundleType: 'COMPANY',
     title: 'Amazon Leadership Pack',
     description: 'Strict adherence to the 16 Leadership Principles mixed with challenging system design rounds.',
-    amount: 3900, 
+    amount: 100, // TEMPORARY 
     currency: 'INR',
     active: true
   },
@@ -23,7 +24,7 @@ const TRUSTED_CATALOG = {
     bundleType: 'COMPANY',
     title: 'Meta Hacker Bundle',
     description: 'Fast-paced algorithmic rounds and product-focused system design interviews tailored for Meta.',
-    amount: 4500,
+    amount: 100, // TEMPORARY
     currency: 'INR',
     active: true
   },
@@ -34,7 +35,7 @@ const TRUSTED_CATALOG = {
     bundleType: 'DOMAIN',
     title: 'Senior Frontend Engineer',
     description: 'Deep dive into React, performance optimization, web vitals, and frontend system design.',
-    amount: 3500,
+    amount: 100, // TEMPORARY
     currency: 'INR',
     active: true
   },
@@ -43,7 +44,7 @@ const TRUSTED_CATALOG = {
     bundleType: 'DOMAIN',
     title: 'Backend Scale & Systems',
     description: 'Microservices, database scaling, caching strategies, and distributed systems architecture.',
-    amount: 4500,
+    amount: 100, // TEMPORARY
     currency: 'INR',
     active: true
   },
@@ -52,7 +53,7 @@ const TRUSTED_CATALOG = {
     bundleType: 'DOMAIN',
     title: 'Product Manager Masterclass',
     description: 'Product sense, execution, metrics, and behavioral scenarios for PM roles.',
-    amount: 3900,
+    amount: 100, // TEMPORARY
     currency: 'INR',
     active: true
   }

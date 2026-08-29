@@ -21,7 +21,7 @@ export const MOCK_COMPANY_BUNDLES: BundleMetadata[] = [
     description: 'Master the Google software engineering interview with real past questions and system design scenarios.',
     type: 'company',
     category: 'FAANG',
-    price: 49,
+    price: 1, // TEMPORARY
     originalPrice: 99,
     features: [
       '15 Company-specific technical mocks',
@@ -39,7 +39,7 @@ export const MOCK_COMPANY_BUNDLES: BundleMetadata[] = [
     description: 'Strict adherence to the 16 Leadership Principles mixed with challenging system design rounds.',
     type: 'company',
     category: 'FAANG',
-    price: 39,
+    price: 1, // TEMPORARY
     features: [
       '10 Leadership Principle focused mocks',
       'Bar-raiser simulation',
@@ -54,7 +54,7 @@ export const MOCK_COMPANY_BUNDLES: BundleMetadata[] = [
     description: 'Fast-paced algorithmic rounds and product-focused system design interviews tailored for Meta.',
     type: 'company',
     category: 'FAANG',
-    price: 45,
+    price: 1, // TEMPORARY
     features: [
       '12 Fast-paced algorithmic mocks',
       'Product architecture rounds',
@@ -72,7 +72,7 @@ export const MOCK_DOMAIN_BUNDLES: BundleMetadata[] = [
     description: 'Deep dive into React, performance optimization, web vitals, and frontend system design.',
     type: 'domain',
     category: 'Engineering',
-    price: 35,
+    price: 1, // TEMPORARY
     features: [
       'React & State Management mocks',
       'Web Performance & Vitals',
@@ -89,7 +89,7 @@ export const MOCK_DOMAIN_BUNDLES: BundleMetadata[] = [
     description: 'Microservices, database scaling, caching strategies, and distributed systems architecture.',
     type: 'domain',
     category: 'Engineering',
-    price: 45,
+    price: 1, // TEMPORARY
     originalPrice: 79,
     features: [
       'Microservices architecture',
@@ -106,7 +106,7 @@ export const MOCK_DOMAIN_BUNDLES: BundleMetadata[] = [
     description: 'Product sense, execution, metrics, and behavioral scenarios for PM roles.',
     type: 'domain',
     category: 'Product',
-    price: 39,
+    price: 1, // TEMPORARY
     features: [
       'Product Sense & Strategy',
       'Execution & Metrics',

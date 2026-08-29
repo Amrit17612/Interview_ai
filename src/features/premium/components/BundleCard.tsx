@@ -61,9 +61,9 @@ export function BundleCard({ bundle, onPreviewClick, onPurchaseClick, isProcessi
       <CardContent className="flex-grow pt-0 pb-4">
         <div className="mb-4">
           <div className="flex items-end gap-2">
-            <span className="text-2xl font-bold text-gray-900">${bundle.price}</span>
+            <span className="text-2xl font-bold text-gray-900">₹{bundle.price}</span>
             {bundle.originalPrice && (
-              <span className="text-sm text-gray-400 line-through mb-1">${bundle.originalPrice}</span>
+              <span className="text-sm text-gray-400 line-through mb-1">₹{bundle.originalPrice}</span>
             )}
             <span className="text-xs text-gray-500 mb-1.5 ml-1">one-time</span>
           </div>

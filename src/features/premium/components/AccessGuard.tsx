@@ -48,7 +48,7 @@ export function AccessGuard({
             onClick={onUnlockRequest}
             className="bg-amber-500 hover:bg-amber-600 text-white shadow-sm font-medium"
           >
-            Unlock Now {price ? `for $${price}` : ''}
+            Unlock Now {price ? `for ₹${price}` : ''}
           </Button>
         )}
       </div>
