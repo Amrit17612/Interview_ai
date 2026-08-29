@@ -1,5 +1,13 @@
 import { apiClient } from './api.client';
 
+export interface BundleAccess {
+  bundleType: string;
+  bundleId: string;
+  purchaseStatus: string;
+  purchasedAt: string;
+  expiresAt?: string;
+}
+
 export interface AuthUser {
   id: string;
   firstName: string;
@@ -7,6 +15,9 @@ export interface AuthUser {
   email: string;
   onboardingCompleted: boolean;
   emailVerified: boolean;
+  credits?: number;
+  purchasedBundles?: BundleAccess[];
+  onboarding?: OnboardingData;
 }
 
 export interface AuthResponse {

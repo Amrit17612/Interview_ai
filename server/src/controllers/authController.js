@@ -55,7 +55,10 @@ const registerUser = async (req, res, next) => {
         lastName: user.lastName,
         email: user.email,
         onboardingCompleted: user.onboardingCompleted,
-        emailVerified: user.emailVerified
+        emailVerified: user.emailVerified,
+        credits: user.credits || 0,
+        purchasedBundles: user.purchasedBundles || [],
+        onboarding: user.onboarding
       }
     });
   } catch (error) {
@@ -114,7 +117,10 @@ const loginUser = async (req, res, next) => {
         lastName: user.lastName,
         email: user.email,
         onboardingCompleted: user.onboardingCompleted,
-        emailVerified: user.emailVerified
+        emailVerified: user.emailVerified,
+        credits: user.credits || 0,
+        purchasedBundles: user.purchasedBundles || [],
+        onboarding: user.onboarding
       }
     });
   } catch (error) {
@@ -179,7 +185,10 @@ const googleAuthUser = async (req, res, next) => {
         lastName: user.lastName,
         email: user.email,
         onboardingCompleted: user.onboardingCompleted,
-        emailVerified: user.emailVerified
+        emailVerified: user.emailVerified,
+        credits: user.credits || 0,
+        purchasedBundles: user.purchasedBundles || [],
+        onboarding: user.onboarding
       }
     });
   } catch (error) {
@@ -198,7 +207,10 @@ const getMe = async (req, res, next) => {
         lastName: req.user.lastName,
         email: req.user.email,
         onboardingCompleted: req.user.onboardingCompleted,
-        emailVerified: req.user.emailVerified
+        emailVerified: req.user.emailVerified,
+        credits: req.user.credits || 0,
+        purchasedBundles: req.user.purchasedBundles || [],
+        onboarding: req.user.onboarding
       }
     });
   } catch (error) {
@@ -262,7 +274,10 @@ const completeOnboarding = async (req, res, next) => {
         lastName: user.lastName,
         email: user.email,
         onboardingCompleted: user.onboardingCompleted,
-        emailVerified: user.emailVerified
+        emailVerified: user.emailVerified,
+        credits: user.credits || 0,
+        purchasedBundles: user.purchasedBundles || [],
+        onboarding: user.onboarding
       }
     });
   } catch (error) {

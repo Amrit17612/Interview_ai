@@ -70,6 +70,15 @@ const ResumeVersions = Loadable(lazy(() => import('../features/resume/pages/Resu
 const ATSDashboard = Loadable(lazy(() => import('../features/ats/pages/ATSDashboard').then(m => ({ default: m.ATSDashboard }))));
 const JobReadiness = Loadable(lazy(() => import('../features/ats/pages/JobReadiness').then(m => ({ default: m.JobReadiness }))));
 
+// Premium Bundles
+const CompanyBundles = Loadable(lazy(() => import('../features/premium/pages/CompanyBundles').then(m => ({ default: m.CompanyBundles }))));
+const DomainBundles = Loadable(lazy(() => import('../features/premium/pages/DomainBundles').then(m => ({ default: m.DomainBundles }))));
+
+// Analytics & Progress
+const ReportsAnalytics = Loadable(lazy(() => import('../features/dashboard/pages/ReportsAnalytics').then(m => ({ default: m.ReportsAnalytics }))));
+const LearningRoadmap = Loadable(lazy(() => import('../features/dashboard/pages/LearningRoadmap').then(m => ({ default: m.LearningRoadmap }))));
+const Achievements = Loadable(lazy(() => import('../features/dashboard/pages/Achievements').then(m => ({ default: m.Achievements }))));
+
 const UserProfile = Loadable(lazy(() => import('../features/profile/pages/UserProfile').then(m => ({ default: m.UserProfile }))));
 import { NotFound } from '../features/system/pages/NotFound';
 import { Maintenance } from '../features/system/pages/Maintenance';
@@ -147,18 +156,18 @@ export const router = createBrowserRouter([
       { path: ROUTES.RESUME_VERSIONS, element: <ResumeVersions /> },
       { path: ROUTES.ATS, element: <ATSDashboard /> },
       { path: ROUTES.ATS_DETAILS, element: <JobReadiness /> },
-      { path: ROUTES.COMPANY_PACKS, element: <ComingSoon /> },
+      { path: ROUTES.COMPANY_PACKS, element: <CompanyBundles /> },
       { path: ROUTES.COMPANY_PACK_DETAILS, element: <ComingSoon /> },
       { path: ROUTES.COMPANY_PACK_READINESS, element: <ComingSoon /> },
-      { path: ROUTES.DOMAIN_PACKS, element: <ComingSoon /> },
+      { path: ROUTES.DOMAIN_PACKS, element: <DomainBundles /> },
       { path: ROUTES.DOMAIN_PACK_DETAILS, element: <ComingSoon /> },
       { path: ROUTES.LEARNING, element: <ComingSoon /> },
-      { path: ROUTES.LEARNING_ROADMAP, element: <ComingSoon /> },
+      { path: ROUTES.LEARNING_ROADMAP, element: <LearningRoadmap /> },
       { path: ROUTES.LEARNING_SKILLS, element: <ComingSoon /> },
       { path: ROUTES.PROGRESS, element: <ComingSoon /> },
-      { path: ROUTES.PROGRESS_ANALYTICS, element: <ComingSoon /> },
+      { path: ROUTES.PROGRESS_ANALYTICS, element: <ReportsAnalytics /> },
       { path: ROUTES.PROGRESS_HISTORY, element: <ComingSoon /> },
-      { path: ROUTES.ACHIEVEMENTS, element: <ComingSoon /> },
+      { path: ROUTES.ACHIEVEMENTS, element: <Achievements /> },
       { path: ROUTES.ACHIEVEMENTS_BADGES, element: <ComingSoon /> },
       { path: ROUTES.PROFILE, element: <UserProfile /> },
       { path: ROUTES.PROFILE_EDIT, element: <ComingSoon /> },
