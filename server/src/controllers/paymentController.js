@@ -4,12 +4,21 @@ const Payment = require('../models/Payment');
 const User = require('../models/User');
 const TRUSTED_CATALOG = require('../config/catalog');
 
-// Initialize Razorpay
-// Note: Fallback to dummy values to prevent crashes if env vars are missing during build/dev
-const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID || 'rzp_test_dummy',
-  key_secret: process.env.RAZORPAY_KEY_SECRET || 'dummy_secret',
-});
+// Lazy load Razorpay instance to ensure env vars are populated
+let razorpayInstance = null;
+const getRazorpay = () => {
+  if (razorpayInstance) return razorpayInstance;
+  
+  const key_id = process.env.RAZORPAY_KEY_ID;
+  const key_secret = process.env.RAZORPAY_KEY_SECRET;
+  
+  if (!key_id || !key_secret) {
+    throw new Error('Razorpay configuration missing from environment variables');
+  }
+  
+  razorpayInstance = new Razorpay({ key_id, key_secret });
+  return razorpayInstance;
+};
 
 /**
  * Grant entitlement to user safely
@@ -74,6 +83,7 @@ exports.createOrder = async (req, res, next) => {
       receipt: `rcpt_${userId}_${Date.now()}`
     };
 
+    const razorpay = getRazorpay();
     const order = await razorpay.orders.create(options);
 
     // Create Payment record
@@ -126,7 +136,12 @@ exports.verifyPayment = async (req, res, next) => {
       return res.json({ success: true, message: 'Payment already verified', user });
     }
 
-    const secret = process.env.RAZORPAY_KEY_SECRET || 'dummy_secret';
+    const secret = process.env.RAZORPAY_KEY_SECRET;
+    if (!secret) {
+      res.status(500);
+      throw new Error('Server configuration error: missing Razorpay secret');
+    }
+    
     const body = razorpay_order_id + '|' + razorpay_payment_id;
     const expectedSignature = crypto
       .createHmac('sha256', secret)
@@ -161,6 +176,7 @@ exports.verifyPayment = async (req, res, next) => {
         emailVerified: updatedUser.emailVerified,
         credits: updatedUser.credits || 0,
         purchasedBundles: updatedUser.purchasedBundles || [],
+        role: updatedUser.role || 'user',
         onboarding: updatedUser.onboarding
       }
     });

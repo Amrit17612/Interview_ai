@@ -4,6 +4,7 @@ import { ROUTES } from '../constants/routes';
 import { PublicLayout } from '../layouts/PublicLayout';
 import { AuthLayout } from '../layouts/AuthLayout';
 import { DashboardLayout } from '../layouts/DashboardLayout';
+import { AdminLayout } from '../layouts/AdminLayout';
 import { SystemLayout } from '../layouts/SystemLayout';
 import { Spinner } from '../components/ui/Spinner';
 
@@ -86,7 +87,11 @@ import { NotFound } from '../features/system/pages/NotFound';
 import { Maintenance } from '../features/system/pages/Maintenance';
 import { ComingSoon } from '../features/system/pages/ComingSoon';
 import { ProtectedRoute } from './ProtectedRoute';
+import { AdminRoute } from './AdminRoute';
 import { GuestRoute } from './GuestRoute';
+
+// Admin Pages
+const AdminDashboard = Loadable(lazy(() => import('../features/admin/pages/AdminDashboard').then(m => ({ default: m.AdminDashboard }))));
 
 export const router = createBrowserRouter([
   {
@@ -186,6 +191,17 @@ export const router = createBrowserRouter([
       { path: ROUTES.REPORT_BUG, element: <ComingSoon /> },
       { path: ROUTES.CREDITS, element: <ComingSoon /> },
       { path: ROUTES.CREDITS_REFERRAL, element: <ComingSoon /> }
+        ]
+      }
+    ]
+  },
+  {
+    element: <AdminRoute />,
+    children: [
+      {
+        element: <AdminLayout />,
+        children: [
+          { path: ROUTES.ADMIN_DASHBOARD, element: <AdminDashboard /> },
         ]
       }
     ]

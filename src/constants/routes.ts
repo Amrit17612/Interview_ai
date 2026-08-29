@@ -26,6 +26,12 @@ export const ROUTES = {
   // Dashboard
   DASHBOARD: '/dashboard',
 
+  // Admin Routes
+  ADMIN_DASHBOARD: '/admin/dashboard',
+
+  // Mock Route for dynamic matching
+  MOCK_INTERVIEW: '/mock/:type/:id',
+
   // Interview
   INTERVIEW: '/interviews',
   INTERVIEW_DEVICE_CHECK: '/interviews/device-check',

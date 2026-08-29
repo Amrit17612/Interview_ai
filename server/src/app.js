@@ -57,6 +57,7 @@ const atsRoutes = require('./routes/atsRoutes');
 const aiRoutes = require('./routes/aiRoutes');
 const interviewRoutes = require('./routes/interviewRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
+const adminRoutes = require('./routes/adminRoutes');
 const { globalLimiter } = require('./middleware/rateLimiter');
 
 // Apply global rate limiter to all /api routes
@@ -69,6 +70,7 @@ app.use('/api/ats', atsRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/interviews', interviewRoutes);
 app.use('/api/payments', paymentRoutes);
+app.use('/api/admin', adminRoutes);
 
 const mongoose = require('mongoose');
 

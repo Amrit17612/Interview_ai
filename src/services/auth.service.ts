@@ -16,6 +16,7 @@ export interface AuthUser {
   onboardingCompleted: boolean;
   emailVerified: boolean;
   credits?: number;
+  role?: 'user' | 'admin';
   purchasedBundles?: BundleAccess[];
   onboarding?: OnboardingData;
 }
