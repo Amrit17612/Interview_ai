@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 import { authService } from '../../../services/auth.service';
 import type { AuthUser, AuthResponse } from '../../../services/auth.service';
 import { auth } from '../../../config/firebase';
-import { onAuthStateChanged, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification } from 'firebase/auth';
+import { onAuthStateChanged, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 
 interface AuthContextType {
   user: AuthUser | null;
@@ -15,6 +15,7 @@ interface AuthContextType {
   register: (data: any) => Promise<AuthResponse>;
   refreshUser: () => Promise<void>;
   resendVerificationEmail: () => Promise<void>;
+  googleAuth: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -175,8 +176,48 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const googleAuth = async () => {
+    console.log("[GOOGLE AUTH] Button handler started");
+
+    try {
+      setError(null);
+      setIsLoading(true);
+
+      const provider = new GoogleAuthProvider();
+      console.log("[GOOGLE AUTH] Opening Google popup");
+
+      const result = await signInWithPopup(auth, provider);
+      const firebaseUser = result.user;
+
+      console.log("[GOOGLE AUTH] Firebase user received", {
+        uidPresent: !!firebaseUser?.uid,
+        emailPresent: !!firebaseUser?.email
+      });
+
+      const firebaseToken = await firebaseUser.getIdToken(true);
+
+      if (!firebaseToken) {
+        throw new Error("Firebase token was not generated");
+      }
+
+      console.log("[GOOGLE AUTH] Firebase token generated successfully");
+
+      const response = await authService.googleAuth(firebaseToken);
+      
+      if (response.success && response.user) {
+         await refreshUser();
+      }
+    } catch (error: any) {
+      console.error("[GOOGLE AUTH] Authentication failed:", error?.code, error?.message, error);
+      setError(error?.message || "Google authentication failed");
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, isLoading, isAuthenticated, error, login, logout, register, refreshUser, resendVerificationEmail }}>
+    <AuthContext.Provider value={{ user, isLoading, isAuthenticated, error, login, logout, register, refreshUser, resendVerificationEmail, googleAuth }}>
       {isLoading ? (
         <div className="flex h-screen w-full items-center justify-center">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-gray-900"></div>

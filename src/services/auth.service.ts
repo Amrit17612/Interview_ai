@@ -67,6 +67,29 @@ export const authService = {
     return response.data;
   },
 
+  async googleAuth(firebaseToken: string): Promise<AuthResponse> {
+    if (!firebaseToken) {
+      throw new Error("authService.googleAuth received an empty Firebase token");
+    }
+    const payload = {
+      firebaseToken: firebaseToken
+    };
+    
+    console.log("[GOOGLE AUTH SERVICE] Payload keys:", Object.keys(payload));
+    console.log("[GOOGLE AUTH SERVICE] Token exists:", Boolean(payload.firebaseToken));
+    console.log("[GOOGLE AUTH SERVICE] Token length:", payload.firebaseToken.length);
+    
+    const headers: Record<string, string> = { 
+      "Content-Type": "application/json",
+      "X-Login-Path": "FINAL-FIREBASE-FLOW",
+      "X-Auth-Flow-Version": "FIREBASE-TOKEN-ONLY-V2",
+      "X-App-Build-ID": typeof window !== 'undefined' ? window.__APP_BUILD_ID__ : "AUTH-PROD-FIX-527699e"
+    };
+    
+    const response = await apiClient.post<AuthResponse>('/auth/google', payload, { headers });
+    return response.data;
+  },
+
   async logout(): Promise<AuthResponse> {
     const response = await apiClient.post<AuthResponse>('/auth/logout');
     return response.data;

@@ -122,6 +122,68 @@ const loginUser = async (req, res, next) => {
   }
 };
 
+const googleAuthUser = async (req, res, next) => {
+  try {
+    console.log('[LOGIN API] request URL:', req.originalUrl);
+    console.log('[LOGIN API] request method:', req.method);
+    console.log('[LOGIN API] x-app-build-id:', req.headers['x-app-build-id']);
+    console.log('[LOGIN API] x-auth-flow-version:', req.headers['x-auth-flow-version']);
+    console.log('[LOGIN API] origin:', req.headers['origin']);
+    console.log('[LOGIN API] user-agent:', req.headers['user-agent']);
+    console.log('[LOGIN API] body keys:', Object.keys(req.body || {}));
+    console.log('[LOGIN API] firebaseToken present:', typeof req.body?.firebaseToken === 'string');
+
+    const { firebaseToken } = req.body;
+
+    if (!firebaseToken) {
+      res.status(401);
+      throw new Error('Not authorized, missing Firebase token in request body');
+    }
+
+    const decodedToken = await getAuth().verifyIdToken(firebaseToken);
+    const { email, uid, email_verified, name } = decodedToken;
+    const normalizedEmail = email.toLowerCase().trim();
+    
+    let user = await User.findOne({ $or: [{ firebaseUid: uid }, { email: normalizedEmail }] });
+
+    if (!user) {
+      const nameParts = name ? name.split(' ') : ['Google', 'User'];
+      const firstName = nameParts[0];
+      const lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : '';
+      
+      user = await User.create({
+        firstName,
+        lastName,
+        email: normalizedEmail,
+        firebaseUid: uid,
+        onboardingCompleted: false,
+        emailVerified: email_verified || true
+      });
+    } else {
+      if (!user.firebaseUid) {
+        user.firebaseUid = uid;
+      }
+      user.emailVerified = email_verified || user.emailVerified;
+      await user.save();
+    }
+
+    res.json({
+      success: true,
+      message: 'Google auth successful',
+      user: {
+        id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        onboardingCompleted: user.onboardingCompleted,
+        emailVerified: user.emailVerified
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 const getMe = async (req, res, next) => {
   try {
     // req.user is already attached by the authMiddleware protect
