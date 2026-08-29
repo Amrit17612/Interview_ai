@@ -10,7 +10,7 @@ export function useAccess() {
     return user.purchasedBundles.some(
       (bundle) => 
         bundle.bundleId === bundleId && 
-        bundle.bundleType === bundleType && 
+        bundle.bundleType.toLowerCase() === bundleType.toLowerCase() && 
         bundle.purchaseStatus === 'active'
     );
   };
