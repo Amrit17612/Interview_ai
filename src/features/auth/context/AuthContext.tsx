@@ -36,7 +36,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
       const response = await authService.getCurrentUser();
       if (response.success && response.user) {
-        if (!response.user.emailVerified) {
+        const hasPasswordProvider = auth.currentUser?.providerData.some(p => p.providerId === 'password');
+        if (hasPasswordProvider && !auth.currentUser?.emailVerified) {
           setUser(null);
         } else {
           setUser(response.user);
@@ -99,6 +100,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       console.log(`[AUTH FLOW] Firebase credential received`);
       
       await firebaseUser.reload();
+      
+      if (!firebaseUser.emailVerified) {
+        throw new Error('Please verify your email address before logging in');
+      }
+
       const firebaseToken = await firebaseUser.getIdToken(true);
       
       console.log(`[AUTH FLOW] token received`);
@@ -112,9 +118,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       console.log(`[AUTH FLOW] backend login response received`);
       
       if (response.success && response.user) {
-        if (!response.user.emailVerified) {
-          throw new Error('Please verify your email address before logging in');
-        }
         console.log(`[AUTH FLOW] profile loaded`);
         setUser(response.user);
         console.log(`[AUTH FLOW] context state updated`);
