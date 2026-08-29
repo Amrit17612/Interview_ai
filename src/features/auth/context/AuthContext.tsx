@@ -1,4 +1,4 @@
-import { createContext, useState, useEffect } from 'react';
+import { createContext, useState, useEffect, useRef } from 'react';
 import type { ReactNode } from 'react';
 import { authService } from '../../../services/auth.service';
 import type { AuthUser, AuthResponse } from '../../../services/auth.service';
@@ -24,6 +24,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+
+  const isAuthInProgress = useRef(false);
 
   const isAuthenticated = user !== null;
 
@@ -51,6 +53,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     let mounted = true;
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (!mounted) return;
+      if (isAuthInProgress.current) {
+        console.log("[AUTH CONTEXT] onAuthStateChanged ignored because manual auth is in progress");
+        return;
+      }
       setIsLoading(true);
       if (firebaseUser) {
         await refreshUser();
@@ -69,6 +75,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const login = async (credentials: any) => {
+    isAuthInProgress.current = true;
     const requestId = crypto.randomUUID();
     console.log(`[LOGIN] requestId: ${requestId}`);
     try {
@@ -102,10 +109,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     } catch (err: any) {
       setError(err.message || 'Login failed');
       throw err;
+    } finally {
+      isAuthInProgress.current = false;
     }
   };
 
   const register = async (data: any) => {
+    isAuthInProgress.current = true;
     const requestId = crypto.randomUUID();
     console.log(`[REGISTER] requestId: ${requestId}`);
     try {
@@ -147,6 +157,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     } catch (err: any) {
       setError(err.message || 'Registration failed');
       throw err;
+    } finally {
+      isAuthInProgress.current = false;
     }
   };
 
@@ -177,6 +189,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const googleAuth = async () => {
+    isAuthInProgress.current = true;
     console.log("[GOOGLE AUTH] Button handler started");
 
     try {
@@ -218,6 +231,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       throw error;
     } finally {
       setIsLoading(false);
+      isAuthInProgress.current = false;
     }
   };
 
