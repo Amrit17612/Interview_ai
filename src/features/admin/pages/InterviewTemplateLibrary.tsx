@@ -28,7 +28,7 @@ export function InterviewTemplateLibrary() {
       if (visibilityFilter) params.append('visibility', visibilityFilter);
       if (categoryFilter) params.append('category', categoryFilter);
 
-      const res = await apiClient.get(`/api/admin/interview-templates?${params.toString()}`);
+      const res = await apiClient.get(`/admin/interview-templates?${params.toString()}`);
       if (res.data.success) {
         setTemplates(res.data.data);
         setTotalPages(res.data.pagination.pages);
@@ -51,7 +51,7 @@ export function InterviewTemplateLibrary() {
   const toggleArchiveStatus = async (id: string, currentStatus: string) => {
     try {
       const newStatus = currentStatus === 'ARCHIVED' ? 'DRAFT' : 'ARCHIVED';
-      await apiClient.patch(`/api/admin/interview-templates/${id}/status`, { status: newStatus });
+      await apiClient.patch(`/admin/interview-templates/${id}/status`, { status: newStatus });
       fetchTemplates(page);
     } catch (err: any) {
       alert(err.response?.data?.message || 'Failed to update status');

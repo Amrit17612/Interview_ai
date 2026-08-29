@@ -37,7 +37,7 @@ export function QuestionEditor() {
 
     const fetchQuestion = async () => {
       try {
-        const res = await apiClient.get(`/api/admin/questions/${id}`);
+        const res = await apiClient.get(`/admin/questions/${id}`);
         const q = res.data.data;
         setText(q.text || '');
         setDescription(q.description || '');
@@ -68,7 +68,7 @@ export function QuestionEditor() {
     }
     const searchFollowUps = async () => {
       try {
-        const res = await apiClient.get(`/api/admin/questions?search=${encodeURIComponent(searchQuery)}&limit=5`);
+        const res = await apiClient.get(`/admin/questions?search=${encodeURIComponent(searchQuery)}&limit=5`);
         // Filter out self and already added
         const results = res.data.data.filter((q: any) => 
           q._id !== id && !followUps.some(f => f._id === q._id)
@@ -105,12 +105,11 @@ export function QuestionEditor() {
       };
 
       if (isNew) {
-        await apiClient.post('/api/admin/questions', payload);
-        navigate(ROUTES.ADMIN_QUESTIONS);
+        await apiClient.post('/admin/questions', payload);
       } else {
-        await apiClient.put(`/api/admin/questions/${id}`, payload);
-        navigate(ROUTES.ADMIN_QUESTIONS);
+        await apiClient.put(`/admin/questions/${id}`, payload);
       }
+      navigate(ROUTES.ADMIN_QUESTIONS);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to save question');
     } finally {

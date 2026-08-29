@@ -19,7 +19,7 @@ export function AuditLogs() {
       const params = new URLSearchParams({ page: p.toString(), limit: '15' });
       if (actionFilter) params.append('action', actionFilter);
 
-      const res = await apiClient.get(`/api/admin/audit-logs?${params.toString()}`);
+      const res = await apiClient.get(`/admin/audit-logs?${params.toString()}`);
       if (res.data.success) {
         setLogs(res.data.data);
         setTotalPages(res.data.pagination.pages);

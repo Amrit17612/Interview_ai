@@ -25,7 +25,7 @@ export function TransactionList() {
       if (searchEmail) params.append('email', searchEmail);
       if (statusFilter) params.append('status', statusFilter);
 
-      const res = await apiClient.get(`/api/admin/payments?${params.toString()}`);
+      const res = await apiClient.get(`/admin/payments?${params.toString()}`);
       if (res.data.success) {
         setTransactions(res.data.data);
         setTotalPages(res.data.pagination.pages);
@@ -48,7 +48,7 @@ export function TransactionList() {
   const viewDetails = async (id: string) => {
     try {
       setLoading(true);
-      const res = await apiClient.get(`/api/admin/payments/${id}`);
+      const res = await apiClient.get(`/admin/payments/${id}`);
       if (res.data.success) {
         setSelectedTx(res.data.data);
       }

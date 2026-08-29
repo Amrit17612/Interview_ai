@@ -31,7 +31,7 @@ export function ManualGrantModal({ user, onClose, onSuccess }: Props) {
     try {
       setLoading(true);
       setError(null);
-      const res = await apiClient.post(`/api/admin/users/${user._id}/grant-bundle`, {
+      const res = await apiClient.post(`/admin/users/${user._id}/grant-bundle`, {
         bundleId,
         reason: reason.trim()
       });

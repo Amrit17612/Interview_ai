@@ -13,7 +13,7 @@ export function AdminDashboard() {
   useEffect(() => {
     const fetchDashboard = async () => {
       try {
-        const response = await apiClient.get('/api/admin/analytics/payments');
+        const response = await apiClient.get('/admin/analytics/payments');
         if (response.data.success) {
           setStats(response.data.analytics);
         }

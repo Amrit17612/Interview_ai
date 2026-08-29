@@ -35,7 +35,7 @@ export function QuestionLibrary() {
       if (typeFilter) params.append('type', typeFilter);
       if (difficultyFilter) params.append('difficulty', difficultyFilter);
 
-      const res = await apiClient.get(`/api/admin/questions?${params.toString()}`);
+      const res = await apiClient.get(`/admin/questions?${params.toString()}`);
       if (res.data.success) {
         setQuestions(res.data.data);
         setTotalPages(res.data.pagination.pages);
@@ -58,7 +58,7 @@ export function QuestionLibrary() {
   const toggleArchiveStatus = async (id: string, currentStatus: string) => {
     try {
       const newStatus = currentStatus === 'ARCHIVED' ? 'DRAFT' : 'ARCHIVED';
-      await apiClient.patch(`/api/admin/questions/${id}/status`, { status: newStatus });
+      await apiClient.patch(`/admin/questions/${id}/status`, { status: newStatus });
       fetchQuestions(page);
     } catch (err: any) {
       alert(err.response?.data?.message || 'Failed to update status');
@@ -85,7 +85,7 @@ export function QuestionLibrary() {
     if (!window.confirm(`Are you sure you want to change ${selectedIds.size} questions to ${status}?`)) return;
     try {
       setBulkLoading(true);
-      const res = await apiClient.post('/api/admin/questions/bulk/status', {
+      const res = await apiClient.post('/admin/questions/bulk/status', {
         questionIds: Array.from(selectedIds),
         status
       });
@@ -109,7 +109,7 @@ export function QuestionLibrary() {
 
     try {
       setBulkLoading(true);
-      const res = await apiClient.post('/api/admin/questions/bulk/tags', {
+      const res = await apiClient.post('/admin/questions/bulk/tags', {
         questionIds: Array.from(selectedIds),
         tags
       });
@@ -127,7 +127,7 @@ export function QuestionLibrary() {
   const handleExport = async (format: 'csv' | 'json') => {
     try {
       setIsExporting(true);
-      const res = await apiClient.get(`/api/admin/questions/export?format=${format}`, {
+      const res = await apiClient.get(`/admin/questions/export?format=${format}`, {
         responseType: 'blob'
       });
       

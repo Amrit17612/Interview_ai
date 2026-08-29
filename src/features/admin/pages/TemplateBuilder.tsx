@@ -43,7 +43,7 @@ export function TemplateBuilder() {
   const fetchTemplate = async () => {
     try {
       setLoading(true);
-      const res = await apiClient.get(`/api/admin/interview-templates/${id}`);
+      const res = await apiClient.get(`/admin/interview-templates/${id}`);
       if (res.data.success) {
         const t = res.data.data;
         setTitle(t.title);
@@ -71,7 +71,7 @@ export function TemplateBuilder() {
     try {
       setSearching(true);
       // Fetch ACTIVE/DRAFT questions
-      const res = await apiClient.get(`/api/admin/questions?search=${encodeURIComponent(searchQuery)}&limit=10`);
+      const res = await apiClient.get(`/admin/questions?search=${encodeURIComponent(searchQuery)}&limit=10`);
       if (res.data.success) {
         // Filter out already selected
         const selectedIds = new Set(selectedQuestions.map(q => typeof q === 'string' ? q : q._id));
@@ -132,9 +132,9 @@ export function TemplateBuilder() {
       };
 
       if (isEditing) {
-        await apiClient.put(`/api/admin/interview-templates/${id}`, payload);
+        await apiClient.put(`/admin/interview-templates/${id}`, payload);
       } else {
-        const res = await apiClient.post('/api/admin/interview-templates', payload);
+        const res = await apiClient.post('/admin/interview-templates', payload);
         navigate(`${ROUTES.ADMIN_TEMPLATES}/${res.data.data._id}/edit`, { replace: true });
       }
       

@@ -38,7 +38,7 @@ export function ImportReviewModal({ onClose, onSuccess }: ImportReviewModalProps
       const formData = new FormData();
       formData.append('file', file);
       
-      const res = await apiClient.post('/api/admin/questions/import/preview', formData, {
+      const res = await apiClient.post('/admin/questions/import/preview', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       
@@ -60,8 +60,9 @@ export function ImportReviewModal({ onClose, onSuccess }: ImportReviewModalProps
       // Extract only the valid rows to send back
       const validRows = preview.rows.filter((r: any) => r.isValid);
       
-      const res = await apiClient.post('/api/admin/questions/import/confirm', {
-        questions: validRows
+      const res = await apiClient.post('/admin/questions/import/confirm', {
+        questions: validRows,
+        tags: [] // Optional tags to apply to all
       });
       
       if (res.data.success) {

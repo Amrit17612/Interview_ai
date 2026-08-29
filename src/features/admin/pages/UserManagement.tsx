@@ -29,7 +29,7 @@ export function UserManagement() {
       if (searchEmail) params.append('email', searchEmail);
       if (roleFilter) params.append('role', roleFilter);
 
-      const res = await apiClient.get(`/api/admin/users?${params.toString()}`);
+      const res = await apiClient.get(`/admin/users?${params.toString()}`);
       if (res.data.success) {
         setUsers(res.data.data);
         setTotalPages(res.data.pagination.pages);
@@ -52,7 +52,7 @@ export function UserManagement() {
   const viewDetails = async (id: string) => {
     try {
       setLoading(true);
-      const res = await apiClient.get(`/api/admin/users/${id}`);
+      const res = await apiClient.get(`/admin/users/${id}`);
       if (res.data.success) {
         setSelectedUser(res.data.data);
       }
