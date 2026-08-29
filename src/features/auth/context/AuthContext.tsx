@@ -15,7 +15,7 @@ interface AuthContextType {
   register: (data: any) => Promise<AuthResponse>;
   refreshUser: () => Promise<void>;
   resendVerificationEmail: () => Promise<void>;
-  googleAuth: () => Promise<void>;
+  googleAuth: () => Promise<AuthResponse>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -211,6 +211,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (response.success && response.user) {
          await refreshUser();
       }
+      return response;
     } catch (error: any) {
       console.error("[GOOGLE AUTH] Authentication failed:", error?.code, error?.message, error);
       setError(`[${error?.code || 'auth/error'}] ${error?.message || "Google authentication failed"}`);

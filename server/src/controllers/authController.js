@@ -144,9 +144,11 @@ const googleAuthUser = async (req, res, next) => {
     const { email, uid, email_verified, name } = decodedToken;
     const normalizedEmail = email.toLowerCase().trim();
     
+    let isNewUser = false;
     let user = await User.findOne({ $or: [{ firebaseUid: uid }, { email: normalizedEmail }] });
 
     if (!user) {
+      isNewUser = true;
       const nameParts = name ? name.split(' ') : ['Google', 'User'];
       const firstName = nameParts[0];
       const lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : '';
@@ -170,6 +172,7 @@ const googleAuthUser = async (req, res, next) => {
     res.json({
       success: true,
       message: 'Google auth successful',
+      isNewUser,
       user: {
         id: user._id,
         firstName: user.firstName,

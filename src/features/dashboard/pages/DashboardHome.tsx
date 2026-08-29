@@ -9,7 +9,7 @@ import {
   Play, FileText, Sparkles, Briefcase, AlertCircle, Video, Clock, BarChart3, 
   TrendingUp, TrendingDown, Minus, CheckCircle, RefreshCw, Star, Lightbulb, Target, Trophy
 } from 'lucide-react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { ROUTES } from '../../../constants/routes';
 import { motion } from 'framer-motion';
 import { useAuth } from '../../auth/hooks/useAuth';
@@ -27,6 +27,8 @@ export function DashboardHome() {
   const [jobs, setJobs] = useState<JobDescription[]>([]);
   const [stats, setStats] = useState<InterviewStatsData | null>(null);
   
+  const location = useLocation();
+  const [successMsg] = useState<string | null>((location.state as any)?.message || null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -126,10 +128,20 @@ export function DashboardHome() {
       <Container className="py-8 max-w-7xl">
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
-            <PageHeader 
-              title={getGreeting()} 
-              description="Welcome to Interviu AI. Start your interview preparation journey." 
-            />
+            <div className="w-full">
+              {successMsg && (
+                <div className="mb-6 p-4 bg-green-50 border border-green-200 text-green-700 text-sm rounded-lg flex items-start gap-3 shadow-sm">
+                  <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0" />
+                  <div>
+                    <p className="font-medium text-green-800">{successMsg}</p>
+                  </div>
+                </div>
+              )}
+              <PageHeader 
+                title={getGreeting()} 
+                description="Welcome to Interviu AI. Start your interview preparation journey." 
+              />
+            </div>
           </div>
           
           <div className="max-w-3xl mx-auto">
@@ -193,10 +205,20 @@ export function DashboardHome() {
         
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-2 gap-4">
-          <PageHeader 
-            title={getGreeting()} 
-            description="Here's your comprehensive interview progress analytics." 
-          />
+          <div className="w-full sm:w-auto">
+            {successMsg && (
+              <div className="mb-4 p-4 bg-green-50 border border-green-200 text-green-700 text-sm rounded-lg flex items-start gap-3 shadow-sm">
+                <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0" />
+                <div>
+                  <p className="font-medium text-green-800">{successMsg}</p>
+                </div>
+              </div>
+            )}
+            <PageHeader 
+              title={getGreeting()} 
+              description="Here's your comprehensive interview progress analytics." 
+            />
+          </div>
           <NavLink to={ROUTES.INTERVIEW} className="w-full sm:w-auto">
             <Button className="w-full sm:w-auto shadow-sm bg-brand-600 hover:bg-brand-700 text-white">
               <Play className="mr-2 h-4 w-4" /> Start Interview

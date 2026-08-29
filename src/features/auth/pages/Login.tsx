@@ -13,6 +13,7 @@ export function Login() {
   const { login, resendVerificationEmail, googleAuth } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const [successMsg, setSuccessMsg] = useState<string | null>((location.state as any)?.message || null);
   const [authError, setAuthError] = useState<string | null>(null);
   const [isVerifying, setIsVerifying] = useState(false);
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm();
@@ -20,6 +21,7 @@ export function Login() {
   const onSubmit = async (data: any) => {
     try {
       setAuthError(null);
+      setSuccessMsg(null);
       setIsVerifying(false);
       await login(data);
       const from = (location.state as any)?.from?.pathname || ROUTES.DASHBOARD;
@@ -41,9 +43,14 @@ export function Login() {
     console.log("[GOOGLE AUTH] CLICK HANDLER REACHED");
 
     try {
-      await googleAuth();
+      setAuthError(null);
+      setSuccessMsg(null);
+      const response = await googleAuth();
       const from = (location.state as any)?.from?.pathname || ROUTES.DASHBOARD;
-      navigate(from, { replace: true });
+      navigate(from, { 
+        replace: true, 
+        state: response?.isNewUser ? { message: "Account created successfully! Welcome to Interview AI." } : undefined 
+      });
     } catch (err: any) {
       console.error("[GOOGLE AUTH] Failed in component:", err);
       setAuthError(err.message || 'Google authentication failed. Please try again.');
@@ -59,6 +66,11 @@ export function Login() {
             <CardDescription>Sign in to your account to continue</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+            {successMsg && (
+              <div className="p-3 bg-green-50 border border-green-200 text-green-700 text-sm rounded-md">
+                {successMsg}
+              </div>
+            )}
             {authError && (
               <div className="p-3 bg-red-50 border border-red-200 text-red-600 text-sm rounded-md">
                 {authError}

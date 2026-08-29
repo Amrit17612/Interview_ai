@@ -33,8 +33,11 @@ export function Register() {
     console.log("[GOOGLE AUTH] CLICK HANDLER REACHED");
 
     try {
-      await googleAuth();
-      navigate(ROUTES.DASHBOARD, { replace: true });
+      const response = await googleAuth();
+      navigate(ROUTES.DASHBOARD, { 
+        replace: true, 
+        state: response?.isNewUser ? { message: "Account created successfully! Welcome to Interview AI." } : undefined 
+      });
     } catch (err: any) {
       console.error("[GOOGLE AUTH] Failed in component:", err);
       setAuthError(err.message || 'Google authentication failed. Please try again.');
