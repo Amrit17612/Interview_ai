@@ -28,8 +28,15 @@ export const useCheckout = () => {
       }
 
       // 3. Initialize Checkout
+      const razorpayKeyId = import.meta.env.VITE_RAZORPAY_KEY_ID;
+      if (!razorpayKeyId) {
+        alert('Payment configuration is missing. Please contact support.');
+        setIsProcessing(null);
+        return;
+      }
+
       const options = {
-        key: import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_dummy',
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
         amount: order.amount,
         currency: order.currency,
         name: 'Interview AI',
@@ -82,7 +89,7 @@ export const useCheckout = () => {
 
     } catch (error: any) {
       console.error(error);
-      alert(error.response?.data?.message || 'Error processing payment. Please try again.');
+      alert(error.message || 'Error processing payment. Please try again.');
       setIsProcessing(null);
     }
   };
