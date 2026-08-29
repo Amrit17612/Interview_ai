@@ -92,7 +92,7 @@ function AdminSidebar({ onClose }: { onClose: () => void }) {
     {
       title: 'COMMERCE',
       items: [
-        { name: 'Payments', icon: CreditCard, href: '/admin/payments', disabled: true },
+        { name: 'Payments', icon: CreditCard, href: '/admin/payments' },
         { name: 'Purchases', icon: ShoppingBag, href: '/admin/purchases', disabled: true },
         { name: 'Bundle Analytics', icon: BarChart, href: '/admin/bundle-analytics', disabled: true },
       ],
@@ -100,20 +100,20 @@ function AdminSidebar({ onClose }: { onClose: () => void }) {
     {
       title: 'CONTENT',
       items: [
-        { name: 'Question Library', icon: BookOpen, href: '/admin/questions', disabled: true },
+        { name: 'Question Library', icon: BookOpen, href: ROUTES.ADMIN_QUESTIONS },
         { name: 'Custom Interviews', icon: PlusSquare, href: '/admin/custom-interviews', disabled: true },
       ],
     },
     {
       title: 'MANAGEMENT',
       items: [
-        { name: 'Users', icon: Users, href: '/admin/users', disabled: true },
+        { name: 'Users', icon: Users, href: '/admin/users' },
       ],
     },
     {
       title: 'SYSTEM',
       items: [
-        { name: 'Audit Logs', icon: ShieldAlert, href: '/admin/audit-logs', disabled: true },
+        { name: 'Audit Logs', icon: ShieldAlert, href: '/admin/audit-logs' },
         { name: 'Settings', icon: Settings, href: '/admin/settings', disabled: true },
       ],
     },

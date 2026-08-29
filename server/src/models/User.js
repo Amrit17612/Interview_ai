@@ -56,7 +56,13 @@ const userSchema = new mongoose.Schema({
       type: Date,
       default: Date.now
     },
-    expiresAt: Date
+    expiresAt: Date,
+    source: {
+      type: String,
+      enum: ['PAYMENT', 'ADMIN_GRANT'],
+      default: 'PAYMENT'
+    },
+    grantReason: String
   }],
   emailVerified: {
     type: Boolean,
@@ -74,6 +80,9 @@ const userSchema = new mongoose.Schema({
 }, {
   timestamps: true,
 });
+
+userSchema.index({ role: 1 });
+userSchema.index({ createdAt: -1 });
 
 const User = mongoose.model('User', userSchema);
 module.exports = User;

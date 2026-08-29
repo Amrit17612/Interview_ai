@@ -1,6 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const { getDashboardOverview } = require('../controllers/adminController');
+const { getPaymentAnalytics, getPayments, getPaymentById } = require('../controllers/adminCommerceController');
+const { getUsers, getUserById, grantBundle } = require('../controllers/adminUserController');
+const { getQuestions, getQuestionById, createQuestion, updateQuestion, updateQuestionStatus, deleteQuestion } = require('../controllers/adminQuestionController');
+const { getAuditLogs } = require('../controllers/adminAuditController');
 const { protect } = require('../middleware/authMiddleware');
 const { requireAdmin } = require('../middleware/roleMiddleware');
 
@@ -9,5 +13,26 @@ router.use(protect);
 router.use(requireAdmin);
 
 router.get('/dashboard', getDashboardOverview);
+
+// Commerce Routes
+router.get('/analytics/payments', getPaymentAnalytics);
+router.get('/payments', getPayments);
+router.get('/payments/:id', getPaymentById);
+
+// User Management Routes
+router.get('/users', getUsers);
+router.get('/users/:id', getUserById);
+router.post('/users/:id/grant-bundle', grantBundle);
+
+// Content Management / Question Library
+router.get('/questions', getQuestions);
+router.get('/questions/:id', getQuestionById);
+router.post('/questions', createQuestion);
+router.put('/questions/:id', updateQuestion);
+router.patch('/questions/:id/status', updateQuestionStatus);
+router.delete('/questions/:id', deleteQuestion);
+
+// Audit Logs
+router.get('/audit-logs', getAuditLogs);
 
 module.exports = router;

@@ -28,6 +28,12 @@ export const ROUTES = {
 
   // Admin Routes
   ADMIN_DASHBOARD: '/admin/dashboard',
+  ADMIN_PAYMENTS: '/admin/payments',
+  ADMIN_QUESTIONS: '/admin/questions',
+  ADMIN_QUESTIONS_NEW: '/admin/questions/new',
+  ADMIN_QUESTIONS_EDIT: '/admin/questions/:id/edit',
+  ADMIN_USERS: '/admin/users',
+  ADMIN_AUDIT_LOGS: '/admin/audit-logs',
 
   // Mock Route for dynamic matching
   MOCK_INTERVIEW: '/mock/:type/:id',

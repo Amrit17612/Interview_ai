@@ -40,7 +40,8 @@ const grantEntitlement = async (userId, bundleId, bundleType) => {
             bundleId,
             bundleType,
             purchaseStatus: 'active',
-            purchasedAt: new Date()
+            purchasedAt: new Date(),
+            source: 'PAYMENT'
           }
         }
       },

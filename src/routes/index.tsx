@@ -92,6 +92,11 @@ import { GuestRoute } from './GuestRoute';
 
 // Admin Pages
 const AdminDashboard = Loadable(lazy(() => import('../features/admin/pages/AdminDashboard').then(m => ({ default: m.AdminDashboard }))));
+const TransactionList = Loadable(lazy(() => import('../features/admin/pages/TransactionList').then(m => ({ default: m.TransactionList }))));
+const UserManagement = Loadable(lazy(() => import('../features/admin/pages/UserManagement').then(m => ({ default: m.UserManagement }))));
+const AuditLogs = Loadable(lazy(() => import('../features/admin/pages/AuditLogs').then(m => ({ default: m.AuditLogs }))));
+const QuestionLibrary = Loadable(lazy(() => import('../features/admin/pages/QuestionLibrary').then(m => ({ default: m.QuestionLibrary }))));
+const QuestionEditor = Loadable(lazy(() => import('../features/admin/pages/QuestionEditor').then(m => ({ default: m.QuestionEditor }))));
 
 export const router = createBrowserRouter([
   {
@@ -202,6 +207,12 @@ export const router = createBrowserRouter([
         element: <AdminLayout />,
         children: [
           { path: ROUTES.ADMIN_DASHBOARD, element: <AdminDashboard /> },
+          { path: ROUTES.ADMIN_PAYMENTS, element: <TransactionList /> },
+          { path: ROUTES.ADMIN_USERS, element: <UserManagement /> },
+          { path: ROUTES.ADMIN_AUDIT_LOGS, element: <AuditLogs /> },
+          { path: ROUTES.ADMIN_QUESTIONS, element: <QuestionLibrary /> },
+          { path: ROUTES.ADMIN_QUESTIONS_NEW, element: <QuestionEditor /> },
+          { path: ROUTES.ADMIN_QUESTIONS_EDIT, element: <QuestionEditor /> }
         ]
       }
     ]
