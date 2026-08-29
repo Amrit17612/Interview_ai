@@ -58,7 +58,7 @@ const registerUser = async (req, res, next) => {
         emailVerified: user.emailVerified,
         credits: user.credits || 0,
         purchasedBundles: user.purchasedBundles || [],
-        role: user.role || 'user',
+        role: String(user.role || 'user').trim().toLowerCase(),
         onboarding: user.onboarding
       }
     });
@@ -121,7 +121,7 @@ const loginUser = async (req, res, next) => {
         emailVerified: user.emailVerified,
         credits: user.credits || 0,
         purchasedBundles: user.purchasedBundles || [],
-        role: user.role || 'user',
+        role: String(user.role || 'user').trim().toLowerCase(),
         onboarding: user.onboarding
       }
     });
@@ -190,7 +190,7 @@ const googleAuthUser = async (req, res, next) => {
         emailVerified: user.emailVerified,
         credits: user.credits || 0,
         purchasedBundles: user.purchasedBundles || [],
-        role: user.role || 'user',
+        role: String(user.role || 'user').trim().toLowerCase(),
         onboarding: user.onboarding
       }
     });
@@ -213,7 +213,7 @@ const getMe = async (req, res, next) => {
         emailVerified: req.user.emailVerified,
         credits: req.user.credits || 0,
         purchasedBundles: req.user.purchasedBundles || [],
-        role: req.user.role || 'user',
+        role: String(req.user.role || 'user').trim().toLowerCase(),
         onboarding: req.user.onboarding
       }
     });
@@ -281,7 +281,7 @@ const completeOnboarding = async (req, res, next) => {
         emailVerified: user.emailVerified,
         credits: user.credits || 0,
         purchasedBundles: user.purchasedBundles || [],
-        role: user.role || 'user',
+        role: String(user.role || 'user').trim().toLowerCase(),
         onboarding: user.onboarding
       }
     });

@@ -21,7 +21,7 @@ const requireRole = (...roles) => {
         throw new Error('User not found');
       }
 
-      const userRole = user.role || 'user';
+      const userRole = String(user.role || 'user').trim().toLowerCase();
 
       if (!roles.includes(userRole)) {
         res.status(403);
