@@ -189,12 +189,12 @@ export function Welcome() {
                 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-3">Preferred difficulty level</label>
-                  <div className="grid grid-cols-3 gap-3">
+                  <div className="flex flex-wrap gap-2">
                     {DIFFICULTIES.map(diff => (
                       <button
                         key={diff}
                         onClick={() => setFormData({ ...formData, difficulty: diff })}
-                        className={`p-3 rounded-xl text-center text-sm font-medium transition-colors border ${formData.difficulty === diff ? 'bg-brand-50 border-brand-500 text-brand-700 shadow-sm' : 'bg-white border-gray-200 text-gray-600 hover:border-brand-300 hover:bg-brand-50'}`}
+                        className={`px-4 py-2 rounded-full text-sm font-medium transition-colors border ${formData.difficulty === diff ? 'bg-brand-50 border-brand-500 text-brand-700 shadow-sm' : 'bg-white border-gray-200 text-gray-600 hover:border-brand-300 hover:bg-brand-50'}`}
                       >
                         {diff}
                       </button>
