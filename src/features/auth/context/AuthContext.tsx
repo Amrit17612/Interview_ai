@@ -47,31 +47,42 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   useEffect(() => {
+    let mounted = true;
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (!mounted) return;
       setIsLoading(true);
       if (firebaseUser) {
-        // Fetch MongoDB user data using the valid Bearer token now attached via interceptor
         await refreshUser();
       } else {
         setUser(null);
       }
-      setIsLoading(false);
+      if (mounted) {
+        setIsLoading(false);
+      }
     });
 
-    return () => unsubscribe();
+    return () => {
+      mounted = false;
+      unsubscribe();
+    };
   }, []);
 
   const login = async (credentials: any) => {
     try {
       setError(null);
-      // Firebase Login
-      await signInWithEmailAndPassword(auth, credentials.email, credentials.password);
-      // Force token refresh and get token
-      const token = await auth.currentUser?.getIdToken(true);
       
-      // We still call backend /login to sync verification state or handle any legacy logic
-      // But the main auth is Firebase
-      const response = await authService.login(token as string);
+      const userCredential = await signInWithEmailAndPassword(auth, credentials.email, credentials.password);
+      const firebaseUser = userCredential.user;
+      
+      await firebaseUser.reload();
+      const firebaseToken = await firebaseUser.getIdToken(true);
+      
+      if (!firebaseToken || firebaseToken.length === 0) {
+        throw new Error("Failed to generate Firebase authentication token");
+      }
+      
+      const response = await authService.login(firebaseToken);
+      
       if (response.success && response.user) {
         if (!response.user.emailVerified) {
           throw new Error('Please verify your email address before logging in');
@@ -88,39 +99,35 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const register = async (data: any) => {
     try {
       setError(null);
-      // 1. Create in Firebase
-      const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
       
-      // 2. Send Verification Email
+      const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
+      const firebaseUser = userCredential.user;
+      
       try {
-        await sendEmailVerification(userCredential.user);
+        await sendEmailVerification(firebaseUser);
       } catch (emailErr: any) {
         console.error('Failed to send verification email:', emailErr.code, emailErr.message);
         throw new Error(`Account created, but verification email failed: ${emailErr.message}`);
       }
       
-      // 3. Force token refresh and get token
-      const token = await userCredential.user.getIdToken(true);
+      const firebaseToken = await firebaseUser.getIdToken(true);
       
-      console.log('[Auth Debug] Token exists:', !!token);
-      console.log('[Auth Debug] Token length:', token?.length);
-
-      // 4. Sync to Mongo DB via backend /register
+      if (!firebaseToken || firebaseToken.length === 0) {
+        throw new Error("Failed to generate Firebase authentication token");
+      }
+      
       const payload = {
         firstName: data.firstName,
         lastName: data.lastName
       };
-      console.log('[Auth Debug] Sending payload to authService:', Object.keys(payload));
       
-      const response = await authService.register(payload, token);
+      const response = await authService.register(payload, firebaseToken);
 
       if (response.success && response.user) {
          await refreshUser();
       }
       return response;
     } catch (err: any) {
-      // Clean up firebase user if backend sync fails? Not strictly necessary, but good practice.
-      // For now, just throw
       setError(err.message || 'Registration failed');
       throw err;
     }

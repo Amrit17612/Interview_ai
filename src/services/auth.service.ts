@@ -17,16 +17,21 @@ export interface AuthResponse {
 }
 
 export const authService = {
-  async register(data: any, token: string): Promise<AuthResponse> {
-    const payload = { ...data, firebaseToken: token };
-    console.log('[Auth Debug] authService.register payload keys:', Object.keys(payload));
-    console.log('[Auth Debug] firebaseToken present in payload:', !!payload.firebaseToken);
+  async register(data: any, firebaseToken: string): Promise<AuthResponse> {
+    const payload = {
+      firstName: data.firstName,
+      lastName: data.lastName,
+      firebaseToken: firebaseToken
+    };
     const response = await apiClient.post<AuthResponse>('/auth/register', payload);
     return response.data;
   },
 
-  async login(token: string): Promise<AuthResponse> {
-    const response = await apiClient.post<AuthResponse>('/auth/login', { firebaseToken: token });
+  async login(firebaseToken: string): Promise<AuthResponse> {
+    const payload = {
+      firebaseToken: firebaseToken
+    };
+    const response = await apiClient.post<AuthResponse>('/auth/login', payload);
     return response.data;
   },
 
