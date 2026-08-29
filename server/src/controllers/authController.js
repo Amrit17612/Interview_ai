@@ -67,6 +67,7 @@ const loginUser = async (req, res, next) => {
   try {
     console.log('[LOGIN API] headers content-type:', req.headers['content-type']);
     console.log('[LOGIN API] req.headers x-debug-request-id:', req.headers['x-debug-request-id']);
+    console.log('[LOGIN API] x-login-path:', req.headers['x-login-path']);
     console.log('[LOGIN API] body keys:', Object.keys(req.body || {}));
     console.log('[LOGIN API] firebaseToken present:', typeof req.body?.firebaseToken === 'string');
 

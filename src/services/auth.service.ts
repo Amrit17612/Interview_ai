@@ -31,7 +31,10 @@ export const authService = {
     console.log("[REGISTER SERVICE] Token exists:", Boolean(payload.firebaseToken));
     console.log("[REGISTER SERVICE] Token length:", payload.firebaseToken.length);
     
-    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    const headers: Record<string, string> = { 
+      "Content-Type": "application/json",
+      "X-Login-Path": "FINAL-FIREBASE-FLOW"
+    };
     if (requestId) headers['X-Debug-Request-ID'] = requestId;
     
     const response = await apiClient.post<AuthResponse>('/auth/register', payload, { headers });
@@ -50,7 +53,10 @@ export const authService = {
     console.log("[LOGIN SERVICE] Token exists:", Boolean(payload.firebaseToken));
     console.log("[LOGIN SERVICE] Token length:", payload.firebaseToken.length);
     
-    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    const headers: Record<string, string> = { 
+      "Content-Type": "application/json",
+      "X-Login-Path": "FINAL-FIREBASE-FLOW"
+    };
     if (requestId) headers['X-Debug-Request-ID'] = requestId;
     
     const response = await apiClient.post<AuthResponse>('/auth/login', payload, { headers });
