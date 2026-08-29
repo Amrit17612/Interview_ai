@@ -178,11 +178,16 @@ const deleteQuestion = async (req, res, next) => {
     const referencingQuestions = await Question.countDocuments({ followUps: questionId });
     if (referencingQuestions > 0) {
       res.status(400);
-      throw new Error(`Cannot delete: This question is used as a follow-up in ${referencingQuestions} other question(s). Please archive it instead or remove the references first.`);
+      throw new Error(`Cannot delete: This question is used as a follow-up in ${referencingQuestions} other question(s). Please archive it instead.`);
     }
 
-    // (Future Phase 4) Check if referenced by InterviewTemplate
-    // const referencingTemplates = await InterviewTemplate.countDocuments({ questions: questionId }); ...
+    // 2. Check if referenced by any InterviewTemplate
+    const InterviewTemplate = require('../models/InterviewTemplate');
+    const referencingTemplates = await InterviewTemplate.countDocuments({ questions: questionId });
+    if (referencingTemplates > 0) {
+      res.status(400);
+      throw new Error(`Cannot delete: This question is used in ${referencingTemplates} interview template(s). Please archive it instead.`);
+    }
 
     const question = await Question.findByIdAndDelete(questionId);
     if (!question) {

@@ -222,7 +222,7 @@ const generateQuestion = async (req, res) => {
       return res.status(400).json({ success: false, message: `Cannot generate question for session in status: ${session.status}` });
     }
 
-    if (session.questions.length >= MAX_QUESTIONS) {
+    if (session.questions.length >= session.maxQuestions) {
       return res.status(400).json({ success: false, message: 'Maximum number of questions reached.' });
     }
 
@@ -234,7 +234,25 @@ const generateQuestion = async (req, res) => {
       }
     }
 
-    // Deterministic Question Selection
+    // Template logic bypass
+    if (session.isTemplateDriven && session.templateQuestions) {
+      const nextIndex = session.questions.length;
+      if (nextIndex < session.templateQuestions.length) {
+        const nextQ = session.templateQuestions[nextIndex];
+        const newQuestion = {
+          index: nextIndex,
+          text: nextQ.text,
+          questionId: nextQ.questionId, // This might just be the string ID from the snapshot
+          expectedPoints: nextQ.expectedPoints || [],
+          status: 'PENDING'
+        };
+        session.questions.push(newQuestion);
+        await session.save();
+        return res.status(200).json({ success: true, data: newQuestion });
+      }
+    }
+
+    // Deterministic Question Selection (AI Flow)
     const { getNextQuestion, getFollowUpQuestion } = require('../services/questionService');
     const { extractSkills } = require('../utils/skillExtractor');
     
@@ -450,7 +468,8 @@ const completeInterview = async (req, res) => {
       evaluations: session.questions.map(q => ({
         question: q.text,
         answer: q.userAnswer || '',
-        score: 0 // Live evaluation removed; prompt must assess entirely from answer
+        score: 0, // Live evaluation removed; prompt must assess entirely from answer
+        ...(q.expectedPoints && q.expectedPoints.length > 0 ? { expectedPoints: q.expectedPoints } : {})
       })),
       resumeContext,
       atsContext,

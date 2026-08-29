@@ -30,8 +30,11 @@ export const ROUTES = {
   ADMIN_DASHBOARD: '/admin/dashboard',
   ADMIN_PAYMENTS: '/admin/payments',
   ADMIN_QUESTIONS: '/admin/questions',
+  ADMIN_TEMPLATES: '/admin/templates',
   ADMIN_QUESTIONS_NEW: '/admin/questions/new',
   ADMIN_QUESTIONS_EDIT: '/admin/questions/:id/edit',
+  ADMIN_TEMPLATES_NEW: '/admin/templates/new',
+  ADMIN_TEMPLATES_EDIT: '/admin/templates/:id/edit',
   ADMIN_USERS: '/admin/users',
   ADMIN_AUDIT_LOGS: '/admin/audit-logs',
 

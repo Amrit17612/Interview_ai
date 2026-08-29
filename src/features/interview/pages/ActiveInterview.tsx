@@ -134,7 +134,8 @@ export function ActiveInterview() {
       clearDraft();
       
       // Immediately move to next or complete
-      if (session.questions.length < 5) {
+      const maxQ = session.maxQuestions || 5;
+      if (session.questions.length < maxQ) {
         setAnswerText(''); // Reset textarea
         resetTranscript();
         await generateNextQuestion();
@@ -210,7 +211,7 @@ export function ActiveInterview() {
           <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
             <div className="flex justify-between items-center mb-4">
               <h3 className="font-semibold text-gray-700">
-                Question {session.questions.length} / 5
+                Question {session.questions.length} / {session.maxQuestions || 5}
               </h3>
               {isGeneratingQuestion && (
                 <span className="text-sm text-brand-600 animate-pulse">Generating...</span>

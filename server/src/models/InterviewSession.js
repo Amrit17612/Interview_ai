@@ -13,6 +13,10 @@ const questionSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  expectedPoints: {
+    type: [String],
+    default: []
+  },
   userAnswer: {
     type: String,
     default: null
@@ -79,6 +83,23 @@ const interviewSessionSchema = new mongoose.Schema({
     type: String,
     enum: ['CONFIGURING', 'IN_PROGRESS', 'COMPLETED', 'ABANDONED'],
     default: 'CONFIGURING'
+  },
+  isTemplateDriven: {
+    type: Boolean,
+    default: false
+  },
+  templateId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'InterviewTemplate',
+    default: null
+  },
+  maxQuestions: {
+    type: Number,
+    default: 5
+  },
+  templateQuestions: {
+    type: [questionSchema],
+    default: []
   },
   questions: {
     type: [questionSchema],

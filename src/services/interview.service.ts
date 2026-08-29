@@ -47,6 +47,7 @@ export interface InterviewSession {
   weaknesses?: string[];
   recommendations?: string[];
   createdAt: string;
+  maxQuestions?: number;
   updatedAt: string;
 }
 

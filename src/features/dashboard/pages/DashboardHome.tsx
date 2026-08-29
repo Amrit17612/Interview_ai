@@ -14,6 +14,7 @@ import { useAuth } from '../../auth/hooks/useAuth';
 import { resumeService } from '../../../services/resume.service';
 import { atsService } from '../../../services/ats.service';
 import { interviewService, type InterviewStatsData, type InterviewRoadmapResponse } from '../../../services/interview.service';
+import { apiClient } from '../../../services/api.client';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 export function DashboardHome() {
@@ -22,6 +23,7 @@ export function DashboardHome() {
   
   const [stats, setStats] = useState<InterviewStatsData | null>(null);
   const [roadmap, setRoadmap] = useState<InterviewRoadmapResponse | null>(null);
+  const [templates, setTemplates] = useState<any[]>([]);
   
   const location = useLocation();
   const [successMsg] = useState<string | null>((location.state as any)?.message || null);
@@ -32,15 +34,17 @@ export function DashboardHome() {
     setIsLoading(true);
     setError(null);
     try {
-      const [, , statsData, roadmapData] = await Promise.all([
+      const [, , statsData, roadmapData, templatesData] = await Promise.all([
         resumeService.getResumes().catch(() => []),
         atsService.getJobDescriptions().catch(() => []),
         interviewService.getInterviewStats(),
-        interviewService.getInterviewRoadmap().catch(() => null)
+        interviewService.getInterviewRoadmap().catch(() => null),
+        apiClient.get('/api/interview-templates').then(res => res.data.data).catch(() => [])
       ]);
       
       setStats(statsData);
       setRoadmap(roadmapData);
+      setTemplates(templatesData);
     } catch (err: any) {
       console.error(err);
       setError('Unable to load analytics.');
@@ -302,6 +306,55 @@ export function DashboardHome() {
 
         {/* RIGHT COLUMN */}
         <div className="space-y-6">
+          
+          {/* Featured Templates */}
+          <Card className="shadow-sm border-gray-100 border-2 border-brand-100 bg-gradient-to-b from-white to-brand-50/20">
+            <CardHeader className="pb-3 border-b border-gray-50">
+              <CardTitle className="text-base flex items-center text-brand-800">
+                <Sparkles className="mr-2 h-5 w-5 text-brand-500" />
+                Featured Interviews
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-4">
+              {templates.length > 0 ? (
+                <div className="space-y-3">
+                  {templates.slice(0, 3).map(t => (
+                    <div key={t._id} className="p-3 bg-white rounded-lg border border-gray-100 shadow-sm relative group">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h4 className="font-semibold text-gray-900 text-sm">{t.title}</h4>
+                          <div className="flex gap-2 text-xs text-gray-500 mt-1">
+                            <span>{t.difficulty}</span>
+                            <span>•</span>
+                            <span>{t.questionCount || 0} Qs</span>
+                          </div>
+                        </div>
+                        {t.isLocked ? (
+                          <span className="text-xs font-medium bg-gray-100 text-gray-600 px-2 py-1 rounded">Locked</span>
+                        ) : (
+                          <button 
+                            onClick={async () => {
+                              try {
+                                const res = await apiClient.post(`/api/interview-templates/${t._id}/start`);
+                                navigate(`${ROUTES.INTERVIEW_ACTIVE}?id=${res.data.data.sessionId}`);
+                              } catch (err) {
+                                alert('Failed to start template');
+                              }
+                            }}
+                            className="text-xs font-semibold bg-brand-50 text-brand-700 hover:bg-brand-100 px-3 py-1.5 rounded transition-colors"
+                          >
+                            Start
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-gray-500 text-center py-2">No featured templates available.</p>
+              )}
+            </CardContent>
+          </Card>
           
           {/* Personalized Roadmap */}
           <Card className="shadow-sm border-gray-100">

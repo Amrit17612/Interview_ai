@@ -97,6 +97,8 @@ const UserManagement = Loadable(lazy(() => import('../features/admin/pages/UserM
 const AuditLogs = Loadable(lazy(() => import('../features/admin/pages/AuditLogs').then(m => ({ default: m.AuditLogs }))));
 const QuestionLibrary = Loadable(lazy(() => import('../features/admin/pages/QuestionLibrary').then(m => ({ default: m.QuestionLibrary }))));
 const QuestionEditor = Loadable(lazy(() => import('../features/admin/pages/QuestionEditor').then(m => ({ default: m.QuestionEditor }))));
+const InterviewTemplateLibrary = Loadable(lazy(() => import('../features/admin/pages/InterviewTemplateLibrary').then(m => ({ default: m.InterviewTemplateLibrary }))));
+const TemplateBuilder = Loadable(lazy(() => import('../features/admin/pages/TemplateBuilder').then(m => ({ default: m.TemplateBuilder }))));
 
 export const router = createBrowserRouter([
   {
@@ -212,7 +214,10 @@ export const router = createBrowserRouter([
           { path: ROUTES.ADMIN_AUDIT_LOGS, element: <AuditLogs /> },
           { path: ROUTES.ADMIN_QUESTIONS, element: <QuestionLibrary /> },
           { path: ROUTES.ADMIN_QUESTIONS_NEW, element: <QuestionEditor /> },
-          { path: ROUTES.ADMIN_QUESTIONS_EDIT, element: <QuestionEditor /> }
+          { path: ROUTES.ADMIN_QUESTIONS_EDIT, element: <QuestionEditor /> },
+          { path: ROUTES.ADMIN_TEMPLATES, element: <InterviewTemplateLibrary /> },
+          { path: ROUTES.ADMIN_TEMPLATES_NEW, element: <TemplateBuilder /> },
+          { path: ROUTES.ADMIN_TEMPLATES_EDIT, element: <TemplateBuilder /> }
         ]
       }
     ]
