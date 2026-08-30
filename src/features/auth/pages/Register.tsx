@@ -1,4 +1,5 @@
 import { Container } from '../../../components/ui/Container';
+import { ArrowLeft } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../../../components/ui/Card';
 import { Input } from '../../../components/ui/Input';
 import { Button } from '../../../components/ui/Button';
@@ -49,7 +50,14 @@ export function Register() {
   };
 
   return (
-    <Container className="py-12 flex justify-center items-center min-h-[calc(100vh-8rem)]">
+    <Container className="py-12 flex justify-center items-center min-h-[calc(100vh-8rem)] relative">
+      <NavLink
+        to={ROUTES.HOME}
+        className="absolute top-4 left-4 md:top-8 md:left-8 flex items-center text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors"
+      >
+        <ArrowLeft className="mr-2 h-4 w-4" />
+        Back to Home
+      </NavLink>
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-md">
         <Card className="shadow-premium border-gray-100">
           <CardHeader className="text-center pb-6">
