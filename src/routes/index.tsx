@@ -27,6 +27,8 @@ import { PrivacyPolicy } from '../features/landing/pages/PrivacyPolicy';
 import { Terms } from '../features/landing/pages/Terms';
 import { RefundPolicy } from '../features/landing/pages/RefundPolicy';
 import { CookiePolicy } from '../features/landing/pages/CookiePolicy';
+const ExplorePacks = Loadable(lazy(() => import('../features/landing/pages/ExplorePacks').then(m => ({ default: m.ExplorePacks }))));
+const ExplorePackDetails = Loadable(lazy(() => import('../features/landing/pages/ExplorePackDetails').then(m => ({ default: m.ExplorePackDetails }))));
 import { Login } from '../features/auth/pages/Login';
 import { Register } from '../features/auth/pages/Register';
 import { ForgotPassword } from '../features/auth/pages/ForgotPassword';
@@ -107,6 +109,8 @@ export const router = createBrowserRouter([
     element: <PublicLayout />,
     children: [
       { path: ROUTES.HOME, element: <Home /> },
+      { path: ROUTES.EXPLORE_PACKS, element: <ExplorePacks /> },
+      { path: ROUTES.EXPLORE_PACK_DETAILS, element: <ExplorePackDetails /> },
       { path: ROUTES.PRICING, element: <Pricing /> },
       { path: ROUTES.CONTACT, element: <Contact /> },
       { path: ROUTES.ABOUT, element: <About /> },

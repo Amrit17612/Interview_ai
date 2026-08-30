@@ -552,7 +552,9 @@ export function Home() {
                 <p className="text-lg text-gray-600 leading-relaxed">
                   Stop practicing generic questions. Access targeted preparation packs for specific domains (Frontend, Backend, Data Science) and top companies, ensuring you practice the patterns they actually test for.
                 </p>
-                <Button variant="ghost" className="px-0 text-brand-600 hover:text-brand-700">Explore Packs <ArrowRight className="ml-2 h-4 w-4" /></Button>
+                <NavLink to={ROUTES.EXPLORE_PACKS}>
+                  <Button variant="ghost" className="px-0 text-brand-600 hover:text-brand-700">Explore Packs <ArrowRight className="ml-2 h-4 w-4" /></Button>
+                </NavLink>
               </motion.div>
               <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeInUp}>
                  <div className="rounded-2xl bg-gray-50 border border-gray-100 p-6 lg:p-8 flex items-center justify-center min-h-[400px]">
@@ -597,7 +599,7 @@ export function Home() {
                              
                              <div className="mt-auto pt-3 border-t border-gray-50 flex items-center justify-between text-[11px] font-bold">
                                <span className="text-brand-600">{bundle.interviewsCount} Modules</span>
-                               <span className="text-gray-400 group-hover:text-brand-600 transition-colors flex items-center gap-0.5">Explore <ChevronRight className="w-3.5 h-3.5" /></span>
+                               <NavLink to={ROUTES.EXPLORE_PACK_DETAILS.replace(':id', bundle.id)} className="text-gray-400 group-hover:text-brand-600 transition-colors flex items-center gap-0.5">Explore <ChevronRight className="w-3.5 h-3.5" /></NavLink>
                              </div>
                            </div>
                          );
