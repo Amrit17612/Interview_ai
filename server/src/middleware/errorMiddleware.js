@@ -1,9 +1,15 @@
 const errorHandler = (err, req, res, _next) => {
-  const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
-  
+  let statusCode = res.statusCode === 200 ? 500 : res.statusCode;
+  let message = err.message;
+
+  if (err.code === 11000) {
+    statusCode = 400; // Duplicate keys are generally bad requests / conflicts
+    message = 'Unable to process this checkout right now. Please try again.';
+  }
+
   // Create an error response object avoiding leaking sensitive information
   const errorResponse = {
-    message: err.message,
+    message: message,
     // Only send stack trace in development
     stack: process.env.NODE_ENV === 'production' ? null : err.stack,
   };
