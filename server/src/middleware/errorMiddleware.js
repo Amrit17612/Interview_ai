@@ -3,6 +3,7 @@ const errorHandler = (err, req, res, _next) => {
   let message = err.message;
 
   if (err.code === 11000) {
+    console.error('MongoDB duplicate key error:', err.message);
     statusCode = 400; // Duplicate keys are generally bad requests / conflicts
     message = 'Unable to process this checkout right now. Please try again.';
   }
