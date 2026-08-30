@@ -1,6 +1,7 @@
 require('../config/firebase'); // ensure initialization
 const { getAuth } = require('firebase-admin/auth');
 const User = require('../models/User');
+const CreditTransaction = require('../models/CreditTransaction');
 
 const registerUser = async (req, res, next) => {
   try {
@@ -35,7 +36,17 @@ const registerUser = async (req, res, next) => {
         email: normalizedEmail,
         firebaseUid: uid,
         onboardingCompleted: false,
-        emailVerified: email_verified || false
+        emailVerified: email_verified || false,
+        credits: 10
+      });
+
+      await CreditTransaction.create({
+        user: user._id,
+        amount: 10,
+        type: 'EARN_SIGNUP',
+        balanceBefore: 0,
+        balanceAfter: 10,
+        referenceId: 'signup'
       });
     } else {
       // Update firebaseUid if it was created via legacy auth
@@ -167,7 +178,17 @@ const googleAuthUser = async (req, res, next) => {
         email: normalizedEmail,
         firebaseUid: uid,
         onboardingCompleted: false,
-        emailVerified: email_verified || true
+        emailVerified: email_verified || true,
+        credits: 10
+      });
+
+      await CreditTransaction.create({
+        user: user._id,
+        amount: 10,
+        type: 'EARN_SIGNUP',
+        balanceBefore: 0,
+        balanceAfter: 10,
+        referenceId: 'signup'
       });
     } else {
       if (!user.firebaseUid) {

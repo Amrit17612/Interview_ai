@@ -1,6 +1,8 @@
 const InterviewSession = require('../models/InterviewSession');
 const Resume = require('../models/Resume');
 const JobDescription = require('../models/JobDescription');
+const User = require('../models/User');
+const CreditTransaction = require('../models/CreditTransaction');
 const mongoose = require('mongoose');
 const { getGenerateQuestionPrompt, getEvaluateAnswerPrompt, getFinalReportPrompt } = require('../utils/prompts');
 const { generateText, validateQuestionResponse, validateEvaluationResponse, validateReportResponse } = require('../services/geminiService');
@@ -497,6 +499,34 @@ const completeInterview = async (req, res) => {
     }
 
     await session.save();
+
+    // Reward Logic (Max 5 times = 25 credits)
+    // We only reward if this is not a retry (session wasn't already in rewardedInterviews)
+    const user = await User.findById(userId);
+    if (user && user.rewardedInterviews && user.rewardedInterviews.length < 5) {
+      const alreadyRewarded = user.rewardedInterviews.some(rid => rid.equals(session._id));
+      if (!alreadyRewarded) {
+        const updatedUser = await User.findOneAndUpdate(
+          { _id: userId, 'rewardedInterviews.4': { $exists: false }, 'rewardedInterviews': { $ne: session._id } },
+          { 
+            $push: { rewardedInterviews: session._id },
+            $inc: { credits: 5 }
+          },
+          { new: true }
+        );
+
+        if (updatedUser) {
+          await CreditTransaction.create({
+            user: userId,
+            amount: 5,
+            type: 'EARN_INTERVIEW',
+            referenceId: session._id.toString(),
+            balanceBefore: updatedUser.credits - 5,
+            balanceAfter: updatedUser.credits
+          });
+        }
+      }
+    }
 
     res.status(200).json({
       success: true,

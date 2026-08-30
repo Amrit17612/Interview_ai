@@ -15,6 +15,22 @@ const paymentSchema = new mongoose.Schema({
     enum: ['COMPANY', 'DOMAIN'],
     required: true
   },
+  originalAmount: {
+    type: Number,
+    required: true
+  },
+  promoCodeApplied: {
+    type: String,
+    default: null
+  },
+  promoDiscountAmount: {
+    type: Number,
+    default: 0
+  },
+  creditsUsed: {
+    type: Number,
+    default: 0
+  },
   amount: {
     type: Number,
     required: true

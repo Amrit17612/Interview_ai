@@ -7,22 +7,29 @@ export const useCheckout = () => {
   const [isProcessing, setIsProcessing] = useState<string | null>(null);
   const { refreshUser } = useAuth();
 
-  const handleCheckout = async (bundleId: string, bundleType: 'COMPANY' | 'DOMAIN') => {
+  const handleCheckout = async (bundleId: string, bundleType: 'COMPANY' | 'DOMAIN', promoCode?: string, creditsToUse?: number) => {
     try {
       setIsProcessing(bundleId);
 
-      // 1. Load Razorpay script
-      const Razorpay = await loadRazorpay();
-      if (!Razorpay) {
-        alert('Razorpay SDK failed to load. Are you online?');
+      // 1. Create Order
+      const order = await paymentService.createOrder({ bundleId, bundleType, promoCode, creditsToUse });
+      if (!order.success) {
+        alert(order.message || 'Failed to create order. Please try again.');
         setIsProcessing(null);
         return;
       }
 
-      // 2. Create Order
-      const order = await paymentService.createOrder({ bundleId, bundleType });
-      if (!order.success) {
-        alert('Failed to create order. Please try again.');
+      if (order.status === 'SUCCESS_ZERO_COST') {
+        await refreshUser();
+        alert('Successfully claimed using promo/credits!');
+        setIsProcessing(null);
+        return;
+      }
+
+      // 2. Load Razorpay script
+      const Razorpay = await loadRazorpay();
+      if (!Razorpay) {
+        alert('Razorpay SDK failed to load. Are you online?');
         setIsProcessing(null);
         return;
       }

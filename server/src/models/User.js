@@ -76,7 +76,8 @@ const userSchema = new mongoose.Schema({
     type: String,
     enum: ['user', 'admin'],
     default: 'user'
-  }
+  },
+  rewardedInterviews: [{ type: mongoose.Schema.Types.ObjectId, ref: 'InterviewSession' }]
 }, {
   timestamps: true,
 });

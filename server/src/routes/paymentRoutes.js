@@ -5,9 +5,11 @@ const {
   createOrder,
   verifyPayment,
   webhook,
-  getPaymentHistory
+  getPaymentHistory,
+  validatePromo
 } = require('../controllers/paymentController');
 
+router.get('/promo/validate', protect, validatePromo);
 router.post('/create-order', protect, createOrder);
 router.post('/verify', protect, verifyPayment);
 router.get('/history', protect, getPaymentHistory);

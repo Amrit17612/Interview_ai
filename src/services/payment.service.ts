@@ -4,13 +4,17 @@ import type { AuthUser } from './auth.service';
 export interface CreateOrderRequest {
   bundleId: string;
   bundleType: 'COMPANY' | 'DOMAIN';
+  promoCode?: string;
+  creditsToUse?: number;
 }
 
 export interface CreateOrderResponse {
   success: boolean;
-  orderId: string;
-  amount: number;
-  currency: string;
+  status: 'SUCCESS_ZERO_COST' | 'REQUIRES_PAYMENT';
+  orderId?: string;
+  amount?: number;
+  currency?: string;
+  message?: string;
 }
 
 export interface VerifyPaymentRequest {
@@ -25,6 +29,11 @@ export interface VerifyPaymentResponse {
   user?: AuthUser;
 }
 
+export interface ValidatePromoResponse {
+  success: boolean;
+  discountAmount: number;
+}
+
 export const paymentService = {
   createOrder: async (data: CreateOrderRequest): Promise<CreateOrderResponse> => {
     const response = await apiClient.post<CreateOrderResponse>('/payments/create-order', data);
@@ -33,6 +42,11 @@ export const paymentService = {
 
   verifyPayment: async (data: VerifyPaymentRequest): Promise<VerifyPaymentResponse> => {
     const response = await apiClient.post<VerifyPaymentResponse>('/payments/verify', data);
+    return response.data;
+  },
+
+  validatePromo: async (promoCode: string, bundleId: string): Promise<ValidatePromoResponse> => {
+    const response = await apiClient.get<ValidatePromoResponse>(`/payments/promo/validate?code=${encodeURIComponent(promoCode)}&bundleId=${encodeURIComponent(bundleId)}`);
     return response.data;
   },
   

@@ -8,6 +8,7 @@ const { getTemplates, getTemplateById, createTemplate, updateTemplate, updateTem
 const { getAuditLogs } = require('../controllers/adminAuditController');
 const { previewImport, confirmImport, exportQuestions } = require('../controllers/adminImportExportController');
 const { bulkUpdateStatus, bulkAddTags } = require('../controllers/adminBulkController');
+const { getPromos, createPromo, updatePromoStatus } = require('../controllers/adminPromoController');
 const multer = require('multer');
 
 // Configure Multer for memory storage (max 10MB)
@@ -57,5 +58,10 @@ router.delete('/interview-templates/:id', deleteTemplate);
 
 // Audit Logs
 router.get('/audit-logs', getAuditLogs);
+
+// Promos
+router.get('/promos', getPromos);
+router.post('/promos', createPromo);
+router.patch('/promos/:id/status', updatePromoStatus);
 
 module.exports = router;
