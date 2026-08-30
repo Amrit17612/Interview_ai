@@ -23,6 +23,7 @@ import { Features } from '../features/landing/pages/Features';
 import { Pricing } from '../features/landing/pages/Pricing';
 import { InterviewDomains } from '../features/landing/pages/InterviewDomains';
 import { CompanyPrep } from '../features/landing/pages/CompanyPrep';
+import { Roadmap } from '../features/landing/pages/Roadmap';
 import { Contact } from '../features/landing/pages/Contact';
 import { AboutUs } from '../features/landing/pages/AboutUs';
 import { FAQ } from '../features/landing/pages/FAQ';
@@ -115,6 +116,7 @@ export const router = createBrowserRouter([
       { path: ROUTES.FEATURES, element: <Features /> },
       { path: ROUTES.INTERVIEW_DOMAINS, element: <InterviewDomains /> },
       { path: ROUTES.COMPANY_PREP_PUBLIC, element: <CompanyPrep /> },
+      { path: ROUTES.ROADMAP_PUBLIC, element: <Roadmap /> },
       { path: ROUTES.EXPLORE_PACKS, element: <ExplorePacks /> },
       { path: ROUTES.EXPLORE_PACK_DETAILS, element: <ExplorePackDetails /> },
       { path: ROUTES.PRICING, element: <Pricing /> },

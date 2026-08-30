@@ -19,9 +19,9 @@ export function PublicNavbar() {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
-            <a href="#features" className="text-sm font-medium text-gray-600 hover:text-brand-600 transition-colors">Features</a>
-            <a href="#domains" className="text-sm font-medium text-gray-600 hover:text-brand-600 transition-colors">Domains</a>
-            <a href="#roadmap" className="text-sm font-medium text-gray-600 hover:text-brand-600 transition-colors">Roadmap</a>
+            <NavLink to={ROUTES.FEATURES} className="text-sm font-medium text-gray-600 hover:text-brand-600 transition-colors">Features</NavLink>
+            <NavLink to={ROUTES.INTERVIEW_DOMAINS} className="text-sm font-medium text-gray-600 hover:text-brand-600 transition-colors">Domains</NavLink>
+            <NavLink to={ROUTES.ROADMAP_PUBLIC} className="text-sm font-medium text-gray-600 hover:text-brand-600 transition-colors">Roadmap</NavLink>
             <NavLink to={ROUTES.PRICING} className="text-sm font-medium text-gray-600 hover:text-brand-600 transition-colors">Pricing</NavLink>
             <NavLink to={ROUTES.ABOUT} className="text-sm font-medium text-gray-600 hover:text-brand-600 transition-colors">About</NavLink>
           </nav>
@@ -57,9 +57,9 @@ export function PublicNavbar() {
         isMobileMenuOpen ? "max-h-[400px] opacity-100" : "max-h-0 opacity-0"
       )}>
         <div className="px-4 pt-2 pb-6 space-y-1">
-          <a href="#features" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-2 text-base font-medium text-gray-900 rounded-md hover:bg-gray-50">Features</a>
-          <a href="#domains" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-2 text-base font-medium text-gray-900 rounded-md hover:bg-gray-50">Domains</a>
-          <a href="#roadmap" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-2 text-base font-medium text-gray-900 rounded-md hover:bg-gray-50">Roadmap</a>
+          <NavLink to={ROUTES.FEATURES} onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-2 text-base font-medium text-gray-900 rounded-md hover:bg-gray-50">Features</NavLink>
+          <NavLink to={ROUTES.INTERVIEW_DOMAINS} onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-2 text-base font-medium text-gray-900 rounded-md hover:bg-gray-50">Domains</NavLink>
+          <NavLink to={ROUTES.ROADMAP_PUBLIC} onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-2 text-base font-medium text-gray-900 rounded-md hover:bg-gray-50">Roadmap</NavLink>
           <NavLink to={ROUTES.PRICING} onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-2 text-base font-medium text-gray-900 rounded-md hover:bg-gray-50">Pricing</NavLink>
           <NavLink to={ROUTES.ABOUT} onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-2 text-base font-medium text-gray-900 rounded-md hover:bg-gray-50">About</NavLink>
           <div className="pt-4 mt-2 border-t border-gray-100 flex flex-col space-y-2">

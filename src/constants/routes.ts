@@ -4,6 +4,7 @@ export const ROUTES = {
   FEATURES: '/features',
   INTERVIEW_DOMAINS: '/interview-domains',
   COMPANY_PREP_PUBLIC: '/company-prep',
+  ROADMAP_PUBLIC: '/roadmap',
   EXPLORE_PACKS: '/explore-packs',
   EXPLORE_PACK_DETAILS: '/explore-packs/:id',
   PRICING: '/pricing',
