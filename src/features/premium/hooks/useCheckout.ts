@@ -1,9 +1,12 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { paymentService } from '../../../services/payment.service';
 import { loadRazorpay } from '../../../utils/loadRazorpay';
 import { useAuth } from '../../auth/hooks/useAuth';
+import { ROUTES } from '../../../constants/routes';
 
 export const useCheckout = () => {
+  const navigate = useNavigate();
   const [isProcessing, setIsProcessing] = useState<string | null>(null);
   const { refreshUser } = useAuth();
 
@@ -23,6 +26,7 @@ export const useCheckout = () => {
         await refreshUser();
         alert('Successfully claimed using promo/credits!');
         setIsProcessing(null);
+        navigate(ROUTES.MY_PURCHASES);
         return;
       }
 
@@ -61,6 +65,7 @@ export const useCheckout = () => {
             if (verification.success) {
               // Refresh user context to update purchasedBundles instantly
               await refreshUser();
+              navigate(ROUTES.MY_PURCHASES);
             } else {
               alert('Payment verification failed.');
             }
