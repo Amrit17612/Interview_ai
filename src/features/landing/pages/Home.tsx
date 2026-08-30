@@ -21,11 +21,14 @@ import {
   ShieldCheck,
   ScanLine,
   AlertCircle,
-  Target
+  Target,
+  Code2,
+  Star
 } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { ROUTES } from '../../../constants/routes';
 import lpuLogo from '../../../assets/logos/lpu-logo.svg';
+import { MOCK_COMPANY_BUNDLES, MOCK_DOMAIN_BUNDLES } from '../../../types/bundle.types';
 
 // Motion variants
 const fadeInUp: any = {
@@ -44,6 +47,12 @@ const staggerContainer: any = {
 };
 
 export function Home() {
+  // Fetch dynamic preview bundles securely (static mock data acts as our available source)
+  const previewBundles = [
+    ...MOCK_COMPANY_BUNDLES,
+    ...MOCK_DOMAIN_BUNDLES
+  ].slice(0, 4);
+
   return (
     <div className="flex flex-col min-h-screen">
       {/* 1. Hero */}
@@ -546,14 +555,62 @@ export function Home() {
                 <Button variant="ghost" className="px-0 text-brand-600 hover:text-brand-700">Explore Packs <ArrowRight className="ml-2 h-4 w-4" /></Button>
               </motion.div>
               <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeInUp}>
-                 <div className="rounded-2xl bg-gray-50 border border-gray-200 aspect-[4/3] flex items-center justify-center p-8">
-                   <div className="grid grid-cols-2 gap-4 w-full">
-                     {[1,2,3,4].map(i => (
-                       <div key={i} className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 flex items-center justify-center text-sm font-medium text-gray-400">
-                         [Company Prep Card]
+                 <div className="rounded-2xl bg-gray-50 border border-gray-100 p-6 lg:p-8 flex items-center justify-center min-h-[400px]">
+                   {previewBundles.length > 0 ? (
+                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 w-full">
+                       {previewBundles.map((bundle) => {
+                         const isPopular = bundle.isPopular;
+                         const isFrontend = bundle.id.includes('frontend');
+                         const isBackend = bundle.id.includes('backend');
+                         const isData = bundle.id.includes('data');
+                         
+                         let accentColor = 'bg-gray-50 text-gray-600 border-gray-200';
+                         let Icon = Building2;
+                         
+                         if (bundle.type === 'domain') {
+                           Icon = Code2;
+                           if (isFrontend) accentColor = 'bg-blue-50 text-blue-600 border-blue-200';
+                           else if (isBackend) accentColor = 'bg-indigo-50 text-indigo-600 border-indigo-200';
+                           else if (isData) accentColor = 'bg-orange-50 text-orange-600 border-orange-200';
+                           else accentColor = 'bg-brand-50 text-brand-600 border-brand-200';
+                         } else {
+                           accentColor = 'bg-blue-50 text-blue-600 border-blue-200';
+                         }
+
+                         return (
+                           <div key={bundle.id} className="relative bg-white p-5 rounded-xl shadow-sm border border-gray-100 flex flex-col h-full transition-all hover:shadow-md cursor-default group">
+                             {isPopular && (
+                               <div className="absolute -top-3 -right-2 bg-brand-600 text-white text-[10px] font-bold px-2.5 py-1 uppercase tracking-wider rounded-full shadow-sm flex items-center gap-1 z-10">
+                                 <Star className="w-3 h-3 fill-current" /> Popular
+                               </div>
+                             )}
+                             <div className="flex items-start gap-3 mb-3">
+                               <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 border ${accentColor}`}>
+                                 <Icon className="w-5 h-5" />
+                               </div>
+                               <div>
+                                 <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-0.5">{bundle.category}</p>
+                                 <h3 className="text-[14px] font-bold text-gray-900 leading-tight group-hover:text-brand-600 transition-colors">{bundle.name}</h3>
+                               </div>
+                             </div>
+                             <p className="text-xs text-gray-600 line-clamp-2 mb-4 leading-relaxed">{bundle.description}</p>
+                             
+                             <div className="mt-auto pt-3 border-t border-gray-50 flex items-center justify-between text-[11px] font-bold">
+                               <span className="text-brand-600">{bundle.interviewsCount} Modules</span>
+                               <span className="text-gray-400 group-hover:text-brand-600 transition-colors flex items-center gap-0.5">Explore <ChevronRight className="w-3.5 h-3.5" /></span>
+                             </div>
+                           </div>
+                         );
+                       })}
+                     </div>
+                   ) : (
+                     <div className="text-center space-y-3">
+                       <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                         <Building2 className="w-5 h-5 text-gray-400" />
                        </div>
-                     ))}
-                   </div>
+                       <p className="text-sm font-medium text-gray-500">No practice packs available at the moment.</p>
+                     </div>
+                   )}
                  </div>
               </motion.div>
             </div>
