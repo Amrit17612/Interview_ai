@@ -51,8 +51,11 @@ const paymentSchema = new mongoose.Schema({
   },
   razorpayOrderId: {
     type: String,
-    required: true,
-    unique: true
+    required: function() {
+      return this.amount > 0;
+    },
+    unique: true,
+    sparse: true
   },
   razorpayPaymentId: {
     type: String,
@@ -69,6 +72,17 @@ const paymentSchema = new mongoose.Schema({
 paymentSchema.index({ status: 1 });
 paymentSchema.index({ createdAt: -1 });
 paymentSchema.index({ status: 1, createdAt: -1 });
+
+// Atomic lock: Prevent a user from creating multiple concurrent active payments for the same bundle
+paymentSchema.index(
+  { user: 1, bundleId: 1 },
+  { 
+    unique: true, 
+    partialFilterExpression: { 
+      status: { $in: ['CREATED', 'PROCESSING', 'SUCCESS'] } 
+    } 
+  }
+);
 
 const Payment = mongoose.model('Payment', paymentSchema);
 module.exports = Payment;

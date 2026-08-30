@@ -232,6 +232,17 @@ exports.createOrder = async (req, res, next) => {
       throw new Error('You already own this bundle');
     }
 
+    // Prevent concurrent duplicate checkouts
+    const existingPayment = await Payment.findOne({
+      user: userId,
+      bundleId,
+      status: { $in: ['CREATED', 'PROCESSING', 'SUCCESS'] }
+    });
+    if (existingPayment) {
+      res.status(400);
+      throw new Error('A payment for this bundle is already processing or successful');
+    }
+
     let originalAmount = catalogItem.amount; // e.g. 4900 (paise)
     let promoDiscountAmount = 0;
     let appliedPromo = null;
@@ -268,18 +279,27 @@ exports.createOrder = async (req, res, next) => {
 
     let finalPayableAmount = Math.max(0, discountedSubtotal - actualCreditsValue);
 
-    const payment = await Payment.create({
-      user: userId,
-      bundleId,
-      bundleType,
-      originalAmount,
-      promoCodeApplied: appliedPromo,
-      promoDiscountAmount,
-      creditsUsed: actualCreditsUsed,
-      amount: finalPayableAmount,
-      currency: catalogItem.currency,
-      status: 'CREATED'
-    });
+    let payment;
+    try {
+      payment = await Payment.create({
+        user: userId,
+        bundleId,
+        bundleType,
+        originalAmount,
+        promoCodeApplied: appliedPromo,
+        promoDiscountAmount,
+        creditsUsed: actualCreditsUsed,
+        amount: finalPayableAmount,
+        currency: catalogItem.currency,
+        status: 'CREATED'
+      });
+    } catch (error) {
+      if (error.code === 11000 && error.keyPattern && error.keyPattern.user && error.keyPattern.bundleId) {
+        res.status(400);
+        throw new Error('A payment for this bundle is already processing or successful');
+      }
+      throw error;
+    }
 
     if (finalPayableAmount === 0) {
       await finalizeSuccessfulPayment(payment._id, userId);
