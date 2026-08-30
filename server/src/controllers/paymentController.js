@@ -345,56 +345,84 @@ exports.createOrder = async (req, res, next) => {
 
     let finalPayableAmount = Math.max(0, discountedSubtotal - actualCreditsValue);
 
+    const paymentId = new mongoose.Types.ObjectId();
     let payment;
-    try {
-      payment = await Payment.create({
-        user: userId,
-        bundleId,
-        bundleType,
-        originalAmount,
-        promoCodeApplied: appliedPromo,
-        promoDiscountAmount,
-        creditsUsed: actualCreditsUsed,
+
+    if (finalPayableAmount > 0) {
+      // PAID CHECKOUT FLOW
+      const options = {
         amount: finalPayableAmount,
         currency: catalogItem.currency,
-        status: 'CREATED'
-      });
-    } catch (error) {
-      if (error.code === 11000 && error.keyPattern && error.keyPattern.user && error.keyPattern.bundleId) {
-        res.status(400);
-        throw new Error('A payment for this bundle is already processing or successful');
-      }
-      throw error;
-    }
+        receipt: `rcpt_${userId}_${paymentId}`
+      };
 
-    if (finalPayableAmount === 0) {
-      await finalizeSuccessfulPayment(payment._id, userId);
+      const razorpay = getRazorpay();
+      const order = await razorpay.orders.create(options);
+
+      try {
+        payment = await Payment.create({
+          _id: paymentId,
+          user: userId,
+          bundleId,
+          bundleType,
+          originalAmount,
+          promoCodeApplied: appliedPromo,
+          promoDiscountAmount,
+          creditsUsed: actualCreditsUsed,
+          amount: finalPayableAmount,
+          currency: catalogItem.currency,
+          status: 'CREATED',
+          razorpayOrderId: order.id
+        });
+      } catch (error) {
+        if (error.code === 11000 && error.keyPattern && error.keyPattern.user && error.keyPattern.bundleId) {
+          res.status(400);
+          throw new Error('A payment for this bundle is already processing or successful');
+        }
+        throw error;
+      }
+
+      res.json({
+        success: true,
+        status: 'REQUIRES_PAYMENT',
+        orderId: order.id,
+        amount: finalPayableAmount,
+        currency: catalogItem.currency
+      });
+
+    } else {
+      // ZERO-COST CHECKOUT FLOW
+      try {
+        payment = await Payment.create({
+          _id: paymentId,
+          user: userId,
+          bundleId,
+          bundleType,
+          originalAmount,
+          promoCodeApplied: appliedPromo,
+          promoDiscountAmount,
+          creditsUsed: actualCreditsUsed,
+          amount: 0,
+          currency: catalogItem.currency,
+          status: 'CREATED'
+          // razorpayOrderId is intentionally omitted
+        });
+      } catch (error) {
+        if (error.code === 11000 && error.keyPattern && error.keyPattern.user && error.keyPattern.bundleId) {
+          res.status(400);
+          throw new Error('A payment for this bundle is already processing or successful');
+        }
+        throw error;
+      }
+
+      await finalizeSuccessfulPayment(paymentId, userId);
+
       return res.json({
         success: true,
         status: 'SUCCESS_ZERO_COST',
         message: 'Successfully claimed using promo/credits'
       });
     }
-
-    const options = {
-      amount: finalPayableAmount,
-      currency: catalogItem.currency,
-      receipt: `rcpt_${userId}_${payment._id}`
-    };
-
-    const razorpay = getRazorpay();
-    const order = await razorpay.orders.create(options);
-
-    payment.razorpayOrderId = order.id;
-    await payment.save();
-
-    res.json({
-      success: true,
-      status: 'REQUIRES_PAYMENT',
-      orderId: order.id,
-      amount: finalPayableAmount,
-      currency: catalogItem.currency
-    });
 
   } catch (error) {
     next(error);
