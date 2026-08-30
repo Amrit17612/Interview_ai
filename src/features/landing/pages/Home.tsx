@@ -23,7 +23,9 @@ import {
   AlertCircle,
   Target,
   Code2,
-  Star
+  Star,
+  MapPin,
+  Lock
 } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { ROUTES } from '../../../constants/routes';
@@ -620,19 +622,73 @@ export function Home() {
             {/* Roadmap & Feedback */}
             <div className="grid lg:grid-cols-2 gap-16 items-center">
               <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeInUp} className="order-2 lg:order-1">
-                 <div className="rounded-2xl bg-gray-50 border border-gray-200 aspect-[4/3] flex items-center justify-center p-8">
-                   <div className="w-full space-y-4">
-                     <div className="flex items-center space-x-4 p-3 bg-white rounded-lg shadow-sm border border-gray-100">
-                       <CheckCircle2 className="h-5 w-5 text-green-500" />
-                       <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                 <div className="rounded-2xl bg-white border border-gray-200 shadow-xl shadow-gray-200/40 overflow-hidden flex flex-col max-h-[500px]">
+                   {/* Header */}
+                   <div className="bg-gray-50 border-b border-gray-100 p-4 flex items-center justify-between">
+                     <div className="flex items-center gap-2">
+                       <MapPin className="w-4 h-4 text-brand-600" />
+                       <span className="font-semibold text-gray-900 text-sm">Your Improvement Roadmap</span>
                      </div>
-                     <div className="flex items-center space-x-4 p-3 bg-white rounded-lg shadow-sm border border-gray-100 opacity-50">
-                       <div className="h-5 w-5 rounded-full border-2 border-gray-300"></div>
-                       <div className="h-3 bg-gray-200 rounded w-3/4"></div>
+                     <span className="bg-brand-100 text-brand-700 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide">
+                       Personalized
+                     </span>
+                   </div>
+                   
+                   {/* Summary Area */}
+                   <div className="p-5 border-b border-gray-100 bg-white flex items-center justify-between">
+                     <div>
+                       <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Interview Readiness</p>
+                       <p className="text-xs text-gray-500 font-medium">Based on latest feedback</p>
                      </div>
-                     <div className="flex items-center space-x-4 p-3 bg-white rounded-lg shadow-sm border border-gray-100 opacity-50">
-                       <div className="h-5 w-5 rounded-full border-2 border-gray-300"></div>
-                       <div className="h-3 bg-gray-200 rounded w-2/3"></div>
+                     <div className="w-12 h-12 rounded-full border-[3px] border-gray-100 border-t-brand-600 border-r-brand-600 flex items-center justify-center rotate-45">
+                       <span className="text-sm font-bold text-gray-900 -rotate-45">68%</span>
+                     </div>
+                   </div>
+
+                   {/* Roadmap List */}
+                   <div className="p-6 bg-gray-50/50 flex-grow overflow-y-auto">
+                     <div className="relative border-l-2 border-gray-200 ml-3 space-y-6">
+                       
+                       {/* Stage 1 */}
+                       <div className="relative pl-6">
+                         <div className="absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-green-500 border-2 border-white shadow-sm flex items-center justify-center">
+                           <CheckCircle2 className="w-2.5 h-2.5 text-white" />
+                         </div>
+                         <h4 className="text-sm font-bold text-gray-900">Technical Fundamentals</h4>
+                         <p className="text-xs text-gray-500 mt-1">Completed &middot; Core concepts improved</p>
+                       </div>
+
+                       {/* Stage 2 */}
+                       <div className="relative pl-6">
+                         <div className="absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-brand-600 border-2 border-white shadow-sm ring-4 ring-brand-50"></div>
+                         <h4 className="text-sm font-bold text-brand-700">DSA & Problem Solving</h4>
+                         <p className="text-xs text-gray-500 mt-1">Current focus &middot; 3 tasks remaining</p>
+                         <div className="mt-3 bg-white border border-brand-100 rounded-md p-3 shadow-sm flex items-start gap-2 relative overflow-hidden">
+                           <div className="absolute left-0 top-0 bottom-0 w-1 bg-brand-500"></div>
+                           <Sparkles className="w-3.5 h-3.5 text-brand-600 shrink-0 mt-0.5" />
+                           <div>
+                             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">AI Focus</p>
+                             <p className="text-xs text-gray-600 font-medium leading-tight">Improve problem-solving explanations before mock interviews.</p>
+                           </div>
+                         </div>
+                       </div>
+
+                       {/* Stage 3 */}
+                       <div className="relative pl-6">
+                         <div className="absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-white border-2 border-gray-300"></div>
+                         <h4 className="text-sm font-semibold text-gray-600">Communication Skills</h4>
+                         <p className="text-xs text-gray-400 mt-1">Practice structured explanations</p>
+                       </div>
+
+                       {/* Stage 4 */}
+                       <div className="relative pl-6">
+                         <div className="absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-gray-100 border-2 border-gray-200 flex items-center justify-center">
+                           <Lock className="w-2.5 h-2.5 text-gray-400" />
+                         </div>
+                         <h4 className="text-sm font-medium text-gray-400">Mock Interview</h4>
+                         <p className="text-xs text-gray-400 mt-1">Unlock after current focus</p>
+                       </div>
+
                      </div>
                    </div>
                  </div>
