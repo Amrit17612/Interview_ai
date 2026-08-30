@@ -32,6 +32,8 @@ import { NavLink } from 'react-router-dom';
 import { ROUTES } from '../../../constants/routes';
 import lpuLogo from '../../../assets/logos/lpu-logo.svg';
 import { MOCK_COMPANY_BUNDLES, MOCK_DOMAIN_BUNDLES } from '../../../types/bundle.types';
+import { useState } from 'react';
+import { InteractiveDemoModal } from '../components/InteractiveDemoModal';
 
 // Motion variants
 const fadeInUp: any = {
@@ -56,8 +58,11 @@ export function Home() {
     ...MOCK_DOMAIN_BUNDLES
   ].slice(0, 4);
 
+  const [isDemoModalOpen, setIsDemoModalOpen] = useState(false);
+
   return (
     <div className="flex flex-col min-h-screen">
+      <InteractiveDemoModal isOpen={isDemoModalOpen} onClose={() => setIsDemoModalOpen(false)} />
       {/* 1. Hero */}
       <section className="relative pt-24 pb-32 overflow-hidden bg-white">
         <Container className="text-center relative z-10">
@@ -75,11 +80,9 @@ export function Home() {
                   Start Preparing Now
                 </Button>
               </NavLink>
-              <a href="#how-it-works">
-                <Button variant="outline" size="lg" className="w-full sm:w-auto h-12 px-8 text-base bg-white">
-                  <Play className="mr-2 h-4 w-4" /> View Demo
-                </Button>
-              </a>
+              <Button onClick={() => setIsDemoModalOpen(true)} variant="outline" size="lg" className="w-full sm:w-auto h-12 px-8 text-base bg-white">
+                <Play className="mr-2 h-4 w-4" /> View Demo
+              </Button>
             </div>
             <p className="text-sm text-gray-400 font-medium">No credit card required. Free tier available.</p>
           </motion.div>
