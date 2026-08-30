@@ -66,110 +66,174 @@ const finalizeSuccessfulPayment = async (paymentId, userId) => {
 
   const originalUser = await User.findById(userId);
 
-  // 1. Deduct Credits safely using atomic $gte check to prevent concurrent double-spend
-  if (payment.creditsUsed > 0) {
-    const updatedUser = await User.findOneAndUpdate(
-      { _id: userId, credits: { $gte: payment.creditsUsed } },
-      { $inc: { credits: -payment.creditsUsed } },
-      { new: true }
-    );
+  // Tracking variables for compensating rollback
+  let promoClaimed = false;
+  let promoUsageId = null;
+  let globalPromoCountIncremented = false;
+  let promoCodeId = null;
 
-    if (!updatedUser) {
-      // User doesn't have enough credits anymore (spent in another concurrent transaction)
-      await Payment.findByIdAndUpdate(paymentId, { status: 'FAILED_INSUFFICIENT_CREDITS' });
-      throw new Error('Insufficient credits');
+  let creditsDeducted = false;
+  let deductedCreditsAmount = 0;
+  let spendTransactionId = null;
+
+  let bundleGranted = false;
+
+  let rewardGranted = false;
+  let rewardTransactionId = null;
+
+  try {
+    // 1. Record Promo Usage with atomic DB constraints FIRST
+    if (payment.promoCodeApplied) {
+      const promo = await PromoCode.findOne({ code: payment.promoCodeApplied });
+      if (promo) {
+        promoCodeId = promo._id;
+        try {
+          const usage = await PromoUsage.create({
+            promoCode: promo._id,
+            user: userId,
+            payment: payment._id
+          });
+          promoClaimed = true;
+          promoUsageId = usage._id;
+        } catch (err) {
+          if (err.code === 11000) {
+            await Payment.findByIdAndUpdate(paymentId, { status: 'FAILED_PROMO_LIMIT_EXCEEDED' });
+            throw new Error('Promo code has already been used by you.');
+          }
+          throw err;
+        }
+
+        // Check global limit atomically
+        let promoUpdateQuery = { _id: promo._id };
+        if (promo.maxGlobalUsage) {
+           promoUpdateQuery.currentUsageCount = { $lt: promo.maxGlobalUsage };
+        }
+
+        const updatedPromo = await PromoCode.findOneAndUpdate(
+          promoUpdateQuery,
+          { $inc: { currentUsageCount: 1 } },
+          { new: true }
+        );
+
+        if (!updatedPromo && promo.maxGlobalUsage) {
+          await Payment.findByIdAndUpdate(paymentId, { status: 'FAILED_PROMO_LIMIT_EXCEEDED' });
+          throw new Error('Promo code global usage limit reached');
+        }
+        globalPromoCountIncremented = true;
+      }
     }
 
-    await CreditTransaction.create({
-      user: userId,
-      amount: -payment.creditsUsed,
-      type: 'SPEND_PURCHASE',
-      referenceId: payment._id.toString(),
-      balanceBefore: updatedUser.credits + payment.creditsUsed,
-      balanceAfter: updatedUser.credits
-    });
-  }
-
-  // 2. Record Promo Usage with atomic limit checks
-  if (payment.promoCodeApplied) {
-    const promo = await PromoCode.findOne({ code: payment.promoCodeApplied });
-    if (promo) {
-      // Check per-user limit
-      if (promo.maxPerUserUsage) {
-        const userUsage = await PromoUsage.countDocuments({ promoCode: promo._id, user: userId });
-        if (userUsage >= promo.maxPerUserUsage) {
-           // Rollback credits if we deducted any
-           if (payment.creditsUsed > 0) {
-              const rbUser = await User.findByIdAndUpdate(userId, { $inc: { credits: payment.creditsUsed } }, { new: true });
-              await CreditTransaction.create({
-                user: userId, amount: payment.creditsUsed, type: 'ADMIN_ADJUSTMENT', referenceId: `rollback_${payment._id}`,
-                balanceBefore: rbUser.credits - payment.creditsUsed, balanceAfter: rbUser.credits
-              });
-           }
-           await Payment.findByIdAndUpdate(paymentId, { status: 'FAILED_PROMO_LIMIT_EXCEEDED' });
-           throw new Error('Promo code per-user usage limit reached');
-        }
-      }
-
-      // Check global limit atomically
-      let promoUpdateQuery = { _id: promo._id };
-      if (promo.maxGlobalUsage) {
-         promoUpdateQuery.currentUsageCount = { $lt: promo.maxGlobalUsage };
-      }
-
-      const updatedPromo = await PromoCode.findOneAndUpdate(
-        promoUpdateQuery,
-        { $inc: { currentUsageCount: 1 } },
+    // 2. Deduct Credits safely using atomic $gte check to prevent concurrent double-spend
+    if (payment.creditsUsed > 0) {
+      const updatedUser = await User.findOneAndUpdate(
+        { _id: userId, credits: { $gte: payment.creditsUsed } },
+        { $inc: { credits: -payment.creditsUsed } },
         { new: true }
       );
 
-      if (!updatedPromo && promo.maxGlobalUsage) {
-        // Rollback credits
-        if (payment.creditsUsed > 0) {
-          const rbUser = await User.findByIdAndUpdate(userId, { $inc: { credits: payment.creditsUsed } }, { new: true });
-          await CreditTransaction.create({
-            user: userId, amount: payment.creditsUsed, type: 'ADMIN_ADJUSTMENT', referenceId: `rollback_${payment._id}`,
-            balanceBefore: rbUser.credits - payment.creditsUsed, balanceAfter: rbUser.credits
-          });
-        }
-        await Payment.findByIdAndUpdate(paymentId, { status: 'FAILED_PROMO_LIMIT_EXCEEDED' });
-        throw new Error('Promo code global usage limit reached');
+      if (!updatedUser) {
+        await Payment.findByIdAndUpdate(paymentId, { status: 'FAILED_INSUFFICIENT_CREDITS' });
+        throw new Error('Insufficient credits');
       }
 
-      await PromoUsage.create({
-        promoCode: promo._id,
+      creditsDeducted = true;
+      deductedCreditsAmount = payment.creditsUsed;
+
+      const spendTx = await CreditTransaction.create({
         user: userId,
-        payment: payment._id
+        amount: -payment.creditsUsed,
+        type: 'SPEND_PURCHASE',
+        referenceId: payment._id.toString(),
+        balanceBefore: updatedUser.credits + payment.creditsUsed,
+        balanceAfter: updatedUser.credits
       });
+      spendTransactionId = spendTx._id;
     }
-  }
 
-  // 3. Grant Bundle Access
-  const finalUser = await grantEntitlement(userId, payment.bundleId, payment.bundleType);
-
-  // 4. Purchase Reward (+20 credits)
-  const catalogItem = TRUSTED_CATALOG[payment.bundleId];
-  if (catalogItem) {
-    const postRewardUser = await User.findByIdAndUpdate(
-      userId,
-      { $inc: { credits: 20 } },
-      { new: true }
+    // 3. Grant Bundle Access
+    const preBundleUser = await User.findById(userId);
+    const alreadyOwned = preBundleUser.purchasedBundles.some(
+      b => b.bundleId === payment.bundleId && b.purchaseStatus === 'active'
     );
+    if (!alreadyOwned) {
+      await grantEntitlement(userId, payment.bundleId, payment.bundleType);
+      bundleGranted = true;
+    }
 
-    await CreditTransaction.create({
-      user: userId,
-      amount: 20,
-      type: 'EARN_PURCHASE',
-      referenceId: payment._id.toString(),
-      balanceBefore: postRewardUser.credits - 20,
-      balanceAfter: postRewardUser.credits
-    });
+    // 4. Purchase Reward (+20 credits)
+    const catalogItem = TRUSTED_CATALOG[payment.bundleId];
+    if (catalogItem) {
+      const postRewardUser = await User.findByIdAndUpdate(
+        userId,
+        { $inc: { credits: 20 } },
+        { new: true }
+      );
+      rewardGranted = true;
+
+      const rewardTx = await CreditTransaction.create({
+        user: userId,
+        amount: 20,
+        type: 'EARN_PURCHASE',
+        referenceId: payment._id.toString(),
+        balanceBefore: postRewardUser.credits - 20,
+        balanceAfter: postRewardUser.credits
+      });
+      rewardTransactionId = rewardTx._id;
+    }
+
+    // 5. Mark as final SUCCESS
+    await Payment.findByIdAndUpdate(paymentId, { status: 'SUCCESS' });
+
+    return await User.findById(userId);
+
+  } catch (error) {
+    // COMPENSATING ROLLBACK IN REVERSE ORDER
+
+    // A. Reverse reward transaction
+    if (rewardTransactionId) {
+      await CreditTransaction.findByIdAndDelete(rewardTransactionId).catch(console.error);
+    }
+
+    // Reverse reward credits
+    if (rewardGranted) {
+      await User.findByIdAndUpdate(userId, { $inc: { credits: -20 } }).catch(console.error);
+    }
+
+    // B. Reverse bundle access
+    if (bundleGranted) {
+      await User.findByIdAndUpdate(userId, {
+        $pull: { purchasedBundles: { bundleId: payment.bundleId, source: 'PAYMENT' } }
+      }).catch(console.error);
+    }
+
+    // C. Reverse spend transaction
+    if (spendTransactionId) {
+      await CreditTransaction.findByIdAndDelete(spendTransactionId).catch(console.error);
+    }
+
+    // Reverse spent credits
+    if (creditsDeducted) {
+      await User.findByIdAndUpdate(userId, { $inc: { credits: deductedCreditsAmount } }).catch(console.error);
+    }
+
+    // D. Reverse global promo usage
+    if (globalPromoCountIncremented && promoCodeId) {
+      await PromoCode.findByIdAndUpdate(promoCodeId, { $inc: { currentUsageCount: -1 } }).catch(console.error);
+    }
+
+    // E. Release promo usage claim
+    if (promoClaimed && promoUsageId) {
+      await PromoUsage.findByIdAndDelete(promoUsageId).catch(console.error);
+    }
+
+    // Update payment state to FAILED if it was left in PROCESSING
+    const currentPayment = await Payment.findById(paymentId);
+    if (currentPayment && currentPayment.status === 'PROCESSING') {
+      await Payment.findByIdAndUpdate(paymentId, { status: 'FAILED' }).catch(console.error);
+    }
+
+    throw error;
   }
-
-  // 5. Mark as final SUCCESS
-  await Payment.findByIdAndUpdate(paymentId, { status: 'SUCCESS' });
-
-  return await User.findById(userId);
 };
 
 exports.validatePromo = async (req, res, next) => {
@@ -194,11 +258,13 @@ exports.validatePromo = async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'Promo code usage limit reached' });
     }
 
-    if (promo.maxPerUserUsage) {
-      const userUsage = await PromoUsage.countDocuments({ promoCode: promo._id, user: userId });
-      if (userUsage >= promo.maxPerUserUsage) {
-        return res.status(400).json({ success: false, message: 'You have reached the usage limit for this promo code' });
-      }
+    const userUsage = await PromoUsage.countDocuments({ promoCode: promo._id, user: userId });
+    if (userUsage > 0) {
+      return res.status(400).json({ success: false, message: 'This promo code has already been used by you.' });
+    }
+
+    if (promo.maxPerUserUsage && userUsage >= promo.maxPerUserUsage) {
+      return res.status(400).json({ success: false, message: 'You have reached the usage limit for this promo code' });
     }
 
     res.json({ success: true, discountAmount: promo.discountValue });
@@ -252,7 +318,7 @@ exports.createOrder = async (req, res, next) => {
       if (promo && (!promo.expiresAt || promo.expiresAt >= new Date())) {
         let globalOk = !promo.maxGlobalUsage || promo.currentUsageCount < promo.maxGlobalUsage;
         let userUsage = await PromoUsage.countDocuments({ promoCode: promo._id, user: userId });
-        let userOk = !promo.maxPerUserUsage || userUsage < promo.maxPerUserUsage;
+        let userOk = userUsage === 0;
 
         if (globalOk && userOk) {
           promoDiscountAmount = promo.discountValue; 

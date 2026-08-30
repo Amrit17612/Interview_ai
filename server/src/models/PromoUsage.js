@@ -7,7 +7,7 @@ const promoUsageSchema = new mongoose.Schema({
   usedAt: { type: Date, default: Date.now }
 });
 
-promoUsageSchema.index({ promoCode: 1, user: 1 });
+promoUsageSchema.index({ promoCode: 1, user: 1 }, { unique: true });
 
 const PromoUsage = mongoose.model('PromoUsage', promoUsageSchema);
 module.exports = PromoUsage;
