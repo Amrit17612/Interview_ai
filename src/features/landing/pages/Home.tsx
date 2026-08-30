@@ -5,15 +5,20 @@ import { Badge } from '../../../components/ui/Badge';
 import { Accordion } from '../../../components/ui/Accordion';
 import { motion } from 'framer-motion';
 import { 
-  CheckCircle2, 
-  BrainCircuit, 
-  FileSearch, 
-  Building2, 
-  TrendingUp, 
   Play, 
-  ShieldCheck,
+  CheckCircle2,
+  BrainCircuit,
+  FileSearch,
+  Building2,
+  TrendingUp,
   ArrowRight,
-  Briefcase
+  Briefcase,
+  User,
+  Sparkles,
+  FileText,
+  ChevronRight,
+  BarChart2,
+  ShieldCheck
 } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { ROUTES } from '../../../constants/routes';
@@ -167,10 +172,124 @@ export function Home() {
             </motion.div>
             <motion.div 
               initial={{ opacity: 0, scale: 0.95 }} whileInView={{ opacity: 1, scale: 1 }} transition={{ duration: 0.5 }} viewport={{ once: true }}
-              className="relative rounded-2xl bg-white border border-gray-200 shadow-xl overflow-hidden aspect-video flex items-center justify-center"
+              className="relative w-full h-[380px] sm:h-[420px] lg:h-[450px] flex items-center justify-center bg-transparent mt-8 lg:mt-0"
             >
-               {/* UI Mockup Placeholder */}
-               <div className="text-gray-400 font-medium">[Platform UI Preview Mockup]</div>
+               {/* Main Dashboard Preview */}
+               <div className="w-[90%] sm:w-[80%] max-w-[340px] bg-white rounded-2xl shadow-xl shadow-gray-200/50 border border-gray-200 flex flex-col overflow-hidden relative z-10">
+                 {/* Top Bar */}
+                 <div className="h-12 border-b border-gray-100 flex items-center justify-between px-4 bg-gray-50/80">
+                    <div className="flex items-center gap-2">
+                       <div className="w-6 h-6 rounded-md bg-brand-600 flex items-center justify-center shadow-sm">
+                          <Sparkles className="w-3.5 h-3.5 text-white" />
+                       </div>
+                       <span className="text-[13px] font-semibold text-gray-800">Career Dashboard</span>
+                    </div>
+                    <div className="w-7 h-7 rounded-full bg-gray-200 flex items-center justify-center border border-gray-300">
+                       <User className="w-3.5 h-3.5 text-gray-500" />
+                    </div>
+                 </div>
+                 {/* Content */}
+                 <div className="p-4 space-y-4">
+                    {/* Readiness Card */}
+                    <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-3 border border-green-100 flex items-center justify-between shadow-sm">
+                       <div>
+                         <p className="text-[10px] font-bold text-green-800 uppercase tracking-wider mb-0.5">Interview Readiness</p>
+                         <p className="text-xs text-green-700 font-medium">Great progress this week</p>
+                       </div>
+                       <div className="w-12 h-12 rounded-full border-[3px] border-green-200 border-t-green-600 flex items-center justify-center bg-white">
+                         <span className="text-xs font-bold text-green-700">82%</span>
+                       </div>
+                    </div>
+                    
+                    {/* Progress Overview */}
+                    <div className="space-y-3 px-1">
+                       <div className="space-y-1.5">
+                          <div className="flex justify-between text-[11px] font-medium text-gray-500">
+                             <span>Technical Skills</span>
+                             <span className="text-gray-700 font-semibold">75%</span>
+                          </div>
+                          <div className="w-full bg-gray-100 rounded-full h-1.5"><div className="bg-blue-500 h-1.5 rounded-full w-3/4"></div></div>
+                       </div>
+                       <div className="space-y-1.5">
+                          <div className="flex justify-between text-[11px] font-medium text-gray-500">
+                             <span>Communication</span>
+                             <span className="text-gray-700 font-semibold">90%</span>
+                          </div>
+                          <div className="w-full bg-gray-100 rounded-full h-1.5"><div className="bg-purple-500 h-1.5 rounded-full w-[90%]"></div></div>
+                       </div>
+                       <div className="space-y-1.5">
+                          <div className="flex justify-between text-[11px] font-medium text-gray-500">
+                             <span>Problem Solving</span>
+                             <span className="text-gray-700 font-semibold">85%</span>
+                          </div>
+                          <div className="w-full bg-gray-100 rounded-full h-1.5"><div className="bg-orange-400 h-1.5 rounded-full w-[85%]"></div></div>
+                       </div>
+                    </div>
+                    
+                    {/* AI Feedback Preview */}
+                    <div className="bg-purple-50/50 rounded-xl p-3 border border-purple-100/60">
+                       <div className="flex items-center gap-1.5 mb-1.5">
+                         <Sparkles className="w-3.5 h-3.5 text-purple-600" />
+                         <span className="text-[11px] font-bold text-purple-900">AI Feedback</span>
+                       </div>
+                       <p className="text-[11px] text-gray-700 leading-snug font-medium">Strong technical structure. Work on explaining tradeoffs more clearly.</p>
+                    </div>
+
+                    {/* Next Action */}
+                    <div className="flex items-center justify-between bg-brand-50 rounded-xl p-2.5 border border-brand-100 shadow-sm transition-colors hover:bg-brand-100/50">
+                       <div className="flex items-center gap-2.5">
+                          <div className="w-7 h-7 rounded-lg bg-white shadow-sm flex items-center justify-center border border-brand-100">
+                             <BarChart2 className="w-3.5 h-3.5 text-brand-600" />
+                          </div>
+                          <span className="text-[12px] font-bold text-brand-900">Next: DSA Roadmap</span>
+                       </div>
+                       <ChevronRight className="w-3.5 h-3.5 text-brand-600" />
+                    </div>
+                 </div>
+               </div>
+
+               {/* Floating Ecosystem Cards */}
+               {/* Card 1: AI Interview */}
+               <motion.div 
+                 initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2 }} viewport={{ once: true }}
+                 className="absolute -top-2 left-0 sm:-left-4 md:-left-6 lg:-left-8 bg-white rounded-xl shadow-lg shadow-gray-200/60 border border-gray-100 p-2.5 flex items-center gap-2.5 z-20"
+               >
+                 <div className="w-9 h-9 rounded-full bg-purple-50 flex items-center justify-center border border-purple-100">
+                    <BrainCircuit className="w-4 h-4 text-purple-600" />
+                 </div>
+                 <div className="pr-3">
+                    <p className="text-[11px] font-bold text-gray-800 leading-tight">AI Interview</p>
+                    <p className="text-[10px] text-green-600 font-semibold mt-0.5">Ready</p>
+                 </div>
+               </motion.div>
+
+               {/* Card 2: ATS Resume */}
+               <motion.div 
+                 initial={{ opacity: 0, x: 10 }} whileInView={{ opacity: 1, x: 0 }} transition={{ duration: 0.5, delay: 0.3 }} viewport={{ once: true }}
+                 className="absolute top-24 -right-2 sm:-right-4 md:-right-6 lg:-right-8 bg-white rounded-xl shadow-lg shadow-gray-200/60 border border-gray-100 p-2.5 flex items-center gap-2.5 z-20"
+               >
+                 <div className="w-9 h-9 rounded-full bg-blue-50 flex items-center justify-center border border-blue-100">
+                    <FileText className="w-4 h-4 text-blue-600" />
+                 </div>
+                 <div className="pr-3">
+                    <p className="text-[11px] font-bold text-gray-800 leading-tight">ATS Resume</p>
+                    <p className="text-[10px] text-gray-500 font-semibold mt-0.5">Score: <span className="text-green-600 font-bold">92</span></p>
+                 </div>
+               </motion.div>
+
+               {/* Card 3: Live Feedback */}
+               <motion.div 
+                 initial={{ opacity: 0, y: -10 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.4 }} viewport={{ once: true }}
+                 className="absolute -bottom-4 right-4 sm:right-8 md:right-10 lg:right-4 bg-white rounded-xl shadow-lg shadow-gray-200/60 border border-gray-100 p-2.5 flex items-center gap-2.5 z-20"
+               >
+                 <div className="w-9 h-9 rounded-full bg-orange-50 flex items-center justify-center border border-orange-100">
+                    <Sparkles className="w-4 h-4 text-orange-600" />
+                 </div>
+                 <div className="pr-3">
+                    <p className="text-[11px] font-bold text-gray-800 leading-tight">Feedback</p>
+                    <p className="text-[10px] text-gray-500 font-semibold mt-0.5">Generated</p>
+                 </div>
+               </motion.div>
             </motion.div>
           </div>
         </Container>
