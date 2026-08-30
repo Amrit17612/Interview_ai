@@ -499,7 +499,7 @@ export function InterviewHome() {
         <div className="text-center pt-8 border-t border-gray-100">
           <p className="text-sm text-gray-500 mb-2">Preparing for a specific company?</p>
           <NavLink 
-            to={ROUTES.EXPLORE_PACKS} 
+            to={ROUTES.COMPANY_PACKS} 
             className="inline-flex items-center text-sm font-semibold text-gray-900 hover:text-brand-600 transition-colors bg-white px-4 py-2 border border-gray-200 rounded-full shadow-sm hover:border-brand-200 hover:bg-brand-50"
           >
             <Building2 className="w-4 h-4 mr-2 text-gray-400" />
