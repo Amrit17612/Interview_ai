@@ -19,13 +19,13 @@ export function PublicFooter() {
               Premium AI-powered interview preparation platform focused on helping students succeed in technical and behavioral interviews.
             </p>
             <div className="flex space-x-4 text-gray-400">
-              <a href="#" aria-label="Social" className="hover:text-gray-900 transition-colors">
+              <a href="https://interview-ai-two-gamma.vercel.app" target="_blank" rel="noopener noreferrer" aria-label="Website" className="hover:text-gray-900 transition-colors">
                 <Globe className="h-5 w-5" />
               </a>
-              <a href="#" aria-label="Contact" className="hover:text-gray-900 transition-colors">
+              <a href="mailto:interviuai.official@gmail.com" aria-label="Contact" className="hover:text-gray-900 transition-colors">
                 <Mail className="h-5 w-5" />
               </a>
-              <a href="#" aria-label="Links" className="hover:text-gray-900 transition-colors">
+              <a href="https://github.com/Amrit17612/Interview_ai" target="_blank" rel="noopener noreferrer" aria-label="GitHub Repository" className="hover:text-gray-900 transition-colors">
                 <LinkIcon className="h-5 w-5" />
               </a>
             </div>
@@ -35,10 +35,10 @@ export function PublicFooter() {
           <div>
             <h3 className="text-sm font-semibold text-gray-900 mb-4 tracking-wider uppercase">Platform</h3>
             <ul className="space-y-3">
-              <li><NavLink to={ROUTES.HOME} className="text-sm text-gray-600 hover:text-brand-600 transition-colors">Features</NavLink></li>
+              <li><NavLink to={ROUTES.FEATURES} className="text-sm text-gray-600 hover:text-brand-600 transition-colors">Features</NavLink></li>
               <li><NavLink to={ROUTES.PRICING} className="text-sm text-gray-600 hover:text-brand-600 transition-colors">Pricing</NavLink></li>
-              <li><NavLink to={ROUTES.HOME} className="text-sm text-gray-600 hover:text-brand-600 transition-colors">Interview Domains</NavLink></li>
-              <li><NavLink to={ROUTES.HOME} className="text-sm text-gray-600 hover:text-brand-600 transition-colors">Company Prep</NavLink></li>
+              <li><NavLink to={ROUTES.INTERVIEW_DOMAINS} className="text-sm text-gray-600 hover:text-brand-600 transition-colors">Interview Domains</NavLink></li>
+              <li><NavLink to={ROUTES.COMPANY_PREP_PUBLIC} className="text-sm text-gray-600 hover:text-brand-600 transition-colors">Company Prep</NavLink></li>
             </ul>
           </div>
 

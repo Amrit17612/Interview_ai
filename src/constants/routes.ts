@@ -1,6 +1,9 @@
 export const ROUTES = {
   // Public
   HOME: '/',
+  FEATURES: '/features',
+  INTERVIEW_DOMAINS: '/interview-domains',
+  COMPANY_PREP_PUBLIC: '/company-prep',
   EXPLORE_PACKS: '/explore-packs',
   EXPLORE_PACK_DETAILS: '/explore-packs/:id',
   PRICING: '/pricing',

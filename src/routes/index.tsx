@@ -19,12 +19,15 @@ const Loadable = (Component: React.ComponentType<any>) => (props: any) => (
 );
 
 import { Home } from '../features/landing/pages/Home';
+import { Features } from '../features/landing/pages/Features';
 import { Pricing } from '../features/landing/pages/Pricing';
+import { InterviewDomains } from '../features/landing/pages/InterviewDomains';
+import { CompanyPrep } from '../features/landing/pages/CompanyPrep';
 import { Contact } from '../features/landing/pages/Contact';
-import { About } from '../features/landing/pages/About';
+import { AboutUs } from '../features/landing/pages/AboutUs';
 import { FAQ } from '../features/landing/pages/FAQ';
 import { PrivacyPolicy } from '../features/landing/pages/PrivacyPolicy';
-import { Terms } from '../features/landing/pages/Terms';
+import { TermsOfService } from '../features/landing/pages/TermsOfService';
 import { RefundPolicy } from '../features/landing/pages/RefundPolicy';
 import { CookiePolicy } from '../features/landing/pages/CookiePolicy';
 const ExplorePacks = Loadable(lazy(() => import('../features/landing/pages/ExplorePacks').then(m => ({ default: m.ExplorePacks }))));
@@ -109,14 +112,17 @@ export const router = createBrowserRouter([
     element: <PublicLayout />,
     children: [
       { path: ROUTES.HOME, element: <Home /> },
+      { path: ROUTES.FEATURES, element: <Features /> },
+      { path: ROUTES.INTERVIEW_DOMAINS, element: <InterviewDomains /> },
+      { path: ROUTES.COMPANY_PREP_PUBLIC, element: <CompanyPrep /> },
       { path: ROUTES.EXPLORE_PACKS, element: <ExplorePacks /> },
       { path: ROUTES.EXPLORE_PACK_DETAILS, element: <ExplorePackDetails /> },
       { path: ROUTES.PRICING, element: <Pricing /> },
       { path: ROUTES.CONTACT, element: <Contact /> },
-      { path: ROUTES.ABOUT, element: <About /> },
+      { path: ROUTES.ABOUT, element: <AboutUs /> },
       { path: ROUTES.FAQ, element: <FAQ /> },
       { path: ROUTES.PRIVACY_POLICY, element: <PrivacyPolicy /> },
-      { path: ROUTES.TERMS, element: <Terms /> },
+      { path: ROUTES.TERMS, element: <TermsOfService /> },
       { path: ROUTES.REFUND_POLICY, element: <RefundPolicy /> },
       { path: ROUTES.COOKIE_POLICY, element: <CookiePolicy /> }
     ]
