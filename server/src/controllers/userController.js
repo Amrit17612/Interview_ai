@@ -19,12 +19,9 @@ const getWalletHistory = async (req, res, next) => {
       const payments = await Payment.find({ _id: { $in: paymentIds } }).lean();
       payments.forEach(p => {
         let bundleTitle = 'Unknown Bundle';
-        if (p.bundleType === 'COMPANY') {
-          const cat = TRUSTED_CATALOG.COMPANY_BUNDLES.find(c => c.id === p.bundleId);
-          if (cat) bundleTitle = cat.title || cat.name;
-        } else if (p.bundleType === 'DOMAIN') {
-          const cat = TRUSTED_CATALOG.DOMAIN_BUNDLES.find(c => c.id === p.bundleId);
-          if (cat) bundleTitle = cat.title || cat.name;
+        const cat = TRUSTED_CATALOG[p.bundleId];
+        if (cat) {
+          bundleTitle = cat.title || cat.name;
         }
         paymentMap[p._id.toString()] = {
           bundleTitle: bundleTitle
