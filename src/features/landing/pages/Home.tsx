@@ -18,8 +18,6 @@ import {
 import { NavLink } from 'react-router-dom';
 import { ROUTES } from '../../../constants/routes';
 import lpuLogo from '../../../assets/logos/lpu-logo.svg';
-import amityLogo from '../../../assets/logos/amity-logo-official.png';
-import parulLogo from '../../../assets/logos/parul-logo.svg';
 
 // Motion variants
 const fadeInUp: any = {
@@ -74,22 +72,12 @@ export function Home() {
           <p className="text-center text-sm font-semibold text-gray-500 uppercase tracking-widest mb-8">
             Trusted by students from top institutions
           </p>
-          <div className="flex flex-wrap justify-center items-center gap-8 md:gap-16">
+          <div className="flex justify-center items-center">
             {/* Authentic university logos */}
             <img 
               src={lpuLogo} 
               alt="Lovely Professional University" 
-              className="h-10 md:h-12 w-auto object-contain opacity-60 hover:opacity-100 grayscale hover:grayscale-0 transition-all duration-300" 
-            />
-            <img 
-              src={amityLogo} 
-              alt="Amity University, Noida" 
-              className="h-10 md:h-12 w-auto object-contain opacity-60 hover:opacity-100 grayscale hover:grayscale-0 transition-all duration-300" 
-            />
-            <img 
-              src={parulLogo} 
-              alt="Parul University" 
-              className="h-10 md:h-12 w-auto object-contain opacity-60 hover:opacity-100 grayscale hover:grayscale-0 transition-all duration-300" 
+              className="h-12 md:h-16 w-auto object-contain" 
             />
           </div>
         </Container>
