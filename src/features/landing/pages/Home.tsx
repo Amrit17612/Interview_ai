@@ -18,7 +18,10 @@ import {
   FileText,
   ChevronRight,
   BarChart2,
-  ShieldCheck
+  ShieldCheck,
+  ScanLine,
+  AlertCircle,
+  Target
 } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { ROUTES } from '../../../constants/routes';
@@ -357,17 +360,170 @@ export function Home() {
             
             {/* Resume & ATS */}
             <div className="grid lg:grid-cols-2 gap-16 items-center">
-              <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeInUp} className="order-2 lg:order-1">
-                <div className="rounded-2xl bg-gray-50 border border-gray-200 aspect-[4/3] flex items-center justify-center p-8">
-                   <div className="w-full max-w-sm space-y-4 text-left">
-                     <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                     <div className="h-4 bg-gray-200 rounded w-full"></div>
-                     <div className="h-4 bg-gray-200 rounded w-5/6"></div>
-                     <div className="mt-8 border-t border-gray-200 pt-4 flex justify-between items-center text-sm font-bold text-brand-600">
-                       <span>ATS Match Score</span>
-                       <span>[ UI Preview ]</span>
-                     </div>
-                   </div>
+              <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeInUp} className="order-2 lg:order-1 relative">
+                <div className="relative w-full h-[550px] sm:h-[600px] lg:h-[650px] rounded-2xl bg-gradient-to-br from-gray-50 to-white border border-gray-100 flex flex-col overflow-hidden">
+                  
+                  {/* Upper-Left ATS Resume Analyzer */}
+                  <motion.div 
+                    initial={{ opacity: 0, x: -15, y: -15 }}
+                    whileInView={{ opacity: 1, x: 0, y: 0 }}
+                    transition={{ duration: 0.6, delay: 0.1 }}
+                    viewport={{ once: true }}
+                    className="absolute top-4 left-4 sm:top-8 sm:left-8 w-[88%] sm:w-[340px] bg-white rounded-2xl shadow-xl shadow-gray-200/50 border border-gray-100 z-10"
+                  >
+                    {/* Header */}
+                    <div className="flex items-center justify-between p-3.5 border-b border-gray-50">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-7 h-7 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600 border border-blue-100/50">
+                          <FileText className="w-4 h-4" />
+                        </div>
+                        <span className="text-[13px] font-bold text-gray-800">Resume Analysis</span>
+                      </div>
+                      <span className="px-2.5 py-1 rounded-full bg-green-50 border border-green-100/50 text-green-700 text-[10px] font-bold tracking-wider uppercase">Analyzed</span>
+                    </div>
+                    
+                    {/* Score Area */}
+                    <div className="p-4 flex items-center gap-5 border-b border-gray-50">
+                      <div className="relative w-[72px] h-[72px] flex items-center justify-center shrink-0">
+                        <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                          <path className="text-gray-100" strokeWidth="3.5" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                          <path className="text-brand-500" strokeDasharray="82, 100" strokeWidth="3.5" strokeLinecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                        </svg>
+                        <div className="absolute flex flex-col items-center">
+                          <span className="text-[22px] font-extrabold text-gray-900 leading-none">82</span>
+                          <span className="text-[9px] text-gray-500 font-bold uppercase tracking-wider mt-0.5">ATS Score</span>
+                        </div>
+                      </div>
+                      <div className="space-y-1">
+                        <h4 className="text-[14px] font-bold text-gray-900">Good match</h4>
+                        <p className="text-[11px] text-gray-600 leading-snug">Your resume is optimized for this role.</p>
+                      </div>
+                    </div>
+
+                    {/* ATS Match Breakdown */}
+                    <div className="p-4 space-y-3.5 border-b border-gray-50">
+                       <div className="space-y-1.5">
+                          <div className="flex justify-between text-[11px] font-medium text-gray-600">
+                             <span>Keyword Match</span>
+                             <span className="text-gray-900 font-bold">88%</span>
+                          </div>
+                          <div className="w-full bg-gray-100 rounded-full h-1.5"><div className="bg-blue-500 h-1.5 rounded-full w-[88%] shadow-sm shadow-blue-500/20"></div></div>
+                       </div>
+                       <div className="space-y-1.5">
+                          <div className="flex justify-between text-[11px] font-medium text-gray-600">
+                             <span>Formatting</span>
+                             <span className="text-gray-900 font-bold">94%</span>
+                          </div>
+                          <div className="w-full bg-gray-100 rounded-full h-1.5"><div className="bg-green-500 h-1.5 rounded-full w-[94%] shadow-sm shadow-green-500/20"></div></div>
+                       </div>
+                       <div className="space-y-1.5">
+                          <div className="flex justify-between text-[11px] font-medium text-gray-600">
+                             <span>Experience Relevance</span>
+                             <span className="text-gray-900 font-bold">76%</span>
+                          </div>
+                          <div className="w-full bg-gray-100 rounded-full h-1.5"><div className="bg-orange-400 h-1.5 rounded-full w-[76%] shadow-sm shadow-orange-400/20"></div></div>
+                       </div>
+                    </div>
+
+                    {/* Keywords Section */}
+                    <div className="p-4 space-y-3">
+                      <h5 className="text-[11px] font-bold text-gray-800 uppercase tracking-wide">Matched Skills</h5>
+                      <div className="flex flex-wrap gap-1.5">
+                        {['React', 'TypeScript', 'Node.js', 'Problem Solving'].map(skill => (
+                          <span key={skill} className="px-2 py-1 bg-gray-50 border border-gray-100 text-gray-700 text-[10px] font-semibold rounded-md">{skill}</span>
+                        ))}
+                      </div>
+                      <div className="flex items-start gap-2 mt-3 text-[11px] text-amber-700 bg-amber-50 p-2.5 rounded-lg border border-amber-100/50">
+                        <AlertCircle className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+                        <span className="font-medium leading-snug">3 important keywords missing</span>
+                      </div>
+                    </div>
+
+                    {/* Bottom Action Row */}
+                    <div className="p-2 border-t border-gray-50 bg-gray-50/80 rounded-b-2xl">
+                      <div className="flex items-center justify-between px-3 py-2 text-brand-600 hover:text-brand-700 transition-colors cursor-default rounded-lg hover:bg-brand-50/50">
+                        <span className="text-[12px] font-bold">View Full Resume Report</span>
+                        <ChevronRight className="w-4 h-4" />
+                      </div>
+                    </div>
+                  </motion.div>
+
+                  {/* Lower-Right AI Suggestions */}
+                  <motion.div 
+                    initial={{ opacity: 0, x: 15, y: 15 }}
+                    whileInView={{ opacity: 1, x: 0, y: 0 }}
+                    transition={{ duration: 0.6, delay: 0.3 }}
+                    viewport={{ once: true }}
+                    className="absolute bottom-4 right-4 sm:bottom-8 sm:right-8 w-[88%] sm:w-[310px] bg-white rounded-2xl shadow-xl shadow-gray-200/60 border border-gray-100 z-20"
+                  >
+                    {/* Header */}
+                    <div className="flex items-center justify-between p-3.5 border-b border-gray-50">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-7 h-7 rounded-lg bg-purple-50 flex items-center justify-center text-purple-600 border border-purple-100/50">
+                          <Sparkles className="w-4 h-4" />
+                        </div>
+                        <span className="text-[13px] font-bold text-gray-800">AI Suggestions</span>
+                      </div>
+                      <span className="px-2.5 py-1 rounded-full bg-brand-50 border border-brand-100/50 text-brand-700 text-[10px] font-bold tracking-wider uppercase">3 improvements</span>
+                    </div>
+
+                    {/* Suggestions */}
+                    <div className="p-3.5 space-y-4">
+                      <div className="flex gap-3">
+                        <div className="mt-0.5 w-6 h-6 rounded-full bg-blue-50 flex items-center justify-center shrink-0 border border-blue-100">
+                          <Target className="w-3.5 h-3.5 text-blue-600" />
+                        </div>
+                        <div>
+                          <p className="text-[12px] font-bold text-gray-900">Add measurable impact</p>
+                          <p className="text-[11px] text-gray-500 leading-snug mt-0.5">Include metrics to strengthen your project experience.</p>
+                        </div>
+                      </div>
+                      <div className="flex gap-3">
+                        <div className="mt-0.5 w-6 h-6 rounded-full bg-orange-50 flex items-center justify-center shrink-0 border border-orange-100">
+                          <ScanLine className="w-3.5 h-3.5 text-orange-600" />
+                        </div>
+                        <div>
+                          <p className="text-[12px] font-bold text-gray-900">Improve keyword coverage</p>
+                          <p className="text-[11px] text-gray-500 leading-snug mt-0.5">Add missing skills relevant to your target role.</p>
+                        </div>
+                      </div>
+                      <div className="flex gap-3">
+                        <div className="mt-0.5 w-6 h-6 rounded-full bg-green-50 flex items-center justify-center shrink-0 border border-green-100">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-green-600" />
+                        </div>
+                        <div>
+                          <p className="text-[12px] font-bold text-gray-900">Strengthen summary</p>
+                          <p className="text-[11px] text-gray-500 leading-snug mt-0.5">Make your professional summary more role-specific.</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* CTA */}
+                    <div className="p-2 border-t border-gray-50 bg-brand-50/40 rounded-b-2xl">
+                      <div className="flex items-center justify-between px-3 py-2 text-brand-700 hover:text-brand-800 transition-colors cursor-default rounded-lg hover:bg-brand-100/50">
+                        <span className="text-[12px] font-bold">Optimize Resume</span>
+                        <ChevronRight className="w-4 h-4" />
+                      </div>
+                    </div>
+                  </motion.div>
+
+                  {/* Floating Ecosystem Detail */}
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.5 }}
+                    viewport={{ once: true }}
+                    className="hidden sm:flex absolute top-6 right-6 lg:top-12 lg:right-10 bg-white rounded-xl shadow-lg shadow-gray-200/50 border border-gray-100 p-2.5 items-center gap-2.5 z-30"
+                  >
+                    <div className="w-8 h-8 rounded-full bg-green-50 flex items-center justify-center border border-green-100/50">
+                      <CheckCircle2 className="w-4 h-4 text-green-600" />
+                    </div>
+                    <div className="pr-3">
+                      <p className="text-[11px] font-bold text-gray-800 leading-tight mb-0.5">ATS Check</p>
+                      <p className="text-[10px] text-gray-500 font-semibold leading-none">82 Score</p>
+                    </div>
+                  </motion.div>
+
                 </div>
               </motion.div>
               <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeInUp} className="order-1 lg:order-2 space-y-6">
