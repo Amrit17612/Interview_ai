@@ -50,14 +50,16 @@ export function Register() {
   };
 
   return (
-    <Container className="py-12 flex justify-center items-center min-h-[calc(100vh-8rem)] relative">
-      <NavLink
-        to={ROUTES.HOME}
-        className="absolute top-4 left-4 md:top-8 md:left-8 flex items-center text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors"
-      >
-        <ArrowLeft className="mr-2 h-4 w-4" />
-        Back to Home
-      </NavLink>
+    <Container className="py-12 flex flex-col justify-center items-center min-h-[calc(100vh-8rem)]">
+      <div className="w-full max-w-md mb-6">
+        <NavLink
+          to={ROUTES.HOME}
+          className="inline-flex items-center text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors"
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Back to Home
+        </NavLink>
+      </div>
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-md">
         <Card className="shadow-premium border-gray-100">
           <CardHeader className="text-center pb-6">
