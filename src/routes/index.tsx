@@ -76,6 +76,7 @@ const CompanyBundles = Loadable(lazy(() => import('../features/premium/pages/Com
 const DomainBundles = Loadable(lazy(() => import('../features/premium/pages/DomainBundles').then(m => ({ default: m.DomainBundles }))));
 const MyPurchases = Loadable(lazy(() => import('../features/premium/pages/MyPurchases').then(m => ({ default: m.MyPurchases }))));
 const BundlePractice = Loadable(lazy(() => import('../features/premium/pages/BundlePractice').then(m => ({ default: m.BundlePractice }))));
+const Wallet = Loadable(lazy(() => import('../features/premium/pages/Wallet').then(m => ({ default: m.Wallet }))));
 
 // Analytics & Progress
 const ReportsAnalytics = Loadable(lazy(() => import('../features/dashboard/pages/ReportsAnalytics').then(m => ({ default: m.ReportsAnalytics }))));
@@ -197,7 +198,7 @@ export const router = createBrowserRouter([
       { path: ROUTES.CONTACT_SUPPORT, element: <ComingSoon /> },
       { path: ROUTES.FEEDBACK, element: <ComingSoon /> },
       { path: ROUTES.REPORT_BUG, element: <ComingSoon /> },
-      { path: ROUTES.CREDITS, element: <ComingSoon /> },
+      { path: ROUTES.CREDITS, element: <Wallet /> },
       { path: ROUTES.CREDITS_REFERRAL, element: <ComingSoon /> }
         ]
       }

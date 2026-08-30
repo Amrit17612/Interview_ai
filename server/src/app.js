@@ -59,6 +59,7 @@ const interviewTemplateRoutes = require('./routes/interviewTemplateRoutes');
 const interviewRoutes = require('./routes/interviewRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
 const adminRoutes = require('./routes/adminRoutes');
+const userRoutes = require('./routes/userRoutes');
 const { globalLimiter } = require('./middleware/rateLimiter');
 
 // Apply global rate limiter to all /api routes
@@ -73,6 +74,7 @@ app.use('/api/interview-templates', interviewTemplateRoutes);
 app.use('/api/interviews', interviewRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/user', userRoutes);
 
 const mongoose = require('mongoose');
 

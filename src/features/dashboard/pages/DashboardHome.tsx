@@ -8,7 +8,7 @@ import {
   CheckCircle, RefreshCw, Target, 
   Flame, Coins, Award, Compass, ShieldCheck, Map
 } from 'lucide-react';
-import { NavLink, useNavigate, useLocation } from 'react-router-dom';
+import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { ROUTES } from '../../../constants/routes';
 import { useAuth } from '../../auth/hooks/useAuth';
 import { resumeService } from '../../../services/resume.service';
@@ -126,13 +126,13 @@ export function DashboardHome() {
           <p className="text-gray-500 mt-1">Let's crack your dream job together.</p>
         </div>
         <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2 bg-amber-50 px-4 py-2 rounded-xl border border-amber-100">
+          <Link to={ROUTES.CREDITS} className="flex items-center gap-2 bg-amber-50 px-4 py-2 rounded-xl border border-amber-100 hover:bg-amber-100 transition-colors cursor-pointer">
             <Coins className="h-5 w-5 text-amber-500" />
             <div>
               <p className="text-xs text-amber-700 font-medium leading-none">Credits</p>
               <p className="text-sm font-bold text-amber-900 leading-none mt-1">{credits}</p>
             </div>
-          </div>
+          </Link>
           <NavLink to={ROUTES.INTERVIEW}>
             <Button className="shadow-sm bg-brand-600 hover:bg-brand-700 text-white">
               <Play className="mr-2 h-4 w-4" /> Start Practice
