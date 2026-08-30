@@ -69,8 +69,8 @@ export function DomainBundles() {
           onClose={() => setCheckoutBundle(null)}
           bundleId={checkoutBundle.id}
           bundleType="DOMAIN"
-          bundleTitle={checkoutBundle.title}
-          originalPrice={checkoutBundle.price.amount * 100} // converting INR to paise
+          bundleTitle={checkoutBundle.name}
+          originalPrice={checkoutBundle.price * 100} // converting INR to paise
           onConfirm={confirmCheckout}
           isProcessing={isProcessing === checkoutBundle.id}
         />

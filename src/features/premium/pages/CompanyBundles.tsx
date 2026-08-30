@@ -69,8 +69,8 @@ export function CompanyBundles() {
           onClose={() => setCheckoutBundle(null)}
           bundleId={checkoutBundle.id}
           bundleType="COMPANY"
-          bundleTitle={checkoutBundle.title}
-          originalPrice={checkoutBundle.price.amount * 100} // assuming price.amount is in INR, convert to paise
+          bundleTitle={checkoutBundle.name}
+          originalPrice={checkoutBundle.price * 100} // assuming price is in INR, convert to paise
           onConfirm={confirmCheckout}
           isProcessing={isProcessing === checkoutBundle.id}
         />
