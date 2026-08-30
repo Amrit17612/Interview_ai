@@ -16,7 +16,8 @@ import {
   LogOut,
   Menu,
   X,
-  Lock
+  Lock,
+  Tag
 } from 'lucide-react';
 import { Container } from '../components/ui/Container';
 
@@ -93,6 +94,7 @@ function AdminSidebar({ onClose }: { onClose: () => void }) {
       title: 'COMMERCE',
       items: [
         { name: 'Payments', icon: CreditCard, href: '/admin/payments' },
+        { name: 'Promos', icon: Tag, href: '/admin/promos' },
         { name: 'Purchases', icon: ShoppingBag, href: '/admin/purchases', disabled: true },
         { name: 'Bundle Analytics', icon: BarChart, href: '/admin/bundle-analytics', disabled: true },
       ],

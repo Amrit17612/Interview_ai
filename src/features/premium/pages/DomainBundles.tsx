@@ -6,6 +6,8 @@ import { motion } from 'framer-motion';
 import { useCheckout } from '../hooks/useCheckout';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '../../../constants/routes';
+import { CheckoutModal } from '../components/CheckoutModal';
+import { useState } from 'react';
 
 export function DomainBundles() {
   const { handleCheckout, isProcessing } = useCheckout();
@@ -20,8 +22,19 @@ export function DomainBundles() {
     navigate(ROUTES.DOMAIN_PACK_DETAILS.replace(':id', bundleId));
   };
 
+  const [checkoutBundle, setCheckoutBundle] = useState<any>(null);
+
   const handlePurchase = (bundleId: string) => {
-    handleCheckout(bundleId, 'DOMAIN');
+    const bundle = MOCK_DOMAIN_BUNDLES.find(b => b.id === bundleId);
+    if (bundle) {
+      setCheckoutBundle(bundle);
+    }
+  };
+
+  const confirmCheckout = (promoCode?: string, creditsToUse?: number) => {
+    if (checkoutBundle) {
+      handleCheckout(checkoutBundle.id, 'DOMAIN', promoCode, creditsToUse);
+    }
   };
 
   return (
@@ -49,6 +62,19 @@ export function DomainBundles() {
           ))}
         </div>
       </motion.div>
+
+      {checkoutBundle && (
+        <CheckoutModal 
+          isOpen={!!checkoutBundle}
+          onClose={() => setCheckoutBundle(null)}
+          bundleId={checkoutBundle.id}
+          bundleType="DOMAIN"
+          bundleTitle={checkoutBundle.title}
+          originalPrice={checkoutBundle.price.amount * 100} // converting INR to paise
+          onConfirm={confirmCheckout}
+          isProcessing={isProcessing === checkoutBundle.id}
+        />
+      )}
     </Container>
   );
 }
