@@ -53,5 +53,10 @@ export const paymentService = {
   getHistory: async () => {
     const response = await apiClient.get('/payments/history');
     return response.data;
+  },
+
+  cancelOrder: async (orderId: string): Promise<any> => {
+    const response = await apiClient.post('/payments/cancel', { orderId });
+    return response.data;
   }
 };

@@ -83,7 +83,10 @@ export const useCheckout = () => {
           color: '#4f46e5'
         },
         modal: {
-          ondismiss: () => {
+          ondismiss: async () => {
+            if (order.orderId) {
+              await paymentService.cancelOrder(order.orderId).catch(console.error);
+            }
             setIsProcessing(null);
           }
         }
@@ -91,8 +94,11 @@ export const useCheckout = () => {
 
       const rzp = new Razorpay(options);
       
-      rzp.on('payment.failed', (response: any) => {
+      rzp.on('payment.failed', async (response: any) => {
         console.error(response.error);
+        if (order.orderId) {
+          await paymentService.cancelOrder(order.orderId).catch(console.error);
+        }
         alert('Payment failed. Please try again.');
         setIsProcessing(null);
       });

@@ -8,6 +8,8 @@ const PromoUsage = require('../models/PromoUsage');
 const CreditTransaction = require('../models/CreditTransaction');
 const TRUSTED_CATALOG = require('../config/catalog');
 
+const PAYMENT_CHECKOUT_EXPIRY_MINUTES = 15;
+
 // Lazy load Razorpay instance to ensure env vars are populated
 let razorpayInstance = null;
 const getRazorpay = () => {
@@ -58,7 +60,7 @@ const grantEntitlement = async (userId, bundleId, bundleType) => {
 const finalizeSuccessfulPayment = async (paymentId, userId) => {
   // Idempotent atomic state transition - Lock the payment for processing
   const payment = await Payment.findOneAndUpdate(
-    { _id: paymentId, status: 'CREATED' },
+    { _id: paymentId, status: { $in: ['CREATED', 'FAILED'] } },
     { $set: { status: 'PROCESSING' } },
     { new: true }
   );
@@ -124,7 +126,7 @@ const finalizeSuccessfulPayment = async (paymentId, userId) => {
       }
     }
 
-    // 2. Deduct Credits safely using atomic $gte check to prevent concurrent double-spend
+    // 2. Deduct Credits safely using atomic $gte check to prevent concurrent double-spend exploits across multiple bundles
     if (payment.creditsUsed > 0) {
       const updatedUser = await User.findOneAndUpdate(
         { _id: userId, credits: { $gte: payment.creditsUsed } },
@@ -134,7 +136,7 @@ const finalizeSuccessfulPayment = async (paymentId, userId) => {
 
       if (!updatedUser) {
         await Payment.findByIdAndUpdate(paymentId, { status: 'FAILED_INSUFFICIENT_CREDITS' });
-        throw new Error('Insufficient credits');
+        throw new Error('Insufficient credits during finalization (potential double-spend detected)');
       }
 
       creditsDeducted = true;
@@ -305,9 +307,45 @@ exports.createOrder = async (req, res, next) => {
       bundleId,
       status: { $in: ['CREATED', 'PROCESSING', 'SUCCESS'] }
     });
+    
     if (existingPayment) {
-      res.status(400);
-      throw new Error('A payment for this bundle is already processing or successful');
+      if (existingPayment.status === 'SUCCESS') {
+        res.status(400);
+        throw new Error('You already own this bundle');
+      }
+      
+      // Verify Razorpay status to avoid race conditions
+      if (existingPayment.razorpayOrderId) {
+        try {
+          const razorpay = getRazorpay();
+          const rzpOrder = await razorpay.orders.fetch(existingPayment.razorpayOrderId);
+          if (rzpOrder.status === 'paid') {
+            await finalizeSuccessfulPayment(existingPayment._id, userId);
+            res.status(400);
+            throw new Error('You already own this bundle');
+          }
+        } catch (e) {
+          console.error("Failed to fetch Razorpay order status", e);
+        }
+      }
+
+      // Check if stale
+      const staleThreshold = new Date(Date.now() - PAYMENT_CHECKOUT_EXPIRY_MINUTES * 60 * 1000);
+      if (existingPayment.createdAt < staleThreshold) {
+         // Atomic conditional update to prevent race conditions with webhook
+         const updated = await Payment.findOneAndUpdate(
+           { _id: existingPayment._id, status: 'CREATED' },
+           { $set: { status: 'FAILED' } },
+           { new: true }
+         );
+         if (!updated) {
+           res.status(400);
+           throw new Error('Your payment is currently being processed. Please check back in a moment.');
+         }
+      } else {
+         res.status(400);
+         throw new Error('Your payment is still processing. Please wait a moment.');
+      }
     }
 
     let originalAmount = catalogItem.amount; // e.g. 4900 (paise)
@@ -471,7 +509,12 @@ exports.verifyPayment = async (req, res, next) => {
     payment.razorpaySignature = razorpay_signature;
     await payment.save(); 
 
-    const updatedUser = await finalizeSuccessfulPayment(payment._id, userId);
+    let updatedUser = await finalizeSuccessfulPayment(payment._id, userId);
+    
+    // If null, the webhook might have already picked it up (PROCESSING or SUCCESS)
+    if (!updatedUser) {
+      updatedUser = await User.findById(userId);
+    }
 
     res.json({
       success: true,
@@ -508,7 +551,7 @@ exports.webhook = async (req, res, next) => {
 
       if (razorpayOrderId) {
         const payment = await Payment.findOne({ razorpayOrderId });
-        if (payment && payment.status === 'CREATED') {
+        if (payment && (payment.status === 'CREATED' || payment.status === 'FAILED')) {
           await finalizeSuccessfulPayment(payment._id, payment.user);
         }
       }
@@ -534,6 +577,54 @@ exports.getPaymentHistory = async (req, res, next) => {
     });
 
     res.json({ success: true, payments: enrichedPayments });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.cancelOrder = async (req, res, next) => {
+  try {
+    const { orderId } = req.body;
+    if (!orderId) {
+      return res.status(400).json({ success: false, message: 'Missing order ID' });
+    }
+
+    const payment = await Payment.findOne({ razorpayOrderId: orderId, user: req.user._id });
+    if (!payment) {
+      return res.status(404).json({ success: false, message: 'Payment not found' });
+    }
+
+    if (payment.status === 'SUCCESS') {
+      return res.json({ success: true, message: 'Payment already successful' });
+    }
+
+    if (payment.status === 'CREATED') {
+      if (payment.razorpayOrderId) {
+        try {
+          const razorpay = getRazorpay();
+          const rzpOrder = await razorpay.orders.fetch(payment.razorpayOrderId);
+          if (rzpOrder.status === 'paid') {
+            await finalizeSuccessfulPayment(payment._id, req.user._id);
+            return res.json({ success: true, message: 'Payment was actually successful' });
+          }
+        } catch (e) {
+          console.error("Failed to fetch Razorpay status during cancellation", e);
+        }
+      }
+
+      // Atomic conditional update to prevent SUCCESS race condition
+      const updated = await Payment.findOneAndUpdate(
+        { _id: payment._id, status: 'CREATED' },
+        { $set: { status: 'FAILED' } },
+        { new: true }
+      );
+      
+      if (!updated) {
+        return res.json({ success: true, message: 'Cancellation aborted due to state change' });
+      }
+    }
+
+    res.json({ success: true, message: 'Payment cancelled successfully' });
   } catch (error) {
     next(error);
   }
