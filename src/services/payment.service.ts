@@ -34,6 +34,12 @@ export interface ValidatePromoResponse {
   discountAmount: number;
 }
 
+export interface CancelOrderResponse {
+  success: boolean;
+  paymentStatus?: 'SUCCESS' | 'FAILED' | 'PROCESSING' | 'CREATED' | string;
+  message?: string;
+}
+
 export const paymentService = {
   createOrder: async (data: CreateOrderRequest): Promise<CreateOrderResponse> => {
     const response = await apiClient.post<CreateOrderResponse>('/payments/create-order', data);
@@ -55,8 +61,8 @@ export const paymentService = {
     return response.data;
   },
 
-  cancelOrder: async (orderId: string): Promise<any> => {
-    const response = await apiClient.post('/payments/cancel', { orderId });
+  cancelOrder: async (orderId: string): Promise<CancelOrderResponse> => {
+    const response = await apiClient.post<CancelOrderResponse>('/payments/cancel', { orderId });
     return response.data;
   }
 };

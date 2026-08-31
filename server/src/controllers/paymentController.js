@@ -595,7 +595,7 @@ exports.cancelOrder = async (req, res, next) => {
     }
 
     if (payment.status === 'SUCCESS') {
-      return res.json({ success: true, message: 'Payment already successful' });
+      return res.json({ success: true, paymentStatus: 'SUCCESS', message: 'Payment already successful' });
     }
 
     if (payment.status === 'CREATED') {
@@ -605,7 +605,7 @@ exports.cancelOrder = async (req, res, next) => {
           const rzpOrder = await razorpay.orders.fetch(payment.razorpayOrderId);
           if (rzpOrder.status === 'paid') {
             await finalizeSuccessfulPayment(payment._id, req.user._id);
-            return res.json({ success: true, message: 'Payment was actually successful' });
+            return res.json({ success: true, paymentStatus: 'SUCCESS', message: 'Payment was actually successful' });
           }
         } catch (e) {
           console.error("Failed to fetch Razorpay status during cancellation", e);
@@ -620,11 +620,14 @@ exports.cancelOrder = async (req, res, next) => {
       );
       
       if (!updated) {
-        return res.json({ success: true, message: 'Cancellation aborted due to state change' });
+        const current = await Payment.findById(payment._id);
+        return res.json({ success: true, paymentStatus: current.status, message: 'Cancellation aborted due to state change' });
       }
+      
+      return res.json({ success: true, paymentStatus: 'FAILED', message: 'Payment cancelled successfully' });
     }
 
-    res.json({ success: true, message: 'Payment cancelled successfully' });
+    res.json({ success: true, paymentStatus: payment.status, message: 'Payment status unchanged' });
   } catch (error) {
     next(error);
   }

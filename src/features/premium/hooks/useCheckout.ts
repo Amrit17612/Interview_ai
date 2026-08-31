@@ -85,11 +85,50 @@ export const useCheckout = () => {
         modal: {
           ondismiss: async () => {
             if (order.orderId) {
-              await paymentService.cancelOrder(order.orderId).catch(console.error);
+              await reconcilePayment(order.orderId);
+            } else {
+              setIsProcessing(null);
             }
-            setIsProcessing(null);
           }
         }
+      };
+
+      const reconcilePayment = async (orderId: string, maxAttempts = 3) => {
+        for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+          try {
+            const result = await paymentService.cancelOrder(orderId);
+            
+            if (result.paymentStatus === 'SUCCESS') {
+              await refreshUser();
+              setIsProcessing(null);
+              // Close any open modals and navigate
+              const rzpContainers = document.querySelectorAll('.razorpay-container');
+              rzpContainers.forEach(container => container.remove());
+              navigate(ROUTES.MY_PURCHASES);
+              return;
+            }
+            
+            if (result.paymentStatus === 'FAILED') {
+              alert('Payment failed. You can try again.');
+              setIsProcessing(null);
+              return;
+            }
+
+            // PROCESSING or CREATED -> wait and poll
+            if (attempt < maxAttempts) {
+              await new Promise(resolve => setTimeout(resolve, attempt * 1000));
+            }
+          } catch (err) {
+            console.error("Reconciliation error", err);
+            if (attempt < maxAttempts) {
+              await new Promise(resolve => setTimeout(resolve, attempt * 1000));
+            }
+          }
+        }
+        
+        // Timeout
+        alert('Payment is being verified. Please check your purchases shortly. Do not pay again.');
+        setIsProcessing(null);
       };
 
       const rzp = new Razorpay(options);
@@ -97,10 +136,11 @@ export const useCheckout = () => {
       rzp.on('payment.failed', async (response: any) => {
         console.error(response.error);
         if (order.orderId) {
-          await paymentService.cancelOrder(order.orderId).catch(console.error);
+          await reconcilePayment(order.orderId);
+        } else {
+          alert('Payment failed. Please try again.');
+          setIsProcessing(null);
         }
-        alert('Payment failed. Please try again.');
-        setIsProcessing(null);
       });
 
       rzp.open();
