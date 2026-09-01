@@ -117,7 +117,7 @@ export function DeviceCheck() {
   // ----------------------------------------------------
   useEffect(() => {
     if (currentStep !== 1) return;
-    setMicStatus('checking');
+    if (micStatus !== 'checking') return;
 
     if (!globalStream) {
       // If globalStream failed, mark error (wait slightly to ensure initialization finished)
@@ -146,6 +146,9 @@ export function DeviceCheck() {
         dataArrayRef.current = dataArray;
 
         let detected = false;
+        let baseline = 0;
+        let baselineSamples = 0;
+        let sustainedFrames = 0;
         
         const checkLevel = () => {
           if (!analyserRef.current || !dataArrayRef.current) return;
@@ -157,10 +160,32 @@ export function DeviceCheck() {
           }
           const average = sum / dataArrayRef.current.length;
           
-          if (average > 10) { // Threshold for "speaking"
-            detected = true;
-            setAudioLevelDetected(true);
-            setMicStatus('success');
+          // Phase 1: Establish ambient baseline (approx 30 frames ~ 0.5s)
+          if (baselineSamples < 30) {
+            baseline += average;
+            baselineSamples++;
+            if (baselineSamples === 30) {
+              baseline = baseline / 30;
+            }
+          } else {
+            // Phase 2: Detect sustained speech significantly above baseline
+            const threshold = Math.max(baseline * 1.5, 12); 
+            
+            if (average > threshold) {
+              sustainedFrames++;
+              if (sustainedFrames > 10 && !detected) {
+                setAudioLevelDetected(true);
+              }
+              if (sustainedFrames > 45 && !detected) { // approx 0.75s of sustained volume
+                detected = true;
+                setMicStatus('success');
+              }
+            } else {
+              if (sustainedFrames > 0) sustainedFrames--;
+              if (sustainedFrames === 0 && !detected) {
+                setAudioLevelDetected(false);
+              }
+            }
           }
 
           if (!detected) {
@@ -181,17 +206,17 @@ export function DeviceCheck() {
       stopListening();
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
     };
-  }, [currentStep, globalStream, startListening, stopListening]);
+  }, [currentStep, micStatus, globalStream, startListening, stopListening]);
 
   // If transcript matches the sentence, mark success (fallback to audio level)
   useEffect(() => {
-    if (currentStep === 1 && transcript) {
+    if (currentStep === 1 && transcript && micStatus === 'checking') {
       const lower = transcript.toLowerCase();
       if (lower.includes('hello') || lower.includes('ready') || lower.includes('start') || lower.includes('interview')) {
         setMicStatus('success');
       }
     }
-  }, [transcript, currentStep]);
+  }, [transcript, currentStep, micStatus]);
 
 
   // ----------------------------------------------------
@@ -324,12 +349,21 @@ export function DeviceCheck() {
                 <p className="text-xl font-medium text-slate-800 italic">"Hello, I am ready to start my interview."</p>
               </div>
 
-              <div className="h-16 w-full max-w-xs mb-8 flex items-center justify-center">
-                {micStatus === 'checking' ? (
-                  <div className="flex flex-col items-center text-gray-400">
+              <div className="h-24 w-full max-w-xs mb-8 flex flex-col items-center justify-center">
+                {micStatus === 'idle' ? (
+                  <div className="flex flex-col items-center gap-2">
+                    <p className="text-sm text-gray-500 mb-2">We haven't detected your voice yet. Please click below and speak the sentence above.</p>
+                    <Button onClick={() => setMicStatus('checking')} className="w-full">
+                      Start Microphone Test
+                    </Button>
+                  </div>
+                ) : micStatus === 'checking' ? (
+                  <div className="flex flex-col items-center text-gray-400 w-full">
                     <AudioWaveform isListening={true} stream={globalStream} />
-                    {audioLevelDetected && !transcript && (
-                      <span className="text-xs text-brand-500 mt-2 font-medium">Microphone input detected...</span>
+                    {audioLevelDetected && !transcript ? (
+                      <span className="text-xs text-brand-500 mt-2 font-medium">Voice detected...</span>
+                    ) : (
+                      <span className="text-xs text-brand-500 mt-2 font-medium">Listening... Speak now</span>
                     )}
                   </div>
                 ) : micStatus === 'error' ? (
@@ -358,7 +392,7 @@ export function DeviceCheck() {
               <Button 
                 size="lg" 
                 onClick={() => setCurrentStep(2)}
-                disabled={micStatus === 'checking'}
+                disabled={micStatus !== 'success'}
                 className="min-w-[200px]"
               >
                 Continue <ArrowRight className="w-5 h-5 ml-2" />
