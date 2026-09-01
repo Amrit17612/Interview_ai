@@ -44,8 +44,9 @@ export function FloatingCamera() {
         if (streamCache.cameraStream && streamCache.cameraStream.active) {
           localStream = streamCache.cameraStream;
         } else {
-          localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
-          streamCache.setCameraStream(localStream);
+          console.warn("No active stream found in cache. Floating camera unavailable.");
+          setError(true);
+          return;
         }
         
         setError(false);

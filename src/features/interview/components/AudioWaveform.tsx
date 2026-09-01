@@ -2,30 +2,23 @@ import { useEffect, useRef } from 'react';
 
 interface AudioWaveformProps {
   isListening: boolean;
+  stream?: MediaStream | null;
 }
 
-export function AudioWaveform({ isListening }: AudioWaveformProps) {
+export function AudioWaveform({ isListening, stream }: AudioWaveformProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const sourceRef = useRef<MediaStreamAudioSourceNode | null>(null);
   const animationRef = useRef<number | null>(null);
-  const streamRef = useRef<MediaStream | null>(null);
 
   useEffect(() => {
     let mounted = true;
 
     const initAudio = async () => {
-      if (!isListening) return;
+      if (!isListening || !stream) return;
 
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
-        if (!mounted) {
-          stream.getTracks().forEach(t => t.stop());
-          return;
-        }
-        
-        streamRef.current = stream;
         
         // Initialize Web Audio API
         const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
@@ -104,13 +97,10 @@ export function AudioWaveform({ isListening }: AudioWaveformProps) {
       if (sourceRef.current) sourceRef.current.disconnect();
       if (analyserRef.current) analyserRef.current.disconnect();
       if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
-        audioContextRef.current.close();
-      }
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach(t => t.stop());
+        audioContextRef.current.close().catch(() => {});
       }
     };
-  }, [isListening]);
+  }, [isListening, stream]);
 
   return (
     <div className="w-full h-24 flex items-center justify-center bg-slate-900 rounded-xl overflow-hidden relative">

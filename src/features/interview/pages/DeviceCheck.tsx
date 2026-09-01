@@ -41,11 +41,11 @@ export function DeviceCheck() {
   const analyserRef = useRef<AnalyserNode | null>(null);
   const dataArrayRef = useRef<Uint8Array | null>(null);
   const sourceRef = useRef<MediaStreamAudioSourceNode | null>(null);
-  const micStreamRef = useRef<MediaStream | null>(null);
   const rafRef = useRef<number | null>(null);
 
-  // Camera Test State
-  const [camStream, setCamStream] = useState<MediaStream | null>(null);
+  // Unified Stream State
+  const [globalStream, setGlobalStream] = useState<MediaStream | null>(null);
+  const streamInitializingRef = useRef(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   // Consent
@@ -59,16 +59,52 @@ export function DeviceCheck() {
     }
   }, [sessionId, navigate]);
 
-  // Clean up ALL streams on unmount
+  // UNIFIED STREAM ACQUISITION
+  useEffect(() => {
+    let active = true;
+
+    const initStream = async () => {
+      // 1. Check if we already have a valid cached stream
+      if (streamCache.cameraStream && streamCache.cameraStream.active) {
+        if (active) {
+          setGlobalStream(streamCache.cameraStream);
+        }
+        return;
+      }
+      
+      // 2. Prevent duplicate calls (React StrictMode / Remounts)
+      if (streamInitializingRef.current) return;
+      streamInitializingRef.current = true;
+
+      try {
+        // Acquire BOTH mic and camera once
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
+        
+        // Save to cache immediately so ActiveInterview can use it
+        streamCache.setCameraStream(stream);
+        
+        if (active) {
+          setGlobalStream(stream);
+        }
+      } catch (err) {
+        console.error("Failed to acquire unified stream", err);
+      } finally {
+        streamInitializingRef.current = false;
+      }
+    };
+
+    initStream();
+    
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  // Clean up ONLY audio context / speech on unmount.
+  // DO NOT stop the global stream tracks here, as ActiveInterview needs them!
   useEffect(() => {
     return () => {
       stopListening();
-      if (micStreamRef.current) {
-        micStreamRef.current.getTracks().forEach(t => t.stop());
-      }
-      // Note: We DO NOT stop camStream here, because we want to hand it off.
-      // ActiveInterview / FloatingCamera will manage camStream cleanup.
-      
       if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
         audioContextRef.current.close().catch(() => {});
       }
@@ -81,25 +117,28 @@ export function DeviceCheck() {
   // ----------------------------------------------------
   useEffect(() => {
     if (currentStep !== 1) return;
-
     setMicStatus('checking');
+
+    if (!globalStream) {
+      // If globalStream failed, mark error (wait slightly to ensure initialization finished)
+      if (!streamInitializingRef.current && !streamCache.cameraStream) {
+        setMicStatus('error');
+      }
+      return;
+    }
     
-    // Check for transcription support vs raw audio fallback
     const checkAudioLevel = async () => {
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        micStreamRef.current = stream;
-        
         // Start listening for transcript if supported
         try { startListening(); } catch (e) { console.warn('SpeechRecognition unavailable', e); }
 
-        // Setup audio level detection
+        // Setup audio level detection using the unified globalStream
         const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
         audioContextRef.current = audioCtx;
         const analyser = audioCtx.createAnalyser();
         analyserRef.current = analyser;
         analyser.fftSize = 256;
-        const source = audioCtx.createMediaStreamSource(stream);
+        const source = audioCtx.createMediaStreamSource(globalStream);
         sourceRef.current = source;
         source.connect(analyser);
         
@@ -130,7 +169,6 @@ export function DeviceCheck() {
         };
         
         checkLevel();
-
       } catch (err) {
         console.error('Microphone error:', err);
         setMicStatus('error');
@@ -143,7 +181,7 @@ export function DeviceCheck() {
       stopListening();
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
     };
-  }, [currentStep, startListening, stopListening]);
+  }, [currentStep, globalStream, startListening, stopListening]);
 
   // If transcript matches the sentence, mark success (fallback to audio level)
   useEffect(() => {
@@ -161,34 +199,25 @@ export function DeviceCheck() {
   // ----------------------------------------------------
   useEffect(() => {
     if (currentStep !== 2) return;
-    
     setCamStatus('checking');
-    let localStream: MediaStream | null = null;
-    
-    const checkCamera = async () => {
-      try {
-        localStream = await navigator.mediaDevices.getUserMedia({ video: true });
-        setCamStream(localStream);
-        streamCache.setCameraStream(localStream);
-        setCamStatus('success');
-      } catch (err) {
-        console.error('Camera error:', err);
-        setCamStatus('error');
+
+    if (globalStream) {
+      // The stream was already acquired in step 1/init
+      setCamStatus('success');
+    } else {
+      if (!streamInitializingRef.current) {
+         setCamStatus('error');
       }
-    };
-    
-    checkCamera();
-    
-    return () => {
-      // Don't stop it yet, keep it active for the preview
-    };
-  }, [currentStep]);
+    }
+  }, [currentStep, globalStream]);
 
   useEffect(() => {
-    if (currentStep === 2 && videoRef.current && camStream) {
-      videoRef.current.srcObject = camStream;
+    if (currentStep === 2 && videoRef.current && globalStream) {
+      videoRef.current.srcObject = globalStream;
+      // explicitly play just in case, though autoPlay is set
+      videoRef.current.play().catch(() => {});
     }
-  }, [currentStep, camStream]);
+  }, [currentStep, globalStream]);
 
 
   // ----------------------------------------------------
@@ -220,7 +249,8 @@ export function DeviceCheck() {
 
 
   const handleContinue = () => {
-    // Navigate will unmount and clean up streams
+    // Navigate will unmount and clean up ONLY DeviceCheck local state.
+    // globalStream (cached in streamCache) survives.
     navigate(`${ROUTES.INTERVIEW_ACTIVE}?id=${sessionId}`);
   };
 
@@ -297,7 +327,7 @@ export function DeviceCheck() {
               <div className="h-16 w-full max-w-xs mb-8 flex items-center justify-center">
                 {micStatus === 'checking' ? (
                   <div className="flex flex-col items-center text-gray-400">
-                    <AudioWaveform isListening={true} />
+                    <AudioWaveform isListening={true} stream={globalStream} />
                     {audioLevelDetected && !transcript && (
                       <span className="text-xs text-brand-500 mt-2 font-medium">Microphone input detected...</span>
                     )}
@@ -364,7 +394,7 @@ export function DeviceCheck() {
                     <span>Camera access denied</span>
                   </div>
                 )}
-                {camStream && (
+                {globalStream && (
                   <video 
                     ref={videoRef}
                     autoPlay 

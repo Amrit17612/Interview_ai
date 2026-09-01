@@ -1,4 +1,4 @@
-import { createBrowserRouter, Navigate } from 'react-router-dom';
+import { createBrowserRouter, Navigate, Outlet } from 'react-router-dom';
 import { lazy, Suspense } from 'react';
 import { ROUTES } from '../constants/routes';
 import { PublicLayout } from '../layouts/PublicLayout';
@@ -7,6 +7,7 @@ import { DashboardLayout } from '../layouts/DashboardLayout';
 import { AdminLayout } from '../layouts/AdminLayout';
 import { SystemLayout } from '../layouts/SystemLayout';
 import { Spinner } from '../components/ui/Spinner';
+import { InterviewProvider } from '../features/interview/context/InterviewContext';
 
 const Loadable = (Component: React.ComponentType<any>) => (props: any) => (
   <Suspense fallback={
@@ -158,8 +159,15 @@ export const router = createBrowserRouter([
     element: <ProtectedRoute requireOnboarding={true} />,
     children: [
       {
-        element: <DashboardLayout />,
+        element: (
+          <InterviewProvider>
+            <Outlet />
+          </InterviewProvider>
+        ),
         children: [
+          {
+            element: <DashboardLayout />,
+            children: [
       { path: ROUTES.DASHBOARD, element: <DashboardHome /> },
       { path: ROUTES.INTERVIEW, element: <InterviewHome /> },
       { path: ROUTES.INTERVIEW_RESUME, element: <ResumeSelection /> },
@@ -214,6 +222,8 @@ export const router = createBrowserRouter([
       { path: ROUTES.INTERVIEW_DEVICE_CHECK, element: <DeviceCheck /> },
       { path: ROUTES.INTERVIEW_ACTIVE, element: <ActiveInterview /> },
       { path: ROUTES.INTERVIEW_PROCESSING, element: <AIProcessing /> }
+        ]
+      }
     ]
   },
   {

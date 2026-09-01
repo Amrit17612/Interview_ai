@@ -24,7 +24,7 @@ import type { LucideIcon } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '../components/ui/Button';
 import { useAuth } from '../features/auth/hooks/useAuth';
-import { InterviewProvider } from '../features/interview/context/InterviewContext';
+
 
 interface SidebarItem {
   name: string;
@@ -197,9 +197,7 @@ export function DashboardLayout() {
         </header>
 
         <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto bg-surface-50">
-          <InterviewProvider>
             <Outlet />
-          </InterviewProvider>
         </main>
       </div>
     </div>
