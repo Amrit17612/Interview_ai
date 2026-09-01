@@ -153,10 +153,10 @@ export function ActiveInterview() {
 
   // If session is completed and has a score, auto-navigate
   useEffect(() => {
-    if (session?.status === 'COMPLETED' && session.overallScore !== undefined && session.overallScore !== null) {
+    if (session?._id === sessionId && session?.status === 'COMPLETED' && session.overallScore !== undefined && session.overallScore !== null) {
       navigate(`${ROUTES.INTERVIEW_REPORT}?id=${session._id}`);
     }
-  }, [session, navigate]);
+  }, [session, sessionId, navigate]);
 
   // Clean up speech on mode switch
   useEffect(() => {
@@ -312,7 +312,7 @@ export function ActiveInterview() {
                 {countdown}
               </div>
             </motion.div>
-          ) : (session.status === 'COMPLETED' || isCompleting) ? (
+          ) : (session._id === sessionId && (session.status === 'COMPLETED' || isCompleting)) ? (
             <motion.div 
               key="completed"
               initial={{ opacity: 0, scale: 0.95 }}
