@@ -9,6 +9,7 @@ import { Mic, Keyboard, Volume2, ArrowRight, XCircle, Wifi, StopCircle, Loader2 
 import { AIAvatar, type InterviewStatus } from '../components/AIAvatar';
 import { FloatingCamera } from '../components/FloatingCamera';
 import { AudioWaveform } from '../components/AudioWaveform';
+import { streamCache } from '../utils/streamCache';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export function ActiveInterview() {
@@ -439,7 +440,7 @@ export function ActiveInterview() {
                         {!permissionDenied ? (
                           <>
                             <div className="h-16 w-full max-w-xs mb-8 flex items-center justify-center">
-                              <AudioWaveform isListening={isListening} />
+                              <AudioWaveform isListening={isListening} stream={streamCache.cameraStream} />
                             </div>
                             
                             <button
