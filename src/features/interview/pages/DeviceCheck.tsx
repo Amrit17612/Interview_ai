@@ -46,7 +46,17 @@ export function DeviceCheck() {
   // Unified Stream State
   const [globalStream, setGlobalStream] = useState<MediaStream | null>(null);
   const streamInitializingRef = useRef(false);
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+
+  const handleVideoRef = (node: HTMLVideoElement | null) => {
+    videoRef.current = node;
+    if (node && globalStream) {
+      if (node.srcObject !== globalStream) {
+        node.srcObject = globalStream;
+      }
+      node.play().catch((err) => console.warn('Video play blocked initially', err));
+    }
+  };
 
   // Consent
   const [consentGiven, setConsentGiven] = useState(false);
@@ -227,20 +237,17 @@ export function DeviceCheck() {
     setCamStatus('checking');
 
     if (globalStream) {
-      // The stream was already acquired in step 1/init
-      setCamStatus('success');
+      // Confirm there is an actual live video track
+      const hasLiveVideo = globalStream.getVideoTracks().some(track => track.readyState === 'live');
+      if (hasLiveVideo) {
+        setCamStatus('success');
+      } else {
+        setCamStatus('error');
+      }
     } else {
       if (!streamInitializingRef.current) {
          setCamStatus('error');
       }
-    }
-  }, [currentStep, globalStream]);
-
-  useEffect(() => {
-    if (currentStep === 2 && videoRef.current && globalStream) {
-      videoRef.current.srcObject = globalStream;
-      // explicitly play just in case, though autoPlay is set
-      videoRef.current.play().catch(() => {});
     }
   }, [currentStep, globalStream]);
 
@@ -430,16 +437,20 @@ export function DeviceCheck() {
                 )}
                 {globalStream && (
                   <video 
-                    ref={videoRef}
+                    ref={handleVideoRef}
                     autoPlay 
                     playsInline 
                     muted 
-                    className="w-full h-full object-cover -scale-x-100"
+                    onLoadedMetadata={(e) => {
+                      e.currentTarget.play().catch(() => {});
+                    }}
+                    className="w-full h-full object-cover -scale-x-100 bg-black/50"
                   />
                 )}
                 {camStatus === 'success' && (
                   <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-green-500 text-white px-4 py-1.5 rounded-full text-sm font-bold flex items-center gap-2 shadow-lg">
-                    <CheckCircle2 className="w-4 h-4" /> Camera Ready
+                    <span className="w-2 h-2 rounded-full bg-white animate-pulse"></span>
+                    Camera Ready
                   </div>
                 )}
               </div>
