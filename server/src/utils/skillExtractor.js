@@ -71,7 +71,54 @@ const extractSkills = (text) => {
     }
   }
 
-  return Array.from(foundSkills);
+  if (foundSkills.size > 0) {
+    return Array.from(foundSkills);
+  }
+
+  // Fallback: derive a meaningful topic from the raw text
+  let fallback = text.toLowerCase().trim();
+  const fillers = [
+    'struggled with', 'had difficulty with', 'needs improvement in',
+    'could not clearly explain', 'could not explain', 'weak in', 'lacks understanding of',
+    'difficulty explaining', 'had difficulty explaining', 'needs better', 'weakness in', 'lacks', 'struggled to',
+    'failed to', 'did not understand', 'poor understanding of', 'had trouble with',
+    'difficulty with', 'unfamiliar with', 'needs to review', 'struggles with'
+  ];
+  
+  // Remove starting fillers and conversational prefixes
+  let matchedFiller = true;
+  while (matchedFiller) {
+    matchedFiller = false;
+    for (const filler of fillers) {
+      if (fallback.startsWith(filler)) {
+        fallback = fallback.slice(filler.length).trim();
+        // Remove lingering prepositions
+        if (fallback.startsWith('in ') || fallback.startsWith('on ') || fallback.startsWith('with ') || fallback.startsWith('to ')) {
+            fallback = fallback.split(' ').slice(1).join(' ');
+        }
+        matchedFiller = true;
+        break;
+      }
+    }
+  }
+  
+  // Strip punctuation and excess whitespace
+  fallback = fallback.replace(/[^a-z0-9\s]/g, '').trim().replace(/\s+/g, ' ');
+  
+  // Enforce reasonable length constraint for a "topic" (e.g. max 7 words)
+  const words = fallback.split(' ').filter(w => w.length > 0);
+  if (words.length > 0 && words.length <= 7) {
+    // Capitalize first letter to make it look like a canonical skill
+    const topic = fallback.charAt(0).toUpperCase() + fallback.slice(1);
+    
+    // Ignore meaningless standalone words
+    const ignoreList = ['the', 'issue', 'weak', 'poor', 'bad', 'nothing', 'none', 'n/a', 'na', 'and', 'or'];
+    if (!ignoreList.includes(fallback)) {
+      return [topic];
+    }
+  }
+
+  return [];
 };
 
 module.exports = {
