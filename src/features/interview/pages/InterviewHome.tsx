@@ -122,7 +122,7 @@ export function InterviewHome() {
       if (selectedJobId) payload.atsJobId = selectedJobId;
 
       const session = await interviewService.createInterview(payload);
-      navigate(`${ROUTES.INTERVIEW_ACTIVE}?id=${session._id}`);
+      navigate(`${ROUTES.INTERVIEW_DEVICE_CHECK}?id=${session._id}`);
     } catch (err: any) {
       setError(err.message || 'Failed to start interview');
       setIsCreating(false);
