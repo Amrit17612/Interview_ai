@@ -5,7 +5,7 @@ import { useInterview } from '../hooks/useInterview';
 import { useSpeech } from '../hooks/useSpeech';
 import { useAutosave, pruneOldDrafts } from '../hooks/useAutosave';
 import { ROUTES } from '../../../constants/routes';
-import { Mic, Keyboard, Volume2, ArrowRight, XCircle, LogOut, Wifi, WifiOff } from 'lucide-react';
+import { Mic, Keyboard, Volume2, ArrowRight, XCircle, Wifi, StopCircle, Loader2 } from 'lucide-react';
 import { AIAvatar, type InterviewStatus } from '../components/AIAvatar';
 import { FloatingCamera } from '../components/FloatingCamera';
 import { AudioWaveform } from '../components/AudioWaveform';
@@ -85,7 +85,7 @@ export function ActiveInterview() {
     return () => clearInterval(interval);
   }, [interviewStarted, session?.status, session?.createdAt]);
 
-  // 1. Initial Load & Prune
+  // Initial Load & Prune
   useEffect(() => {
     pruneOldDrafts();
     if (sessionId && (!session || session._id !== sessionId)) {
@@ -93,7 +93,7 @@ export function ActiveInterview() {
     }
   }, [sessionId, session, loadSession]);
 
-  // 2. Countdown Logic
+  // Countdown Logic
   useEffect(() => {
     if (!session || session.status === 'COMPLETED' || error || isLoading) return;
     
@@ -106,14 +106,14 @@ export function ActiveInterview() {
     }
   }, [countdown, session, error, isLoading]);
 
-  // 3. Generate First Question automatically if none exists and session is IN_PROGRESS
+  // Generate First Question automatically if none exists and session is IN_PROGRESS
   useEffect(() => {
     if (interviewStarted && session && session.status === 'IN_PROGRESS' && session.questions.length === 0 && !isGeneratingQuestion && !currentQuestion && !error) {
       generateNextQuestion();
     }
   }, [interviewStarted, session, currentQuestion, isGeneratingQuestion, error, generateNextQuestion]);
 
-  // 4. Auto-Speak Question
+  // Auto-Speak Question
   const prevQuestionId = useRef<string | undefined>(undefined);
   useEffect(() => {
     if (interviewStarted && currentQuestion && currentQuestion._id !== prevQuestionId.current && ttsSupported) {
@@ -121,7 +121,7 @@ export function ActiveInterview() {
       // Small delay to let UI settle before speaking
       setTimeout(() => {
         speak(currentQuestion.text);
-      }, 500);
+      }, 800);
     }
   }, [currentQuestion, interviewStarted, ttsSupported, speak]);
 
@@ -138,9 +138,9 @@ export function ActiveInterview() {
     }
   }, [currentQuestion, getDraft, draftRestored]);
 
-  // Sync speech transcript with answer text (Only in Speak Mode)
+  // Sync speech transcript with answer text
   useEffect(() => {
-    if (isListening && isSpeakMode) {
+    if (isListening && isSpeakMode && transcript) {
       setAnswerText(transcript);
     }
   }, [transcript, isListening, isSpeakMode]);
@@ -152,14 +152,32 @@ export function ActiveInterview() {
     }
   }, [session, navigate]);
 
+  // Clean up speech on mode switch
+  useEffect(() => {
+    if (!isSpeakMode && isListening) {
+      stopListening();
+    }
+  }, [isSpeakMode, isListening, stopListening]);
+
+  // Ensure speech stops on unmount
+  useEffect(() => {
+    return () => {
+      stopListening();
+      stopSpeaking();
+    };
+  }, [stopListening, stopSpeaking]);
+
   const handleSubmit = async () => {
-    if (!answerText.trim()) return;
+    if (!answerText.trim() && !isSpeakMode) return; // Allow empty submit if speak mode just hasn't transcribed perfectly but user forces submit, though ideally we disable submit
+    
     stopListening();
     stopSpeaking();
     
     try {
-      await submitAnswer(answerText);
-      clearDraft();
+      if (answerText.trim()) {
+        await submitAnswer(answerText);
+        clearDraft();
+      }
       
       const maxQ = session?.maxQuestions || 5;
       if (session && session.questions.length < maxQ) {
@@ -174,9 +192,10 @@ export function ActiveInterview() {
     }
   };
 
-  const handleEndInterview = async () => {
+  const handleEndInterviewEarly = async () => {
     stopListening();
     stopSpeaking();
+    setShowExitConfirm(false);
     try {
       await completeInterview();
     } catch (err) {
@@ -185,11 +204,8 @@ export function ActiveInterview() {
   };
 
   const toggleListen = () => {
-    if (isListening) {
-      stopListening();
-    } else {
-      startListening();
-    }
+    if (isListening) stopListening();
+    else startListening();
   };
 
   const deriveStatus = (): InterviewStatus => {
@@ -202,6 +218,16 @@ export function ActiveInterview() {
 
   const currentStatus = deriveStatus();
 
+  const getStatusMessage = () => {
+    switch(currentStatus) {
+      case 'ANALYZING': return 'Analyzing your response...';
+      case 'AI_SPEAKING': return 'AI is speaking...';
+      case 'LISTENING': return 'I\'m listening...';
+      case 'READY_FOR_ANSWER': return 'Your turn';
+      default: return '';
+    }
+  };
+
   const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60).toString().padStart(2, '0');
     const s = (seconds % 60).toString().padStart(2, '0');
@@ -210,54 +236,62 @@ export function ActiveInterview() {
 
   if (!sessionId || isLoading || !session) {
     return (
-      <div className="fixed inset-0 z-[100] bg-slate-900 flex items-center justify-center text-white">
+      <div className="fixed inset-0 z-[100] bg-slate-950 flex items-center justify-center text-white">
         <div className="animate-pulse flex flex-col items-center">
-          <AIAvatar status="IDLE" />
-          <p className="mt-8 text-slate-400">Loading interview space...</p>
+          <Loader2 className="w-8 h-8 animate-spin text-brand-500 mb-4" />
+          <p className="text-slate-400">Loading interview space...</p>
         </div>
       </div>
     );
   }
 
+  const isFinalQuestion = session && session.questions.length === (session.maxQuestions || 5);
+
   return (
-    <div ref={containerRef} className="fixed inset-0 z-[100] bg-slate-900 text-white overflow-hidden flex flex-col font-sans">
+    <div ref={containerRef} className="fixed inset-0 z-[100] bg-slate-950 text-white overflow-hidden flex flex-col font-sans selection:bg-brand-500/30">
       
-      {/* Top Bar */}
-      <header className="p-6 flex justify-between items-center z-10 shrink-0">
-        <div className="flex items-center gap-4">
-          <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
-          <span className="text-sm font-semibold tracking-wider text-slate-300 uppercase">
-            {session.configuration.type} INTERVIEW
+      {/* Background Visual Depth */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-brand-900/20 blur-[120px] mix-blend-screen" />
+        <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] rounded-full bg-indigo-900/10 blur-[120px] mix-blend-screen" />
+        <div className="absolute inset-0 bg-[url('/noise.svg')] opacity-[0.015] mix-blend-overlay" />
+      </div>
+
+      {/* Top Header */}
+      <header className="relative z-10 px-6 py-4 flex justify-between items-center bg-slate-950/50 backdrop-blur-md border-b border-white/5 shrink-0">
+        <div className="flex items-center gap-3">
+          <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-brand-500/10 border border-brand-500/20">
+            <div className="w-2 h-2 bg-brand-500 rounded-full animate-pulse" />
+          </div>
+          <div className="flex flex-col">
+            <span className="text-xs font-bold tracking-wider text-slate-300 uppercase">
+              AI INTERVIEW
+            </span>
+            <span className="text-[10px] text-slate-500 capitalize">{session.configuration.type} • {session.configuration.difficulty}</span>
+          </div>
+        </div>
+
+        <div className="hidden md:flex items-center gap-2 px-4 py-1.5 bg-white/5 rounded-full border border-white/5 backdrop-blur-sm">
+          <span className="text-xs font-semibold text-slate-300">
+            Question {Math.max(1, session.questions.length)} / {session.maxQuestions || 5}
           </span>
         </div>
-        <div className="flex items-center gap-6">
-          <div className="text-slate-400 text-sm hidden sm:block">
-            Question {Math.max(1, session.questions.length)} of {session.maxQuestions || 5}
-          </div>
-          
-          <div className="flex items-center gap-2 px-3 py-1 bg-slate-800 rounded-full border border-slate-700">
-            {isOnline ? (
-              <Wifi className="w-3 h-3 text-green-400" />
-            ) : (
-              <WifiOff className="w-3 h-3 text-red-400" />
-            )}
-            <span className="text-xs font-medium text-slate-300 font-mono">
+        
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-black/40 rounded-full border border-white/5 backdrop-blur-sm shadow-inner">
+            <div className="flex items-center gap-1.5">
+              <div className={`w-1.5 h-1.5 rounded-full ${isOnline ? 'bg-green-500' : 'bg-red-500 animate-pulse'}`} />
+              <span className="text-[10px] font-bold text-slate-400 tracking-wider">LIVE</span>
+            </div>
+            <span className="text-xs font-medium text-slate-200 font-mono border-l border-white/10 pl-2 ml-1">
               {formatTime(elapsedTime)}
             </span>
           </div>
-
-          <button 
-            onClick={() => setShowExitConfirm(true)}
-            className="text-slate-400 hover:text-white transition-colors flex items-center gap-2"
-          >
-            <span className="text-sm font-medium hidden md:inline">Finish Test</span>
-            <LogOut className="w-5 h-5" />
-          </button>
         </div>
       </header>
 
       {/* Main Content Area */}
-      <main className="flex-1 flex flex-col items-center justify-center relative px-4 md:px-12 w-full max-w-5xl mx-auto">
+      <main className="flex-1 relative z-10 flex flex-col items-center w-full max-w-4xl mx-auto px-4 py-6 md:py-10 overflow-y-auto overflow-x-hidden custom-scrollbar">
         
         <AnimatePresence mode="wait">
           {countdown !== null ? (
@@ -265,31 +299,41 @@ export function ActiveInterview() {
               key="countdown"
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 1.5, opacity: 0 }}
-              className="text-8xl md:text-9xl font-bold text-white tracking-tighter"
+              exit={{ scale: 1.5, opacity: 0, filter: 'blur(10px)' }}
+              className="m-auto flex flex-col items-center justify-center"
             >
-              {countdown}
+              <div className="text-8xl md:text-[150px] font-bold text-transparent bg-clip-text bg-gradient-to-b from-white to-slate-500 tracking-tighter">
+                {countdown}
+              </div>
             </motion.div>
           ) : session.status === 'COMPLETED' ? (
             <motion.div 
               key="completed"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="text-center space-y-6"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="m-auto flex flex-col items-center text-center p-8 bg-slate-900/50 backdrop-blur-xl rounded-3xl border border-white/10 shadow-2xl max-w-md w-full"
             >
-              <h2 className="text-3xl font-bold">Interview Completed</h2>
+              <div className="w-16 h-16 rounded-full bg-green-500/10 flex items-center justify-center mb-6">
+                <Wifi className="w-8 h-8 text-green-500" />
+              </div>
+              <h2 className="text-3xl font-bold mb-2">Interview Completed</h2>
+              <p className="text-slate-400 mb-8 text-sm">Your responses have been successfully recorded.</p>
+              
               {isCompleting ? (
-                <p className="text-brand-400 animate-pulse">Analyzing responses and generating your report...</p>
+                <div className="w-full flex flex-col items-center gap-4">
+                  <Loader2 className="w-6 h-6 animate-spin text-brand-500" />
+                  <p className="text-brand-400 text-sm font-medium animate-pulse">Building your personalized report...</p>
+                </div>
               ) : (
                 <>
                   {(error || session.overallScore == null) ? (
-                    <div className="text-red-400 space-y-4">
-                      <p>{error || 'Report generation failed.'}</p>
-                      <Button onClick={() => retryReport()} variant="outline" className="border-red-500 text-red-500">Retry</Button>
+                    <div className="w-full text-red-400 space-y-4">
+                      <p className="text-sm bg-red-500/10 p-3 rounded-lg border border-red-500/20">{error || 'Report generation failed.'}</p>
+                      <Button onClick={() => retryReport()} variant="outline" className="w-full border-red-500/50 text-red-400 hover:bg-red-500/10 hover:text-red-300">Retry Generation</Button>
                     </div>
                   ) : (
-                    <Button onClick={() => navigate(`${ROUTES.INTERVIEW_REPORT}?id=${session._id}`)}>
-                      View Full Report
+                    <Button onClick={() => navigate(`${ROUTES.INTERVIEW_REPORT}?id=${session._id}`)} size="lg" className="w-full bg-white text-slate-900 hover:bg-slate-200">
+                      View Full Report <ArrowRight className="w-4 h-4 ml-2" />
                     </Button>
                   )}
                 </>
@@ -300,153 +344,231 @@ export function ActiveInterview() {
               key="interview"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="w-full h-full flex flex-col items-center"
+              className="w-full flex flex-col items-center flex-1"
             >
               
-              {/* Avatar Section */}
-              <div className="flex-1 flex flex-col items-center justify-center w-full min-h-[40vh]">
-                <AIAvatar status={currentStatus} />
-                
-                <div className="mt-8 text-center max-w-2xl px-4">
-                  {currentQuestion ? (
-                    <motion.div 
-                      initial={{ opacity: 0, y: 10 }}
+              {/* AI Avatar Area */}
+              <div className="flex flex-col items-center justify-center shrink-0 mb-8 mt-2 md:mt-6">
+                <div className="relative">
+                  <div className="absolute inset-0 bg-brand-500/20 blur-3xl rounded-full scale-150 animate-pulse" />
+                  <AIAvatar status={currentStatus} />
+                </div>
+                <div className="h-6 mt-4">
+                  <AnimatePresence mode="wait">
+                    <motion.span
+                      key={currentStatus}
+                      initial={{ opacity: 0, y: 5 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className="space-y-4"
+                      exit={{ opacity: 0, y: -5 }}
+                      className="text-xs font-semibold tracking-widest uppercase text-brand-400"
                     >
-                      <h3 className="text-xl md:text-2xl font-medium leading-relaxed text-slate-100">
-                        {currentQuestion.text}
-                      </h3>
-                      {ttsSupported && (
-                        <button 
-                          onClick={() => speak(currentQuestion.text)}
-                          disabled={isSpeaking || isSubmittingAnswer}
-                          className="inline-flex items-center gap-2 text-sm text-brand-400 hover:text-brand-300 disabled:opacity-50 transition-colors"
-                        >
-                          <Volume2 className="w-4 h-4" />
-                          Repeat Question
-                        </button>
-                      )}
-                    </motion.div>
-                  ) : (
-                    <div className="text-slate-400 animate-pulse">
-                      {isGeneratingQuestion ? 'Analyzing context...' : error ? error : 'Waiting for question...'}
-                    </div>
-                  )}
+                      {getStatusMessage()}
+                    </motion.span>
+                  </AnimatePresence>
                 </div>
               </div>
 
-              {/* Input Section */}
-              {currentQuestion && currentQuestion.status === 'PENDING' && (
-                <div className="w-full shrink-0 pb-8 md:pb-12 max-w-3xl flex flex-col items-center gap-6">
-                  
-                  {/* Mode Toggles */}
-                  <div className="flex bg-slate-800 rounded-full p-1 border border-slate-700/50">
-                    <button
-                      onClick={() => {
-                        setIsSpeakMode(true);
-                      }}
-                      className={`flex items-center gap-2 px-6 py-2 rounded-full text-sm font-medium transition-all ${
-                        isSpeakMode ? 'bg-brand-500 text-white shadow-lg' : 'text-slate-400 hover:text-slate-200'
-                      }`}
+              {/* Question Card */}
+              <div className="w-full max-w-3xl mb-8">
+                <AnimatePresence mode="wait">
+                  {currentQuestion ? (
+                    <motion.div 
+                      key={currentQuestion._id}
+                      initial={{ opacity: 0, y: 20, scale: 0.98 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: -20, scale: 0.98 }}
+                      className="bg-slate-900/80 backdrop-blur-xl border border-white/10 rounded-3xl p-6 md:p-10 shadow-2xl relative overflow-hidden group"
                     >
-                      <Mic className="w-4 h-4" /> Speak
-                    </button>
-                    <button
-                      onClick={() => {
-                        setIsSpeakMode(false);
-                        stopListening();
-                      }}
-                      className={`flex items-center gap-2 px-6 py-2 rounded-full text-sm font-medium transition-all ${
-                        !isSpeakMode ? 'bg-slate-700 text-white shadow-lg' : 'text-slate-400 hover:text-slate-200'
-                      }`}
-                    >
-                      <Keyboard className="w-4 h-4" /> Type
-                    </button>
-                  </div>
-
-                  {/* Dynamic Input Area */}
-                  <div className="w-full relative">
-                    {isSpeakMode ? (
-                      <div className="flex flex-col items-center space-y-4 w-full">
-                        <AudioWaveform isListening={isListening} />
-                        
-                        {permissionDenied && (
-                          <div className="text-red-400 text-sm flex items-center gap-2">
-                            <XCircle className="w-4 h-4" /> Microphone permission denied
-                          </div>
-                        )}
-                        
-                        {!permissionDenied && (
-                          <button
-                            onClick={toggleListen}
-                            disabled={isSubmittingAnswer || isSpeaking}
-                            className={`w-16 h-16 rounded-full flex items-center justify-center transition-all ${
-                              isListening 
-                                ? 'bg-red-500 hover:bg-red-600 shadow-[0_0_30px_rgba(239,68,68,0.4)]' 
-                                : 'bg-brand-500 hover:bg-brand-600 shadow-lg'
-                            } disabled:opacity-50 disabled:cursor-not-allowed text-white`}
-                            aria-label={isListening ? "Stop listening" : "Start listening"}
+                      {/* Subtle ambient glow inside card */}
+                      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-32 bg-brand-500/5 blur-3xl rounded-full pointer-events-none" />
+                      
+                      <div className="flex justify-between items-start mb-6 relative z-10">
+                        <span className="text-xs font-bold text-slate-500 tracking-widest uppercase">
+                          Question {session.questions.length} / {session.maxQuestions || 5}
+                        </span>
+                        {ttsSupported && (
+                          <button 
+                            onClick={() => speak(currentQuestion.text)}
+                            disabled={isSpeaking || isSubmittingAnswer}
+                            className="flex items-center gap-2 text-xs font-medium text-slate-400 hover:text-brand-400 disabled:opacity-50 transition-colors bg-white/5 hover:bg-brand-500/10 px-3 py-1.5 rounded-full border border-white/5"
                           >
-                            <Mic className={`w-6 h-6 ${isListening ? 'animate-pulse' : ''}`} />
+                            <Volume2 className="w-3.5 h-3.5" />
+                            Repeat
                           </button>
                         )}
-                        
-                        {/* Show partial transcript preview */}
-                        {answerText && (
-                          <div className="w-full p-4 bg-slate-800/50 rounded-xl border border-slate-700 max-h-32 overflow-y-auto text-sm text-slate-300">
-                            {answerText}
+                      </div>
+                      
+                      <h3 className="text-xl md:text-3xl font-medium leading-relaxed text-white relative z-10">
+                        {currentQuestion.text}
+                      </h3>
+                    </motion.div>
+                  ) : (
+                    <motion.div 
+                      key="loading-question"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="bg-slate-900/50 backdrop-blur-md border border-white/5 rounded-3xl p-10 flex flex-col items-center justify-center text-slate-400 min-h-[200px]"
+                    >
+                      <Loader2 className="w-6 h-6 animate-spin text-brand-500 mb-4" />
+                      {isGeneratingQuestion ? 'Generating next question...' : error ? <span className="text-red-400">{error}</span> : 'Waiting...'}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              {/* Answer / Input Area */}
+              {currentQuestion && currentQuestion.status === 'PENDING' && (
+                <div className="w-full max-w-3xl flex-1 flex flex-col min-h-[200px] pb-32">
+                  <AnimatePresence mode="wait">
+                    {isSpeakMode ? (
+                      <motion.div 
+                        key="speak-mode"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        className="flex-1 flex flex-col items-center justify-center bg-slate-900/30 border border-white/5 rounded-3xl p-8"
+                      >
+                        {!permissionDenied ? (
+                          <>
+                            <div className="h-16 w-full max-w-xs mb-8 flex items-center justify-center">
+                              <AudioWaveform isListening={isListening} />
+                            </div>
+                            
+                            <button
+                              onClick={toggleListen}
+                              disabled={isSubmittingAnswer || isSpeaking}
+                              className={`w-20 h-20 rounded-full flex items-center justify-center transition-all duration-300 ${
+                                isListening 
+                                  ? 'bg-red-500 hover:bg-red-600 shadow-[0_0_40px_rgba(239,68,68,0.5)] scale-105' 
+                                  : 'bg-slate-800 hover:bg-slate-700 border border-white/10 shadow-xl'
+                              } disabled:opacity-50 disabled:scale-100 disabled:cursor-not-allowed`}
+                              aria-label={isListening ? "Stop listening" : "Start listening"}
+                            >
+                              <Mic className={`w-8 h-8 ${isListening ? 'text-white' : 'text-slate-300'}`} />
+                            </button>
+
+                            {answerText && (
+                              <div className="mt-8 w-full p-4 bg-slate-950/50 backdrop-blur-sm rounded-2xl border border-white/5 text-sm text-slate-300 max-h-40 overflow-y-auto custom-scrollbar">
+                                <span className="text-xs text-brand-400 uppercase font-bold tracking-wider mb-2 block">Your Response</span>
+                                {answerText}
+                              </div>
+                            )}
+                          </>
+                        ) : (
+                          <div className="text-center text-red-400 flex flex-col items-center">
+                            <XCircle className="w-8 h-8 mb-3 opacity-80" />
+                            <p className="font-medium mb-1">Microphone Access Denied</p>
+                            <p className="text-sm opacity-80">Please use Type mode below.</p>
                           </div>
                         )}
-                      </div>
+                      </motion.div>
                     ) : (
-                      <div className="w-full animate-in fade-in slide-in-from-bottom-4">
+                      <motion.div 
+                        key="type-mode"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        className="flex-1 w-full flex flex-col relative"
+                      >
                         <textarea
                           value={answerText}
                           onChange={(e) => setAnswerText(e.target.value)}
                           placeholder="Type your answer here..."
-                          className="w-full bg-slate-800 border-slate-700 text-white rounded-xl p-4 min-h-[120px] focus:ring-brand-500 focus:border-brand-500 resize-none shadow-xl"
+                          className="flex-1 w-full bg-slate-900/60 backdrop-blur-md border border-white/10 text-white rounded-3xl p-6 md:p-8 min-h-[200px] focus:ring-1 focus:ring-brand-500 focus:border-brand-500 resize-none shadow-2xl custom-scrollbar text-lg leading-relaxed placeholder:text-slate-600 transition-all"
                           disabled={isSubmittingAnswer}
                         />
-                      </div>
+                        <div className="absolute bottom-4 right-6 text-xs text-slate-500 font-mono">
+                          {answerText.length} chars
+                        </div>
+                      </motion.div>
                     )}
-                  </div>
-
-                  {/* Submit Button */}
-                  <Button
-                    onClick={handleSubmit}
-                    disabled={isSubmittingAnswer || isGeneratingQuestion || !answerText.trim() || currentStatus === 'AI_SPEAKING'}
-                    size="lg"
-                    className="w-full sm:w-auto px-12 bg-white text-slate-900 hover:bg-slate-100 mt-2"
-                  >
-                    {isSubmittingAnswer ? 'Analyzing Response...' : 'Submit Answer'} <ArrowRight className="w-4 h-4 ml-2" />
-                  </Button>
+                  </AnimatePresence>
                 </div>
               )}
             </motion.div>
           )}
         </AnimatePresence>
-
       </main>
+
+      {/* Bottom Floating Control Bar */}
+      {interviewStarted && session?.status !== 'COMPLETED' && currentQuestion && (
+        <div className="absolute bottom-0 left-0 w-full p-4 md:p-6 bg-gradient-to-t from-slate-950 via-slate-950/90 to-transparent z-20 flex justify-center pointer-events-none">
+          <div className="w-full max-w-4xl bg-slate-900/90 backdrop-blur-xl border border-white/10 rounded-2xl p-2 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-2xl pointer-events-auto">
+            
+            {/* Left: Finish Early */}
+            <Button
+              variant="ghost"
+              onClick={() => setShowExitConfirm(true)}
+              className="text-slate-400 hover:text-white hover:bg-white/5 w-full sm:w-auto shrink-0 order-3 sm:order-1"
+            >
+              <StopCircle className="w-4 h-4 mr-2" />
+              <span className="hidden md:inline">Finish</span> Interview
+            </Button>
+
+            {/* Center: Mode Switcher */}
+            <div className="flex bg-black/40 rounded-xl p-1 border border-white/5 w-full sm:w-auto order-1 sm:order-2">
+              <button
+                onClick={() => setIsSpeakMode(true)}
+                className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-2.5 rounded-lg text-sm font-semibold transition-all duration-300 ${
+                  isSpeakMode ? 'bg-white text-slate-900 shadow-md scale-100' : 'text-slate-400 hover:text-slate-200 scale-95'
+                }`}
+              >
+                <Mic className="w-4 h-4" /> Speak
+              </button>
+              <button
+                onClick={() => setIsSpeakMode(false)}
+                className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-2.5 rounded-lg text-sm font-semibold transition-all duration-300 ${
+                  !isSpeakMode ? 'bg-white text-slate-900 shadow-md scale-100' : 'text-slate-400 hover:text-slate-200 scale-95'
+                }`}
+              >
+                <Keyboard className="w-4 h-4" /> Type
+              </button>
+            </div>
+
+            {/* Right: Submit */}
+            <Button
+              onClick={handleSubmit}
+              disabled={isSubmittingAnswer || isGeneratingQuestion || (!answerText.trim() && !isSpeakMode) || currentStatus === 'AI_SPEAKING'}
+              className="w-full sm:w-auto bg-brand-500 hover:bg-brand-400 text-white shadow-[0_0_20px_rgba(14,165,233,0.3)] shrink-0 order-2 sm:order-3"
+            >
+              {isSubmittingAnswer ? 'Analyzing...' : isFinalQuestion ? 'Submit & Finish' : 'Submit Answer'} 
+              {!isSubmittingAnswer && <ArrowRight className="w-4 h-4 ml-2" />}
+            </Button>
+          </div>
+        </div>
+      )}
 
       {/* Local Floating Camera Preview */}
       <FloatingCamera />
 
       {/* Exit Confirmation Modal */}
       {showExitConfirm && (
-        <div className="fixed inset-0 z-[200] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-800 border border-slate-700 p-6 rounded-2xl max-w-md w-full shadow-2xl">
-            <h3 className="text-xl font-bold mb-2">End Interview Early?</h3>
-            <p className="text-slate-400 mb-6">Are you sure you want to exit? Your progress up to the last submitted question will be saved and evaluated.</p>
-            <div className="flex gap-4">
-              <Button variant="outline" className="flex-1 bg-transparent border-slate-600 text-slate-300 hover:bg-slate-700 hover:text-white" onClick={() => setShowExitConfirm(false)}>
-                Cancel
+        <div className="fixed inset-0 z-[300] bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-slate-900 border border-slate-700 p-8 rounded-3xl max-w-md w-full shadow-2xl text-center"
+          >
+            <div className="w-16 h-16 bg-red-500/10 text-red-500 rounded-full flex items-center justify-center mx-auto mb-6">
+              <StopCircle className="w-8 h-8" />
+            </div>
+            <h3 className="text-2xl font-bold mb-3 text-white">Finish Interview Early?</h3>
+            <p className="text-slate-400 mb-8 leading-relaxed">
+              You have answered {Math.max(0, session?.questions.length ? session.questions.length - (currentQuestion ? 1 : 0) : 0)} of {session?.maxQuestions || 5} questions. 
+              {currentQuestion && ' The current question will be skipped.'}
+              <br/><br/>
+              Your completed answers will be analyzed and included in your final report.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Button variant="outline" className="flex-1 bg-transparent border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white" onClick={() => setShowExitConfirm(false)}>
+                Continue Interview
               </Button>
-              <Button className="flex-1 bg-red-500 hover:bg-red-600 text-white border-transparent" onClick={handleEndInterview}>
-                End Interview
+              <Button className="flex-1 bg-white hover:bg-slate-200 text-slate-900 border-transparent shadow-xl" onClick={handleEndInterviewEarly}>
+                Finish Now
               </Button>
             </div>
-          </div>
+          </motion.div>
         </div>
       )}
 

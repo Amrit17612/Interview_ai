@@ -162,15 +162,12 @@ export const router = createBrowserRouter([
         children: [
       { path: ROUTES.DASHBOARD, element: <DashboardHome /> },
       { path: ROUTES.INTERVIEW, element: <InterviewHome /> },
-      { path: ROUTES.INTERVIEW_DEVICE_CHECK, element: <DeviceCheck /> },
       { path: ROUTES.INTERVIEW_RESUME, element: <ResumeSelection /> },
       { path: ROUTES.INTERVIEW_DOMAIN, element: <DomainSelection /> },
       { path: ROUTES.INTERVIEW_COMPANY, element: <CompanySelection /> },
       { path: ROUTES.INTERVIEW_DIFFICULTY, element: <DifficultySelection /> },
       { path: ROUTES.INTERVIEW_TYPE, element: <InterviewType /> },
       { path: ROUTES.INTERVIEW_INSTRUCTIONS, element: <InterviewInstructions /> },
-      { path: ROUTES.INTERVIEW_ACTIVE, element: <ActiveInterview /> },
-      { path: ROUTES.INTERVIEW_PROCESSING, element: <AIProcessing /> },
       { path: ROUTES.INTERVIEW_REPORT, element: <FinalReport /> },
       { path: ROUTES.INTERVIEW_REPORT_DETAILS, element: <ReportDetails /> },
       { path: ROUTES.INTERVIEW_HISTORY, element: <InterviewHistory /> },
@@ -213,7 +210,10 @@ export const router = createBrowserRouter([
       { path: ROUTES.CREDITS, element: <Wallet /> },
       { path: ROUTES.CREDITS_REFERRAL, element: <ComingSoon /> }
         ]
-      }
+      },
+      { path: ROUTES.INTERVIEW_DEVICE_CHECK, element: <DeviceCheck /> },
+      { path: ROUTES.INTERVIEW_ACTIVE, element: <ActiveInterview /> },
+      { path: ROUTES.INTERVIEW_PROCESSING, element: <AIProcessing /> }
     ]
   },
   {

@@ -51,6 +51,7 @@ export function DeviceCheck() {
   // Consent
   const [consentGiven, setConsentGiven] = useState(false);
   const [agreedTerms, setAgreedTerms] = useState(false);
+  const [showTermsModal, setShowTermsModal] = useState<'terms' | 'privacy' | null>(null);
 
   useEffect(() => {
     if (!sessionId) {
@@ -230,7 +231,8 @@ export function DeviceCheck() {
   };
 
   return (
-    <Container className="py-8 md:py-16 max-w-4xl min-h-screen flex flex-col justify-center">
+    <div className="fixed inset-0 z-[100] bg-white overflow-y-auto w-screen min-h-screen flex flex-col font-sans">
+      <Container className="py-8 md:py-16 max-w-4xl flex-1 flex flex-col justify-center mx-auto w-full">
       
       <div className="text-center mb-10">
         <h1 className="text-3xl font-bold text-gray-900 mb-3 tracking-tight">System Check</h1>
@@ -456,7 +458,7 @@ export function DeviceCheck() {
                       className="mt-1 rounded border-gray-300 text-brand-600 focus:ring-brand-500"
                     />
                     <span className="text-sm text-gray-700 leading-relaxed group-hover:text-gray-900 transition-colors">
-                      I have read and agree to the <a href={ROUTES.TERMS} target="_blank" rel="noopener noreferrer" className="text-brand-600 hover:underline font-medium">Terms of Service</a> and <a href={ROUTES.PRIVACY_POLICY} target="_blank" rel="noopener noreferrer" className="text-brand-600 hover:underline font-medium">Privacy Policy</a>.
+                      I have read and agree to the <button type="button" onClick={(e) => { e.preventDefault(); setShowTermsModal('terms'); }} className="text-brand-600 hover:underline font-medium">Terms of Service</button> and <button type="button" onClick={(e) => { e.preventDefault(); setShowTermsModal('privacy'); }} className="text-brand-600 hover:underline font-medium">Privacy Policy</button>.
                     </span>
                   </label>
                 </motion.div>
@@ -475,7 +477,42 @@ export function DeviceCheck() {
 
         </AnimatePresence>
       </div>
+      </Container>
 
-    </Container>
+      {/* Terms & Privacy Modal */}
+      {showTermsModal && (
+        <div className="fixed inset-0 z-[200] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl flex flex-col max-h-[80vh]"
+          >
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-bold text-gray-900">
+                {showTermsModal === 'terms' ? 'Terms of Service' : 'Privacy Policy'}
+              </h3>
+              <button onClick={() => setShowTermsModal(null)} className="text-gray-500 hover:text-gray-700">
+                <XCircle className="w-6 h-6" />
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar text-sm text-gray-600 space-y-4">
+              <p>
+                By proceeding with this AI interview, you acknowledge that your audio and video data will be processed in real-time to facilitate the interview experience.
+              </p>
+              <p>
+                We do not permanently store your raw video or audio streams. The processed text transcripts and AI evaluations are saved to provide you with your final report and score.
+              </p>
+              <p>
+                Please ensure you are in a quiet, well-lit environment and that you are the only person visible in the camera frame.
+              </p>
+            </div>
+            <div className="mt-6 pt-4 border-t border-gray-100 flex justify-end">
+              <Button onClick={() => setShowTermsModal(null)}>Close</Button>
+            </div>
+          </motion.div>
+        </div>
+      )}
+
+    </div>
   );
 }

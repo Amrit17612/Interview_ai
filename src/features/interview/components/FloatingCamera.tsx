@@ -1,48 +1,61 @@
 import { useRef, useState, useEffect } from 'react';
-import { motion, useDragControls } from 'framer-motion';
-import { CameraOff, GripHorizontal, EyeOff, Eye, Camera } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { CameraOff, GripHorizontal, EyeOff, Eye, Camera, Maximize2, Minimize2 } from 'lucide-react';
 import { streamCache } from '../utils/streamCache';
 
-interface FloatingCameraProps {}
-
-export function FloatingCamera(_props: FloatingCameraProps) {
+export function FloatingCamera() {
+  const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
-
-  const [error, setError] = useState<boolean>(false);
-  const [isHidden, setIsHidden] = useState<boolean>(false);
-  const dragControls = useDragControls();
-
-  const [constraints, setConstraints] = useState({ left: -1000, top: -1000, right: 0, bottom: 0 });
+  
+  const [error, setError] = useState(false);
+  const [isHidden, setIsHidden] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
+  
+  // Dynamic drag constraints based on window resize
+  const [constraints, setConstraints] = useState({ left: 0, right: 0, top: 0, bottom: 0 });
 
   useEffect(() => {
-    // Calculate rough viewport bounds for dragging from the bottom-right corner
     const updateConstraints = () => {
-      setConstraints({
-        left: -window.innerWidth + (window.innerWidth < 768 ? 150 : 250),
-        top: -window.innerHeight + (window.innerWidth < 768 ? 200 : 300),
-        right: 20,
-        bottom: 20
-      });
+      if (containerRef.current) {
+        const { width, height } = containerRef.current.getBoundingClientRect();
+        // Allow moving freely within the screen, keeping it on screen.
+        // Assuming default placement is top-right, right: 0 and top: 0
+        // The container uses layout positioned from top-right.
+        setConstraints({
+          left: -(window.innerWidth - width - 32), // 32px padding margin
+          right: 0,
+          top: 0,
+          bottom: window.innerHeight - height - 32
+        });
+      }
     };
-    updateConstraints();
+    
+    // Initial calculate after a tiny delay to allow layout to settle
+    setTimeout(updateConstraints, 100);
     window.addEventListener('resize', updateConstraints);
     return () => window.removeEventListener('resize', updateConstraints);
-  }, []);
+  }, [isExpanded, isHidden]); // recalculate if size changes
 
   useEffect(() => {
     let localStream: MediaStream | null = null;
+    
     const startCamera = async () => {
       try {
         if (streamCache.cameraStream && streamCache.cameraStream.active) {
           localStream = streamCache.cameraStream;
         } else {
-          localStream = await navigator.mediaDevices.getUserMedia({ video: true });
+          localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
           streamCache.setCameraStream(localStream);
         }
         
         setError(false);
-        if (videoRef.current) {
+        if (videoRef.current && localStream) {
           videoRef.current.srcObject = localStream;
+          // Explicitly play to prevent blank camera issue
+          videoRef.current.play().catch(e => {
+            console.error("Camera playback failed:", e);
+            // Safari/iOS may require muted autoPlay
+          });
         }
       } catch (err) {
         console.error('Failed to access camera in FloatingCamera:', err);
@@ -53,8 +66,6 @@ export function FloatingCamera(_props: FloatingCameraProps) {
     startCamera();
 
     return () => {
-      // If we used the cached stream, DO NOT stop it here, ActiveInterview will stop it on unmount.
-      // Actually, FloatingCamera lives in ActiveInterview, so it's okay to clean up here on unmount
       if (localStream) {
         localStream.getTracks().forEach(track => track.stop());
         streamCache.clearCameraStream();
@@ -64,57 +75,75 @@ export function FloatingCamera(_props: FloatingCameraProps) {
 
   return (
     <motion.div
+      ref={containerRef}
       drag
-      dragControls={dragControls}
-      dragListener={false}
-      dragMomentum={false}
-      dragElastic={0}
       dragConstraints={constraints}
-      className={`fixed z-50 bottom-6 right-6 md:bottom-12 md:right-12 bg-slate-800 rounded-2xl overflow-hidden shadow-2xl border border-slate-700/50 flex flex-col group touch-none transition-all duration-300 ${
-        isHidden ? 'w-32 h-12' : 'w-32 h-44 md:w-56 md:h-72'
+      dragElastic={0.1}
+      dragMomentum={false}
+      initial={{ opacity: 0, scale: 0.8 }}
+      animate={{ opacity: 1, scale: 1 }}
+      className={`fixed top-4 right-4 z-[200] shadow-2xl rounded-2xl overflow-hidden bg-slate-900 border border-slate-700/50 backdrop-blur-sm transition-all duration-300 flex flex-col ${
+        isHidden ? 'w-48 h-16' : (isExpanded ? 'w-[280px] sm:w-[360px] aspect-[4/3]' : 'w-[160px] sm:w-[220px] aspect-[4/3]')
       }`}
-      initial={{ opacity: 0, scale: 0.8, y: 20 }}
-      animate={{ opacity: 1, scale: 1, y: 0 }}
-      transition={{ type: 'spring', damping: 20, stiffness: 200 }}
+      style={{ touchAction: 'none' }}
     >
-      <div 
-        className="w-full h-8 bg-slate-900/80 absolute top-0 left-0 z-20 flex items-center justify-between px-2 cursor-grab active:cursor-grabbing opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-sm"
-        onPointerDown={(e) => dragControls.start(e)}
-      >
-        <GripHorizontal className="w-4 h-4 text-slate-400" />
-        <button 
-          onClick={() => setIsHidden(!isHidden)}
-          className="text-slate-400 hover:text-white p-1"
-          aria-label={isHidden ? "Show camera" : "Hide camera"}
-        >
-          {isHidden ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
-        </button>
-      </div>
       
-      {isHidden ? (
-        <div className="flex-1 flex items-center justify-center text-slate-400 bg-slate-800 pt-8 pb-2 px-3 gap-2">
-          <Camera className="w-4 h-4 text-green-400" />
-          <span className="text-xs font-medium">On</span>
+      {/* Top Header / Drag Handle */}
+      <div className="h-8 bg-slate-800/80 backdrop-blur flex items-center justify-between px-3 cursor-grab active:cursor-grabbing border-b border-slate-700/50 group shrink-0">
+        <div className="flex items-center gap-2">
+          <GripHorizontal className="w-4 h-4 text-slate-500 group-hover:text-slate-300 transition-colors" />
+          <span className="text-[10px] font-bold tracking-wider text-slate-400 uppercase hidden sm:block">You</span>
         </div>
-      ) : error ? (
-        <div className="flex-1 flex flex-col items-center justify-center text-slate-500 bg-slate-800">
-          <CameraOff className="w-8 h-8 mb-2 opacity-50" />
-          <span className="text-xs">Camera Off</span>
+        
+        <div className="flex items-center gap-2 opacity-50 group-hover:opacity-100 transition-opacity">
+          {!isHidden && (
+            <button 
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="text-slate-400 hover:text-white p-1"
+              aria-label={isExpanded ? "Shrink camera" : "Expand camera"}
+            >
+              {isExpanded ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
+            </button>
+          )}
+          <button 
+            onClick={() => setIsHidden(!isHidden)}
+            className="text-slate-400 hover:text-white p-1"
+            aria-label={isHidden ? "Show camera" : "Hide camera"}
+          >
+            {isHidden ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+          </button>
         </div>
-      ) : (
-        <>
-          <video 
-            ref={videoRef}
-            autoPlay 
-            playsInline 
-            muted 
-            className="w-full h-full object-cover -scale-x-100 absolute inset-0 z-0"
-          />
-          <div className="absolute bottom-2 left-2 z-10 bg-black/50 backdrop-blur-md px-2 py-0.5 rounded text-[10px] font-medium text-white shadow-sm border border-white/10">
-            You
+      </div>
+
+      {/* Main Video Area */}
+      <div className="flex-1 relative bg-slate-950 flex items-center justify-center overflow-hidden">
+        {isHidden ? (
+          <div className="flex items-center justify-center gap-2 text-slate-400 w-full h-full text-sm font-medium">
+            <Camera className="w-4 h-4" /> Camera Hidden
           </div>
-        </>
-      )}
+        ) : error ? (
+          <div className="flex flex-col items-center justify-center text-slate-500 p-4 text-center">
+            <CameraOff className="w-8 h-8 mb-2 opacity-50" />
+            <span className="text-xs">Camera unavailable</span>
+          </div>
+        ) : (
+          <>
+            <video
+              ref={videoRef}
+              autoPlay
+              playsInline
+              muted
+              className="w-full h-full object-cover -scale-x-100"
+            />
+            {/* Live Recording Indicator */}
+            <div className="absolute bottom-2 left-2 flex items-center gap-1.5 px-2 py-1 bg-black/50 backdrop-blur-md rounded-md">
+              <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+              <span className="text-[9px] font-medium text-white tracking-widest">LIVE</span>
+            </div>
+          </>
+        )}
+      </div>
+
     </motion.div>
   );
 }
