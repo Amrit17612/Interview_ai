@@ -106,6 +106,16 @@ export function InterviewHome() {
       setError('Focus area is required');
       return;
     }
+
+    // Attempt fullscreen immediately on user gesture
+    try {
+      if (document.documentElement.requestFullscreen) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      }
+    } catch (err) {
+      // Ignore, CSS fallback handles it
+    }
+
     setIsCreating(true);
     setError(null);
     try {

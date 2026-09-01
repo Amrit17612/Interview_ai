@@ -5,7 +5,7 @@ import { useInterview } from '../hooks/useInterview';
 import { useSpeech } from '../hooks/useSpeech';
 import { useAutosave, pruneOldDrafts } from '../hooks/useAutosave';
 import { ROUTES } from '../../../constants/routes';
-import { Mic, Keyboard, Volume2, ArrowRight, XCircle, LogOut } from 'lucide-react';
+import { Mic, Keyboard, Volume2, ArrowRight, XCircle, LogOut, Wifi, WifiOff } from 'lucide-react';
 import { AIAvatar, type InterviewStatus } from '../components/AIAvatar';
 import { FloatingCamera } from '../components/FloatingCamera';
 import { AudioWaveform } from '../components/AudioWaveform';
@@ -51,6 +51,8 @@ export function ActiveInterview() {
   const [countdown, setCountdown] = useState<number | null>(3);
   const [interviewStarted, setInterviewStarted] = useState(false);
   const [showExitConfirm, setShowExitConfirm] = useState(false);
+  const [elapsedTime, setElapsedTime] = useState(0);
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
 
   const { getDraft, clearDraft } = useAutosave({
     sessionId: session?._id,
@@ -58,26 +60,30 @@ export function ActiveInterview() {
     answerText
   });
 
-  // 0. Fullscreen Logic
+  // 0. Network Listener
   useEffect(() => {
-    const enterFullscreen = async () => {
-      try {
-        if (containerRef.current && document.documentElement.requestFullscreen) {
-          // Ignore error if denied, the fixed inset-0 css handles the fallback
-          await document.documentElement.requestFullscreen().catch(() => {});
-        }
-      } catch (err) {
-        // Fallback handled by CSS fixed positioning
-      }
-    };
-    enterFullscreen();
-
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
     return () => {
-      if (document.fullscreenElement && document.exitFullscreen) {
-        document.exitFullscreen().catch(() => {});
-      }
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
     };
   }, []);
+
+  // 1. Timer Logic
+  useEffect(() => {
+    if (!interviewStarted || session?.status === 'COMPLETED') return;
+    const interval = setInterval(() => {
+      if (session?.createdAt) {
+        setElapsedTime(Math.floor((Date.now() - new Date(session.createdAt).getTime()) / 1000));
+      } else {
+        setElapsedTime(prev => prev + 1);
+      }
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [interviewStarted, session?.status, session?.createdAt]);
 
   // 1. Initial Load & Prune
   useEffect(() => {
@@ -196,6 +202,12 @@ export function ActiveInterview() {
 
   const currentStatus = deriveStatus();
 
+  const formatTime = (seconds: number) => {
+    const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+    const s = (seconds % 60).toString().padStart(2, '0');
+    return `${m}:${s}`;
+  };
+
   if (!sessionId || isLoading || !session) {
     return (
       <div className="fixed inset-0 z-[100] bg-slate-900 flex items-center justify-center text-white">
@@ -222,10 +234,23 @@ export function ActiveInterview() {
           <div className="text-slate-400 text-sm hidden sm:block">
             Question {Math.max(1, session.questions.length)} of {session.maxQuestions || 5}
           </div>
+          
+          <div className="flex items-center gap-2 px-3 py-1 bg-slate-800 rounded-full border border-slate-700">
+            {isOnline ? (
+              <Wifi className="w-3 h-3 text-green-400" />
+            ) : (
+              <WifiOff className="w-3 h-3 text-red-400" />
+            )}
+            <span className="text-xs font-medium text-slate-300 font-mono">
+              {formatTime(elapsedTime)}
+            </span>
+          </div>
+
           <button 
             onClick={() => setShowExitConfirm(true)}
-            className="text-slate-400 hover:text-white transition-colors"
+            className="text-slate-400 hover:text-white transition-colors flex items-center gap-2"
           >
+            <span className="text-sm font-medium hidden md:inline">Finish Test</span>
             <LogOut className="w-5 h-5" />
           </button>
         </div>
