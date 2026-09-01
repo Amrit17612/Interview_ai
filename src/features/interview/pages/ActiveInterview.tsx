@@ -60,13 +60,18 @@ export function ActiveInterview() {
     answerText
   });
 
-  // 0. Network Listener
+  // 0. Network Listener & Body Scroll Lock
   useEffect(() => {
+    // Disable document scrolling while in interview
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    
     const handleOnline = () => setIsOnline(true);
     const handleOffline = () => setIsOnline(false);
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
     return () => {
+      document.body.style.overflow = originalOverflow;
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
     };
@@ -248,7 +253,7 @@ export function ActiveInterview() {
   const isFinalQuestion = session && session.questions.length === (session.maxQuestions || 5);
 
   return (
-    <div ref={containerRef} className="fixed inset-0 z-[100] bg-slate-950 text-white overflow-hidden flex flex-col font-sans selection:bg-brand-500/30">
+    <div ref={containerRef} className="fixed top-0 left-0 w-full h-[100dvh] z-[100] bg-slate-950 text-white overflow-hidden flex flex-col font-sans selection:bg-brand-500/30 pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)]">
       
       {/* Background Visual Depth */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -291,7 +296,7 @@ export function ActiveInterview() {
       </header>
 
       {/* Main Content Area */}
-      <main className="flex-1 relative z-10 flex flex-col items-center w-full max-w-4xl mx-auto px-4 py-6 md:py-10 overflow-y-auto overflow-x-hidden custom-scrollbar">
+      <main className="flex-1 min-h-0 relative z-10 flex flex-col items-center w-full max-w-4xl mx-auto px-4 py-2 md:py-6 overflow-hidden">
         
         <AnimatePresence mode="wait">
           {countdown !== null ? (
@@ -348,8 +353,8 @@ export function ActiveInterview() {
             >
               
               {/* AI Avatar Area */}
-              <div className="flex flex-col items-center justify-center shrink-0 mb-8 mt-2 md:mt-6">
-                <div className="relative">
+              <div className="flex flex-col items-center justify-center shrink-0 mb-4 md:mb-6 mt-2">
+                <div className="relative scale-75 md:scale-100 transform origin-top">
                   <div className="absolute inset-0 bg-brand-500/20 blur-3xl rounded-full scale-150 animate-pulse" />
                   <AIAvatar status={currentStatus} />
                 </div>
@@ -369,7 +374,7 @@ export function ActiveInterview() {
               </div>
 
               {/* Question Card */}
-              <div className="w-full max-w-3xl mb-8">
+              <div className="w-full max-w-3xl shrink-0 max-h-[30vh] flex flex-col mb-4 md:mb-6">
                 <AnimatePresence mode="wait">
                   {currentQuestion ? (
                     <motion.div 
@@ -377,12 +382,12 @@ export function ActiveInterview() {
                       initial={{ opacity: 0, y: 20, scale: 0.98 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: -20, scale: 0.98 }}
-                      className="bg-slate-900/80 backdrop-blur-xl border border-white/10 rounded-3xl p-6 md:p-10 shadow-2xl relative overflow-hidden group"
+                      className="bg-slate-900/80 backdrop-blur-xl border border-white/10 rounded-3xl p-4 md:p-8 shadow-2xl relative flex flex-col min-h-0 group"
                     >
                       {/* Subtle ambient glow inside card */}
                       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-32 bg-brand-500/5 blur-3xl rounded-full pointer-events-none" />
                       
-                      <div className="flex justify-between items-start mb-6 relative z-10">
+                      <div className="flex justify-between items-start mb-3 md:mb-6 shrink-0 relative z-10">
                         <span className="text-xs font-bold text-slate-500 tracking-widest uppercase">
                           Question {session.questions.length} / {session.maxQuestions || 5}
                         </span>
@@ -398,9 +403,11 @@ export function ActiveInterview() {
                         )}
                       </div>
                       
-                      <h3 className="text-xl md:text-3xl font-medium leading-relaxed text-white relative z-10">
-                        {currentQuestion.text}
-                      </h3>
+                      <div className="overflow-y-auto custom-scrollbar pr-2 relative z-10 min-h-0 flex-1">
+                        <h3 className="text-lg md:text-2xl font-medium leading-relaxed text-white">
+                          {currentQuestion.text}
+                        </h3>
+                      </div>
                     </motion.div>
                   ) : (
                     <motion.div 
@@ -419,7 +426,7 @@ export function ActiveInterview() {
 
               {/* Answer / Input Area */}
               {currentQuestion && currentQuestion.status === 'PENDING' && (
-                <div className="w-full max-w-3xl flex-1 flex flex-col min-h-[200px] pb-32">
+                <div className="w-full max-w-3xl flex-1 min-h-0 flex flex-col pb-2">
                   <AnimatePresence mode="wait">
                     {isSpeakMode ? (
                       <motion.div 
@@ -427,7 +434,7 @@ export function ActiveInterview() {
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
-                        className="flex-1 flex flex-col items-center justify-center bg-slate-900/30 border border-white/5 rounded-3xl p-8"
+                        className="flex-1 min-h-0 flex flex-col items-center justify-center bg-slate-900/30 border border-white/5 rounded-3xl p-4 md:p-8"
                       >
                         {!permissionDenied ? (
                           <>
@@ -469,13 +476,13 @@ export function ActiveInterview() {
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
-                        className="flex-1 w-full flex flex-col relative"
+                        className="flex-1 min-h-0 w-full flex flex-col relative"
                       >
                         <textarea
                           value={answerText}
                           onChange={(e) => setAnswerText(e.target.value)}
                           placeholder="Type your answer here..."
-                          className="flex-1 w-full bg-slate-900/60 backdrop-blur-md border border-white/10 text-white rounded-3xl p-6 md:p-8 min-h-[200px] focus:ring-1 focus:ring-brand-500 focus:border-brand-500 resize-none shadow-2xl custom-scrollbar text-lg leading-relaxed placeholder:text-slate-600 transition-all"
+                          className="flex-1 w-full min-h-0 bg-slate-900/60 backdrop-blur-md border border-white/10 text-white rounded-3xl p-4 md:p-6 focus:ring-1 focus:ring-brand-500 focus:border-brand-500 resize-none shadow-2xl custom-scrollbar text-base md:text-lg leading-relaxed placeholder:text-slate-600 transition-all pb-10"
                           disabled={isSubmittingAnswer}
                         />
                         <div className="absolute bottom-4 right-6 text-xs text-slate-500 font-mono">
@@ -491,10 +498,10 @@ export function ActiveInterview() {
         </AnimatePresence>
       </main>
 
-      {/* Bottom Floating Control Bar */}
+      {/* Bottom Footer Control Bar */}
       {interviewStarted && session?.status !== 'COMPLETED' && currentQuestion && (
-        <div className="absolute bottom-0 left-0 w-full p-4 md:p-6 bg-gradient-to-t from-slate-950 via-slate-950/90 to-transparent z-20 flex justify-center pointer-events-none">
-          <div className="w-full max-w-4xl bg-slate-900/90 backdrop-blur-xl border border-white/10 rounded-2xl p-2 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-2xl pointer-events-auto">
+        <footer className="shrink-0 w-full p-3 md:p-6 bg-slate-950 border-t border-white/5 z-20 flex justify-center">
+          <div className="w-full max-w-4xl flex flex-col sm:flex-row items-center justify-between gap-3 md:gap-4">
             
             {/* Left: Finish Early */}
             <Button
@@ -536,7 +543,7 @@ export function ActiveInterview() {
               {!isSubmittingAnswer && <ArrowRight className="w-4 h-4 ml-2" />}
             </Button>
           </div>
-        </div>
+        </footer>
       )}
 
       {/* Local Floating Camera Preview */}
