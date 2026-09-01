@@ -419,10 +419,13 @@ const completeInterview = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Cannot complete an empty interview session.' });
     }
 
-    const hasPending = session.questions.some(q => q.status === 'PENDING');
-    if (hasPending) {
-      return res.status(400).json({ success: false, message: 'Cannot complete interview with pending unanswered questions.' });
-    }
+    // Automatically mark any pending questions as skipped for early completion
+    session.questions.forEach(q => {
+      if (q.status === 'PENDING') {
+        q.status = 'ANSWERED';
+        q.userAnswer = '(Skipped)';
+      }
+    });
 
     // Persist completed status immediately to prevent data loss if Gemini fails
     if (session.status !== 'COMPLETED') {

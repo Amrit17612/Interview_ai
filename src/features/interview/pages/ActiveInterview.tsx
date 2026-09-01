@@ -311,7 +311,7 @@ export function ActiveInterview() {
                 {countdown}
               </div>
             </motion.div>
-          ) : session.status === 'COMPLETED' ? (
+          ) : (session.status === 'COMPLETED' || isCompleting) ? (
             <motion.div 
               key="completed"
               initial={{ opacity: 0, scale: 0.95 }}
@@ -507,6 +507,7 @@ export function ActiveInterview() {
             <Button
               variant="ghost"
               onClick={() => setShowExitConfirm(true)}
+              disabled={isCompleting}
               className="text-slate-400 hover:text-white hover:bg-white/5 w-full sm:w-auto shrink-0 order-3 sm:order-1"
             >
               <StopCircle className="w-4 h-4 mr-2" />
@@ -536,7 +537,7 @@ export function ActiveInterview() {
             {/* Right: Submit */}
             <Button
               onClick={handleSubmit}
-              disabled={isSubmittingAnswer || isGeneratingQuestion || (!answerText.trim() && !isSpeakMode) || currentStatus === 'AI_SPEAKING'}
+              disabled={isSubmittingAnswer || isGeneratingQuestion || (!answerText.trim() && !isSpeakMode) || currentStatus === 'AI_SPEAKING' || isCompleting}
               className="w-full sm:w-auto bg-brand-500 hover:bg-brand-400 text-white shadow-[0_0_20px_rgba(14,165,233,0.3)] shrink-0 order-2 sm:order-3"
             >
               {isSubmittingAnswer ? 'Analyzing...' : isFinalQuestion ? 'Submit & Finish' : 'Submit Answer'} 
@@ -571,7 +572,7 @@ export function ActiveInterview() {
               <Button variant="outline" className="flex-1 bg-transparent border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white" onClick={() => setShowExitConfirm(false)}>
                 Continue Interview
               </Button>
-              <Button className="flex-1 bg-white hover:bg-slate-200 text-slate-900 border-transparent shadow-xl" onClick={handleEndInterviewEarly}>
+              <Button className="flex-1 bg-white hover:bg-slate-200 text-slate-900 border-transparent shadow-xl" onClick={handleEndInterviewEarly} disabled={isCompleting}>
                 Finish Now
               </Button>
             </div>

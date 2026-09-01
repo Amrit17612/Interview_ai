@@ -105,12 +105,15 @@ export const InterviewProvider: React.FC<{ children: ReactNode }> = ({ children 
       const completedSession = await interviewService.completeInterview(session._id);
       setSession(completedSession);
     } catch (err: any) {
+      // The backend might have saved the COMPLETED status before the AI failed.
+      // Reload the session to sync the state.
+      await loadSession(session._id);
       setError(err.message || 'Failed to complete interview');
       throw err;
     } finally {
       setIsCompleting(false);
     }
-  }, [session]);
+  }, [session, loadSession]);
 
   const retryReport = useCallback(async () => {
     if (!session) return;
