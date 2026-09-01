@@ -99,6 +99,7 @@ export function DashboardHome() {
     .reverse()
     .filter(p => p.overallScore !== null)
     .map(p => ({
+      chartKey: p.id,
       date: new Date(p.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }),
       score: p.overallScore,
       domain: p.domain
@@ -217,9 +218,9 @@ export function DashboardHome() {
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={chartData} margin={{ top: 10, right: 10, bottom: 5, left: -20 }}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3f4f6" />
-                    <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#6b7280' }} dy={10} />
+                    <XAxis dataKey="chartKey" tickFormatter={(value) => chartData.find(d => d.chartKey === value)?.date || value} axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#6b7280' }} dy={10} />
                     <YAxis domain={[0, 100]} axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#6b7280' }} />
-                    <Tooltip contentStyle={{ borderRadius: '8px', border: '1px solid #f3f4f6', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+                    <Tooltip labelFormatter={(label) => chartData.find(d => d.chartKey === label)?.date || label} contentStyle={{ borderRadius: '8px', border: '1px solid #f3f4f6', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
                     <Line type="monotone" dataKey="score" stroke="#4f46e5" strokeWidth={3} dot={{ r: 4, strokeWidth: 2, fill: '#fff' }} activeDot={{ r: 6 }} />
                   </LineChart>
                 </ResponsiveContainer>
