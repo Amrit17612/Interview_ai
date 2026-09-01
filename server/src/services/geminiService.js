@@ -119,9 +119,20 @@ const validateEvaluationResponse = (data) => {
 };
 
 const validateReportResponse = (data) => {
-  if (!data || typeof data.overall_score !== 'number' || data.overall_score < 0 || data.overall_score > 100 || typeof data.summary !== 'string' || !Array.isArray(data.strengths) || !Array.isArray(data.weaknesses) || !Array.isArray(data.recommendations)) {
-    throw new Error('PROVIDER_ERROR: AI response missing required report fields or invalid score.');
+  if (!data || typeof data.summary !== 'string' || !Array.isArray(data.strengths) || !Array.isArray(data.weaknesses) || !Array.isArray(data.recommendations)) {
+    throw new Error('PROVIDER_ERROR: AI response missing required report fields.');
   }
+  
+  if (!Array.isArray(data.question_evaluations)) {
+    throw new Error('PROVIDER_ERROR: AI response missing question_evaluations array.');
+  }
+  
+  data.question_evaluations.forEach((evalItem, i) => {
+    if (typeof evalItem.index !== 'number' || typeof evalItem.score !== 'number' || evalItem.score < 0 || evalItem.score > 100 || typeof evalItem.feedback !== 'string') {
+      throw new Error(`PROVIDER_ERROR: Invalid evaluation format at index ${i}`);
+    }
+  });
+
   return data;
 };
 

@@ -471,9 +471,9 @@ const completeInterview = async (req, res) => {
       difficulty: session.configuration.difficulty,
       type: session.configuration.type,
       evaluations: session.questions.map(q => ({
+        index: q.index,
         question: q.text,
         answer: q.userAnswer || '',
-        score: 0, // Live evaluation removed; prompt must assess entirely from answer
         ...(q.expectedPoints && q.expectedPoints.length > 0 ? { expectedPoints: q.expectedPoints } : {})
       })),
       resumeContext,
@@ -485,21 +485,43 @@ const completeInterview = async (req, res) => {
     const aiResText = await generateText(prompt, { responseMimeType: 'application/json' });
     const report = validateReportResponse(aiResText);
 
-    session.overallScore = report.overall_score;
+    let totalScore = 0;
+    let evaluatedCount = 0;
+
+    session.questions.forEach((q) => {
+      if (q.userAnswer === '(Skipped)' || !q.userAnswer) {
+        q.evaluation = {
+          score: 0,
+          feedback: 'Question was skipped.'
+        };
+        q.status = 'EVALUATED';
+      } else {
+        const evalItem = report.question_evaluations.find(e => e.index === q.index);
+        if (evalItem) {
+          q.evaluation = {
+            score: evalItem.score,
+            feedback: evalItem.feedback
+          };
+          q.status = 'EVALUATED';
+        } else {
+          // Fallback if AI somehow misses an index, though validation should catch it
+          q.evaluation = {
+            score: 0,
+            feedback: 'Evaluation not generated.'
+          };
+          q.status = 'EVALUATED';
+        }
+      }
+      
+      totalScore += (q.evaluation.score || 0);
+      evaluatedCount++;
+    });
+
+    session.overallScore = evaluatedCount > 0 ? Math.round(totalScore / evaluatedCount) : 0;
     session.feedbackSummary = report.summary;
     session.strengths = report.strengths || [];
     session.weaknesses = report.weaknesses || [];
     session.recommendations = report.recommendations || [];
-    // We could map per-question evaluations here if the schema supports it.
-    if (report.question_evaluations && report.question_evaluations.length === session.questions.length) {
-      session.questions.forEach((q, idx) => {
-        q.evaluation = {
-          score: report.question_evaluations[idx].score,
-          feedback: report.question_evaluations[idx].feedback
-        };
-        q.status = 'EVALUATED';
-      });
-    }
 
     await session.save();
 
