@@ -136,11 +136,11 @@ const sendInterviewReport = async (user, session) => {
       email: process.env.BREVO_FROM_EMAIL
     };
     sendSmtpEmail.to = [
-      { email: user.email, name: user.firstName ? \`\${user.firstName} \${user.lastName || ''}\` : "Student" }
+      { email: user.email, name: user.firstName ? `${user.firstName} ${user.lastName || ''}` : "Student" }
     ];
     sendSmtpEmail.attachment = [
       {
-        name: \`interview-report-\${session._id}.pdf\`,
+        name: `interview-report-${session._id}.pdf`,
         content: pdfBuffer.toString('base64')
       }
     ];
