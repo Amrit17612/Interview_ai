@@ -24,12 +24,25 @@ const questionSchema = new mongoose.Schema({
   companies: [{ type: String }],
   domains: [{ type: String }],
   roles: [{ type: String }],
+  legacyId: { 
+    type: String, 
+    sparse: true,
+    unique: true,
+    trim: true
+  },
+  category: { 
+    type: String,
+    enum: ['primary', 'follow-up'],
+    default: 'primary'
+  },
+  skills: [{ type: String }],
   expectedPoints: [{ type: String }],
   tags: [{ type: String }],
-  followUps: [{ 
-    type: mongoose.Schema.Types.ObjectId, 
-    ref: 'Question' 
-  }],
+  followUps: {
+    weak: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Question' }],
+    neutral: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Question' }],
+    strong: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Question' }]
+  },
   status: { 
     type: String, 
     enum: ['DRAFT', 'ACTIVE', 'ARCHIVED'], 
@@ -57,12 +70,22 @@ questionSchema.pre('save', async function(next) {
     return next();
   }
   
-  if (!this.followUps || this.followUps.length === 0) {
+  if (!this.followUps || 
+      (this.followUps.weak.length === 0 && 
+       this.followUps.neutral.length === 0 && 
+       this.followUps.strong.length === 0)) {
     return next();
   }
 
+  // Combine all branches for cycle detection
+  const allFollowUps = [
+    ...(this.followUps.weak || []),
+    ...(this.followUps.neutral || []),
+    ...(this.followUps.strong || [])
+  ];
+
   // Direct self-reference check
-  if (this.followUps.some(id => id.toString() === this._id.toString())) {
+  if (allFollowUps.some(id => id && id.toString() === this._id.toString())) {
     return next(new Error('Question cannot be a follow-up to itself.'));
   }
 
@@ -81,11 +104,17 @@ questionSchema.pre('save', async function(next) {
       
       if (!visited.has(idStr)) {
         visited.add(idStr);
-        // Find the child question to get its followUps
         const child = await mongoose.model('Question').findById(id).select('followUps').lean();
-        if (child && child.followUps && child.followUps.length > 0) {
-          const hasCycle = await checkCycle(child.followUps);
-          if (hasCycle) return true;
+        if (child && child.followUps) {
+          const childFollowUps = [
+            ...(child.followUps.weak || []),
+            ...(child.followUps.neutral || []),
+            ...(child.followUps.strong || [])
+          ];
+          if (childFollowUps.length > 0) {
+            const hasCycle = await checkCycle(childFollowUps);
+            if (hasCycle) return true;
+          }
         }
       }
     }
@@ -93,7 +122,7 @@ questionSchema.pre('save', async function(next) {
   };
 
   try {
-    const hasCycle = await checkCycle(this.followUps);
+    const hasCycle = await checkCycle(allFollowUps);
     if (hasCycle) {
       return next(new Error('Adding this follow-up would create a circular reference cycle.'));
     }

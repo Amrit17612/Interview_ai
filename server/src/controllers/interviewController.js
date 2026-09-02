@@ -262,11 +262,11 @@ const generateQuestion = async (req, res) => {
     
     // Check if we need a follow up based on the previous question
     if (session.questions.length > 0) {
+      const askedQuestionIds = session.questions.map(q => q.questionId).filter(id => id != null);
       const lastQuestion = session.questions[session.questions.length - 1];
-      if (lastQuestion.questionId) {
-        // Deterministic follow-up without Gemini score (default to neutral branch)
-        // A hardcoded 50 triggers the neutral branch deterministically in questionService
-        selectedQuestion = getFollowUpQuestion(lastQuestion.questionId, 50);
+      if (lastQuestion.questionId && lastQuestion.userAnswer) {
+        // Deterministic follow-up evaluating the actual text answer
+        selectedQuestion = await getFollowUpQuestion(lastQuestion.questionId, lastQuestion.userAnswer, askedQuestionIds);
       }
     }
 
@@ -305,7 +305,7 @@ const generateQuestion = async (req, res) => {
         await Promise.all(contextPromises);
       }
 
-      selectedQuestion = getNextQuestion(session, resumeSkills, atsSkills);
+      selectedQuestion = await getNextQuestion(session, resumeSkills, atsSkills);
     }
 
     const newQuestion = {

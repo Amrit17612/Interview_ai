@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { apiClient } from '../../../services/api.client';
+import { FaceDetector, FilesetResolver } from '@mediapipe/tasks-vision';
 
 export type SecuritySeverity = 'INFO' | 'LOW' | 'MEDIUM' | 'HIGH';
 export type SecurityEventType = 
@@ -156,34 +157,50 @@ export function useSecurityMonitor(sessionId: string | null, isActive: boolean, 
     };
   }, [isActive, addEvent, flushEvents]);
 
-  // Face Detection Polling
+  // Face Detection Polling via MediaPipe
   useEffect(() => {
     if (!isActive || !videoRef?.current) return;
 
-    // @ts-ignore (FaceDetector is experimental)
-    if (!window.FaceDetector) {
-      console.log('[Security] FaceDetector API not supported in this browser.');
-      return;
-    }
+    let detector: FaceDetector | null = null;
+    let isActivePolling = true;
 
-    // @ts-ignore
-    const faceDetector = new window.FaceDetector({ fastMode: true, maxDetectedFaces: 5 });
+    const initMediaPipe = async () => {
+      try {
+        const vision = await FilesetResolver.forVisionTasks(
+          "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/wasm"
+        );
+        detector = await FaceDetector.createFromOptions(vision, {
+          baseOptions: {
+            modelAssetPath: "https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/1/blaze_face_short_range.tflite",
+            delegate: "GPU"
+          },
+          runningMode: "VIDEO"
+        });
+      } catch (err) {
+        console.warn('[Security] MediaPipe FaceDetector initialization failed:', err);
+      }
+    };
+
+    initMediaPipe();
 
     faceCheckInterval.current = setInterval(async () => {
-      if (videoRef.current && videoRef.current.readyState >= 2) { // HAVE_CURRENT_DATA
+      if (!detector || !isActivePolling) return;
+      if (videoRef.current && videoRef.current.readyState >= 2 && videoRef.current.videoWidth > 0) {
         try {
-          const faces = await faceDetector.detect(videoRef.current);
+          const startTimeMs = performance.now();
+          const results = detector.detectForVideo(videoRef.current, startTimeMs);
+          const numFaces = results.detections.length;
           
-          if (faces.length === 0) {
+          if (numFaces === 0) {
             consecutiveNoFace.current++;
             consecutiveMultipleFaces.current = 0;
-            if (consecutiveNoFace.current === 3) { // ~3 seconds debounce
+            if (consecutiveNoFace.current === 6) { // ~3 seconds debounce (2 FPS => 6 frames)
               addEvent('NO_FACE', 'HIGH');
             }
-          } else if (faces.length > 1) {
+          } else if (numFaces > 1) {
             consecutiveMultipleFaces.current++;
             consecutiveNoFace.current = 0;
-            if (consecutiveMultipleFaces.current === 3) { // ~3 seconds debounce
+            if (consecutiveMultipleFaces.current === 6) { 
               addEvent('MULTIPLE_FACES', 'HIGH');
             }
           } else {
@@ -192,17 +209,19 @@ export function useSecurityMonitor(sessionId: string | null, isActive: boolean, 
             consecutiveMultipleFaces.current = 0;
           }
         } catch (err) {
-          console.warn('[Security] Face detection error:', err);
+          console.warn('[Security] MediaPipe Face detection error:', err);
         }
       }
-    }, 1000);
+    }, 500); // 2 FPS
 
     return () => {
-      if (faceCheckInterval.current) {
-        clearInterval(faceCheckInterval.current);
+      isActivePolling = false;
+      if (faceCheckInterval.current) clearInterval(faceCheckInterval.current);
+      if (detector) {
+        detector.close();
       }
     };
-  }, [isActive, addEvent, videoRef]);
+  }, [isActive, videoRef, addEvent]);
 
   // Sync timer fallback (every 30s)
   useEffect(() => {

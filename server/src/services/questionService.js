@@ -1,33 +1,34 @@
-const questionLibrary = require('../data/questionLibrary.json');
-const { validateLibrary } = require('../utils/validateLibrary');
+const Question = require('../models/Question');
 const { COMPANY_DICTIONARY } = require('../utils/companyDictionary');
 const { extractSkills } = require('../utils/skillExtractor');
-
-// Validate library strictly on startup
-validateLibrary();
 
 /**
  * Question Selection Service
  * Responsible for deterministically selecting questions without requiring Gemini for every request.
  */
 
-const getNextQuestion = (session, resumeSkills = [], atsSkills = []) => {
+const getNextQuestion = async (session, resumeSkills = [], atsSkills = []) => {
   const askedQuestionIds = session.questions.map(q => q.questionId).filter(id => id != null);
   
   // Filter questions by session configuration
-  const validQuestions = questionLibrary.filter(q => {
-    // Only return top level questions, not explicitly marked follow-ups
-    if (q.category === 'follow-up') return false;
-
-    return q.type === session.configuration.type && 
-           q.difficulty === session.configuration.difficulty;
-  });
+  const validQuestions = await Question.find({
+    status: 'ACTIVE',
+    category: { $ne: 'follow-up' },
+    type: session.configuration.type,
+    difficulty: session.configuration.difficulty
+  }).lean();
 
   // If we can't find exact matches for type and difficulty, relax constraints.
-  let pool = validQuestions.length > 0 ? validQuestions : questionLibrary.filter(q => q.category !== 'follow-up');
+  let pool = validQuestions.length > 0 ? validQuestions : await Question.find({
+    status: 'ACTIVE',
+    category: { $ne: 'follow-up' }
+  }).lean();
   
   // Remove already asked questions to prevent duplicates
-  pool = pool.filter(q => !askedQuestionIds.includes(q.id));
+  pool = pool.filter(q => {
+    const isAsked = askedQuestionIds.includes(q.legacyId) || askedQuestionIds.includes(q._id.toString());
+    return !isAsked;
+  });
 
   if (pool.length === 0) {
     // If somehow all questions are exhausted, just return a generic fallback
@@ -47,7 +48,7 @@ const getNextQuestion = (session, resumeSkills = [], atsSkills = []) => {
     let score = 0;
     
     // Baseline +1 if matches domain config exactly
-    if (q.domain === session.configuration.domain) score += 1;
+    if (q.domains && q.domains.includes(session.configuration.domain)) score += 1;
 
     const qSkills = q.skills || [];
     
@@ -96,58 +97,116 @@ const getNextQuestion = (session, resumeSkills = [], atsSkills = []) => {
   const selected = bestQuestions[nextIndex];
 
   return {
-    id: selected.id,
-    text: selected.question,
+    id: selected.legacyId || selected._id.toString(),
+    text: selected.text,
     needsAI: false
   };
 };
 
 /**
- * Gets a deterministic follow-up if applicable based on the evaluation.
- * For now, simple rule: if score < 70, use 'weak_answer' or 'needs_more_detail' follow-up.
- * If score >= 85, use 'strong_answer'. Otherwise 'neutral_answer'.
+ * Heuristic to evaluate answer quality based on expected points coverage.
  */
-const getFollowUpQuestion = (questionId, evaluationScore) => {
-  const originalQuestion = questionLibrary.find(q => q.id === questionId);
+const evaluateAnswerQuality = (answer, expectedPoints) => {
+  if (!answer || answer.trim().length < 20) {
+    return 'weak';
+  }
+
+  if (!expectedPoints || expectedPoints.length === 0) {
+    return 'neutral';
+  }
+
+  const normalizedAnswer = answer.toLowerCase();
+  
+  // Tokenize words, removing very short stop words
+  const words = normalizedAnswer.split(/[^a-z0-9]+/);
+  const stopWords = new Set(['the', 'a', 'an', 'and', 'or', 'but', 'is', 'are', 'was', 'were', 'in', 'on', 'at', 'to', 'for', 'with', 'by']);
+  const meaningfulWords = words.filter(w => w.length > 2 && !stopWords.has(w));
+  
+  if (meaningfulWords.length < 5) {
+    return 'weak';
+  }
+
+  let matchCount = 0;
+  
+  expectedPoints.forEach(point => {
+    const pWords = point.toLowerCase().split(/[^a-z0-9]+/).filter(w => w.length > 2 && !stopWords.has(w));
+    // If the answer contains at least one meaningful keyword from the expected point
+    const hasMatch = pWords.some(pw => meaningfulWords.includes(pw));
+    if (hasMatch) {
+      matchCount++;
+    }
+  });
+
+  const matchRatio = matchCount / expectedPoints.length;
+
+  if (matchRatio >= 0.6) return 'strong';
+  if (matchRatio >= 0.3) return 'neutral';
+  return 'weak';
+};
+
+/**
+ * Gets a deterministic follow-up if applicable based on the local heuristic.
+ */
+const getFollowUpQuestion = async (questionId, userAnswer, askedQuestionIds = []) => {
+  let originalQuestion = await Question.findOne({ legacyId: questionId })
+    .populate('followUps.weak')
+    .populate('followUps.neutral')
+    .populate('followUps.strong')
+    .lean();
+
+  if (!originalQuestion) {
+    originalQuestion = await Question.findById(questionId)
+      .populate('followUps.weak')
+      .populate('followUps.neutral')
+      .populate('followUps.strong')
+      .lean();
+  }
+
   if (!originalQuestion || !originalQuestion.followUps) {
     return null;
   }
 
-  let targetCondition = 'neutral_answer';
-  if (evaluationScore < 70) targetCondition = 'weak_answer';
-  else if (evaluationScore >= 85) targetCondition = 'strong_answer';
+  const targetCondition = evaluateAnswerQuality(userAnswer, originalQuestion.expectedPoints);
 
-  let followUpId = null;
+  const filterUnasked = (branch) => {
+    if (!branch) return [];
+    return branch.filter(q => {
+      const isAsked = askedQuestionIds.includes(q.legacyId) || askedQuestionIds.includes(q._id.toString());
+      return !isAsked;
+    });
+  };
 
-  if (targetCondition === 'weak_answer' && originalQuestion.followUps.weak && originalQuestion.followUps.weak.length > 0) {
-    followUpId = originalQuestion.followUps.weak[0];
-  } else if (targetCondition === 'strong_answer' && originalQuestion.followUps.strong && originalQuestion.followUps.strong.length > 0) {
-    followUpId = originalQuestion.followUps.strong[0];
-  } else if (targetCondition === 'neutral_answer' && originalQuestion.followUps.neutral && originalQuestion.followUps.neutral.length > 0) {
-    followUpId = originalQuestion.followUps.neutral[0];
+  const validWeak = filterUnasked(originalQuestion.followUps.weak);
+  const validNeutral = filterUnasked(originalQuestion.followUps.neutral);
+  const validStrong = filterUnasked(originalQuestion.followUps.strong);
+
+  let followUpQuestion = null;
+
+  if (targetCondition === 'weak' && validWeak.length > 0) {
+    followUpQuestion = validWeak[0];
+  } else if (targetCondition === 'strong' && validStrong.length > 0) {
+    followUpQuestion = validStrong[0];
+  } else if (targetCondition === 'neutral' && validNeutral.length > 0) {
+    followUpQuestion = validNeutral[0];
   }
 
-  if (!followUpId) {
-    // Fallback if specific condition isn't defined
-    const allFollowUps = [
-      ...(originalQuestion.followUps.weak || []),
-      ...(originalQuestion.followUps.neutral || []),
-      ...(originalQuestion.followUps.strong || [])
-    ];
-    if (allFollowUps.length > 0) {
-      followUpId = allFollowUps[0];
+  if (!followUpQuestion) {
+    // Fallback order: NEUTRAL -> WEAK -> STRONG
+    if (validNeutral.length > 0) {
+      followUpQuestion = validNeutral[0];
+    } else if (validWeak.length > 0) {
+      followUpQuestion = validWeak[0];
+    } else if (validStrong.length > 0) {
+      followUpQuestion = validStrong[0];
     }
   }
 
-  if (followUpId) {
-    const followUpQuestion = questionLibrary.find(q => q.id === followUpId);
-    if (followUpQuestion) {
-      return {
-        id: followUpQuestion.id,
-        text: followUpQuestion.question,
-        needsAI: false
-      };
-    }
+  if (followUpQuestion) {
+    return {
+      id: followUpQuestion.legacyId || followUpQuestion._id.toString(),
+      text: followUpQuestion.text,
+      needsAI: false
+    };
   }
 
   return null;
@@ -155,5 +214,6 @@ const getFollowUpQuestion = (questionId, evaluationScore) => {
 
 module.exports = {
   getNextQuestion,
-  getFollowUpQuestion
+  getFollowUpQuestion,
+  evaluateAnswerQuality
 };

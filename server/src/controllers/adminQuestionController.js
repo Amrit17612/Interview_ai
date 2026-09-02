@@ -48,7 +48,9 @@ const getQuestions = async (req, res, next) => {
 const getQuestionById = async (req, res, next) => {
   try {
     const question = await Question.findById(req.params.id)
-      .populate('followUps', 'text type difficulty status')
+      .populate('followUps.weak', 'text type difficulty status')
+      .populate('followUps.neutral', 'text type difficulty status')
+      .populate('followUps.strong', 'text type difficulty status')
       .populate('createdBy', 'firstName lastName email')
       .populate('updatedBy', 'firstName lastName email')
       .lean();
@@ -105,7 +107,7 @@ const updateQuestion = async (req, res, next) => {
     }
 
     // Update fields explicitly
-    const updatableFields = ['text', 'description', 'type', 'difficulty', 'companies', 'domains', 'roles', 'expectedPoints', 'tags', 'followUps'];
+    const updatableFields = ['text', 'description', 'type', 'category', 'difficulty', 'companies', 'domains', 'roles', 'skills', 'expectedPoints', 'tags', 'followUps'];
     updatableFields.forEach(field => {
       if (req.body[field] !== undefined) {
         question[field] = req.body[field];

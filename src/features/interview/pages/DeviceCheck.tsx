@@ -35,7 +35,7 @@ export function DeviceCheck() {
   const [netStatus, setNetStatus] = useState<CheckStatus>('idle');
   
   // Microphone Test State
-  const { startListening, stopListening, transcript, ttsSupported } = useSpeech();
+  const { startListening, stopListening, transcript } = useSpeech();
   const [audioLevelDetected, setAudioLevelDetected] = useState(false);
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
@@ -255,24 +255,40 @@ export function DeviceCheck() {
   // ----------------------------------------------------
   // STEP 3: SYSTEM / BROWSER
   // ----------------------------------------------------
+  const [browserStatus, setBrowserStatus] = useState<CheckStatus>('idle');
+  const [browserLatency, setBrowserLatency] = useState<number | null>(null);
+
   useEffect(() => {
     if (currentStep !== 3) return;
     
     setNetStatus('checking');
+    setBrowserStatus('checking');
     
     const checkSystem = async () => {
+      // Browser checks
+      if (
+        navigator.mediaDevices && 
+        typeof navigator.mediaDevices.getUserMedia === 'function' &&
+        typeof document.hidden !== 'undefined'
+      ) {
+        setBrowserStatus('success');
+      } else {
+        setBrowserStatus('error');
+      }
+
       if (!navigator.onLine) {
         setNetStatus('error');
         return;
       }
       try {
-        // Quick ping to check actual reachability
         const start = performance.now();
-        await fetch('/api/health', { method: 'HEAD', cache: 'no-cache' }).catch(() => {});
-        const duration = performance.now() - start;
+        // Since we don't know if /api/health exists, fetch a tiny resource or root
+        await fetch('/', { method: 'HEAD', cache: 'no-cache' }).catch(() => {});
+        const duration = Math.round(performance.now() - start);
+        setBrowserLatency(duration);
         setNetStatus(duration > 2000 ? 'warning' : 'success');
       } catch {
-        setNetStatus('warning'); // Default to warning if fetch fails but we're "online"
+        setNetStatus('warning');
       }
     };
     
@@ -497,62 +513,89 @@ export function DeviceCheck() {
                 <div className="flex items-center justify-between p-4 rounded-xl border border-gray-100 bg-gray-50">
                   <span className="font-semibold text-gray-700 flex items-center gap-2"><Globe className="w-4 h-4 text-gray-400" /> Network Connection</span>
                   {netStatus === 'checking' ? <Loader2 className="w-5 h-5 animate-spin text-brand-500" /> 
-                   : netStatus === 'success' ? <span className="text-green-500 font-medium flex items-center gap-1"><CheckCircle2 className="w-4 h-4" /> Optimal</span>
-                   : netStatus === 'warning' ? <span className="text-amber-500 font-medium flex items-center gap-1"><AlertTriangle className="w-4 h-4" /> Unstable</span>
+                   : netStatus === 'success' ? <span className="text-green-500 font-medium flex items-center gap-1"><CheckCircle2 className="w-4 h-4" /> Connected — {browserLatency} ms</span>
+                   : netStatus === 'warning' ? <span className="text-amber-500 font-medium flex items-center gap-1"><AlertTriangle className="w-4 h-4" /> Slow — {browserLatency} ms</span>
                    : <span className="text-red-500 font-medium flex items-center gap-1"><XCircle className="w-4 h-4" /> Offline</span>}
                 </div>
                 <div className="flex items-center justify-between p-4 rounded-xl border border-gray-100 bg-gray-50">
                   <span className="font-semibold text-gray-700 flex items-center gap-2"><ShieldCheck className="w-4 h-4 text-gray-400" /> Browser Compatibility</span>
-                  {ttsSupported 
-                    ? <span className="text-green-500 font-medium flex items-center gap-1"><CheckCircle2 className="w-4 h-4" /> Supported</span> 
-                    : <span className="text-amber-500 font-medium text-xs text-right max-w-[150px]">Some voice features unavailable. Type mode available.</span>}
+                  {browserStatus === 'checking' ? <Loader2 className="w-5 h-5 animate-spin text-brand-500" />
+                    : browserStatus === 'success' ? <span className="text-green-500 font-medium flex items-center gap-1"><CheckCircle2 className="w-4 h-4" /> Supported</span> 
+                    : <span className="text-red-500 font-medium text-xs flex items-center gap-1"><XCircle className="w-4 h-4" /> Unsupported</span>}
                 </div>
+              </div>
+
+              <Button 
+                size="lg" 
+                onClick={() => setCurrentStep(4)}
+                disabled={netStatus === 'checking' || browserStatus === 'checking' || browserStatus === 'error'}
+                className="min-w-[200px]"
+              >
+                Continue to Security <ArrowRight className="w-5 h-5 ml-2" />
+              </Button>
+            </motion.div>
+          )}
+
+          {/* ----------------- STEP 4 ----------------- */}
+          {currentStep === 4 && (
+            <motion.div 
+              key="step4"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              className="p-8 md:p-12 flex flex-col items-center text-center"
+            >
+              <div className="w-20 h-20 rounded-full bg-brand-50 text-brand-500 flex items-center justify-center mb-6">
+                <ShieldCheck className="w-10 h-10" />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Security & Consent</h2>
+              <p className="text-gray-500 mb-8">Please review and consent to the security monitoring requirements.</p>
+
+              <div className="w-full max-w-lg space-y-4 mb-8 text-left">
                 <div className="flex items-center justify-between p-4 rounded-xl border border-gray-100 bg-gray-50">
                   <span className="font-semibold text-gray-700 flex items-center gap-2"><ShieldCheck className="w-4 h-4 text-brand-500" /> Security Monitoring</span>
                   <span className="text-green-500 font-medium flex items-center gap-1"><CheckCircle2 className="w-4 h-4" /> Ready</span>
                 </div>
               </div>
 
-              {netStatus !== 'checking' && (
-                <motion.div 
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="w-full max-w-lg text-left bg-brand-50/50 p-6 rounded-2xl border border-brand-100 mb-8"
-                >
-                  <h3 className="font-bold text-brand-900 mb-4 flex items-center gap-2">
-                    <ShieldCheck className="w-5 h-5 text-brand-500" /> Terms & Consent
-                  </h3>
-                  
-                  <label className="flex items-start gap-3 cursor-pointer group mb-4">
-                    <input 
-                      type="checkbox" 
-                      checked={consentGiven}
-                      onChange={(e) => setConsentGiven(e.target.checked)}
-                      className="mt-1 rounded border-gray-300 text-brand-600 focus:ring-brand-500"
-                    />
-                    <span className="text-sm text-gray-700 leading-relaxed group-hover:text-gray-900 transition-colors">
-                      I consent to Interviu AI accessing my camera and microphone. I understand that my interview environment (tab switches, focus loss, clipboard usage) will be monitored for security purposes.
-                    </span>
-                  </label>
-                  
-                  <label className="flex items-start gap-3 cursor-pointer group">
-                    <input 
-                      type="checkbox" 
-                      checked={agreedTerms}
-                      onChange={(e) => setAgreedTerms(e.target.checked)}
-                      className="mt-1 rounded border-gray-300 text-brand-600 focus:ring-brand-500"
-                    />
-                    <span className="text-sm text-gray-700 leading-relaxed group-hover:text-gray-900 transition-colors">
-                      I have read and agree to the <button type="button" onClick={(e) => { e.preventDefault(); setShowTermsModal('terms'); }} className="text-brand-600 hover:underline font-medium">Terms of Service</button> and <button type="button" onClick={(e) => { e.preventDefault(); setShowTermsModal('privacy'); }} className="text-brand-600 hover:underline font-medium">Privacy Policy</button>.
-                    </span>
-                  </label>
-                </motion.div>
-              )}
+              <motion.div 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="w-full max-w-lg text-left bg-brand-50/50 p-6 rounded-2xl border border-brand-100 mb-8"
+              >
+                <h3 className="font-bold text-brand-900 mb-4 flex items-center gap-2">
+                  <ShieldCheck className="w-5 h-5 text-brand-500" /> Terms & Consent
+                </h3>
+                
+                <label className="flex items-start gap-3 cursor-pointer group mb-4">
+                  <input 
+                    type="checkbox" 
+                    checked={consentGiven}
+                    onChange={(e) => setConsentGiven(e.target.checked)}
+                    className="mt-1 rounded border-gray-300 text-brand-600 focus:ring-brand-500"
+                  />
+                  <span className="text-sm text-gray-700 leading-relaxed group-hover:text-gray-900 transition-colors">
+                    I consent to Interviu AI accessing my camera and microphone. I understand that my interview environment (tab switches, focus loss, clipboard usage) will be monitored for security purposes.
+                  </span>
+                </label>
+                
+                <label className="flex items-start gap-3 cursor-pointer group">
+                  <input 
+                    type="checkbox" 
+                    checked={agreedTerms}
+                    onChange={(e) => setAgreedTerms(e.target.checked)}
+                    className="mt-1 rounded border-gray-300 text-brand-600 focus:ring-brand-500"
+                  />
+                  <span className="text-sm text-gray-700 leading-relaxed group-hover:text-gray-900 transition-colors">
+                    I have read and agree to the <button type="button" onClick={(e) => { e.preventDefault(); setShowTermsModal('terms'); }} className="text-brand-600 hover:underline font-medium">Terms of Service</button> and <button type="button" onClick={(e) => { e.preventDefault(); setShowTermsModal('privacy'); }} className="text-brand-600 hover:underline font-medium">Privacy Policy</button>.
+                  </span>
+                </label>
+              </motion.div>
 
               <Button 
                 size="lg" 
                 onClick={handleContinue}
-                disabled={netStatus === 'checking' || !consentGiven || !agreedTerms}
+                disabled={!consentGiven || !agreedTerms}
                 className="min-w-[200px]"
               >
                 Enter Interview Room <ArrowRight className="w-5 h-5 ml-2" />

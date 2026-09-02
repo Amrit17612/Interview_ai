@@ -26,10 +26,11 @@ export function QuestionEditor() {
   const [roles, setRoles] = useState<string[]>([]);
   const [tags, setTags] = useState<string[]>([]);
   const [expectedPoints, setExpectedPoints] = useState<string[]>([]);
-  const [followUps, setFollowUps] = useState<any[]>([]);
+  const [followUps, setFollowUps] = useState<{weak: any[], neutral: any[], strong: any[]}>({weak: [], neutral: [], strong: []});
 
   // Search followups
   const [searchQuery, setSearchQuery] = useState('');
+  const [searchTargetBranch, setSearchTargetBranch] = useState<'weak' | 'neutral' | 'strong'>('neutral');
   const [searchResults, setSearchResults] = useState<any[]>([]);
 
   useEffect(() => {
@@ -49,7 +50,7 @@ export function QuestionEditor() {
         setRoles(q.roles || []);
         setTags(q.tags || []);
         setExpectedPoints(q.expectedPoints || []);
-        setFollowUps(q.followUps || []);
+        setFollowUps(q.followUps || {weak: [], neutral: [], strong: []});
       } catch (err: any) {
         setError(err.response?.data?.message || 'Failed to fetch question');
       } finally {
@@ -70,8 +71,13 @@ export function QuestionEditor() {
       try {
         const res = await apiClient.get(`/admin/questions?search=${encodeURIComponent(searchQuery)}&limit=5`);
         // Filter out self and already added
+        const allFollowUpIds = [
+          ...followUps.weak.map(f => f._id),
+          ...followUps.neutral.map(f => f._id),
+          ...followUps.strong.map(f => f._id)
+        ];
         const results = res.data.data.filter((q: any) => 
-          q._id !== id && !followUps.some(f => f._id === q._id)
+          q._id !== id && !allFollowUpIds.includes(q._id)
         );
         setSearchResults(results);
       } catch (err) {
@@ -101,7 +107,11 @@ export function QuestionEditor() {
         roles,
         tags,
         expectedPoints: expectedPoints.filter(p => p.trim() !== ''),
-        followUps: followUps.map(f => f._id)
+        followUps: {
+          weak: followUps.weak.map(f => f._id),
+          neutral: followUps.neutral.map(f => f._id),
+          strong: followUps.strong.map(f => f._id)
+        }
       };
 
       if (isNew) {
@@ -248,47 +258,73 @@ export function QuestionEditor() {
               <p>Adding follow-ups creates a directed graph. The backend strictly prevents cycles (e.g. A → B → C → A) upon save.</p>
             </div>
             
-            <div className="relative">
-              <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-md text-sm focus:ring-brand-500 focus:border-brand-500"
-                placeholder="Search to add existing questions as follow-ups (min 3 chars)..."
-              />
-              {searchResults.length > 0 && (
-                <div className="absolute z-10 w-full mt-1 bg-white shadow-lg border border-gray-200 rounded-md max-h-60 overflow-y-auto">
-                  {searchResults.map(res => (
-                    <div key={res._id} className="p-3 hover:bg-gray-50 border-b border-gray-100 flex justify-between items-center group">
-                      <div className="text-sm text-gray-900 line-clamp-1">{res.text}</div>
-                      <button 
-                        type="button"
-                        onClick={() => {
-                          setFollowUps([...followUps, res]);
-                          setSearchQuery('');
-                          setSearchResults([]);
-                        }}
-                        className="opacity-0 group-hover:opacity-100 text-xs bg-brand-100 text-brand-700 px-2 py-1 rounded font-medium"
-                      >
-                        Add
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
+            <div className="flex gap-2 mb-2">
+              <select 
+                value={searchTargetBranch}
+                onChange={e => setSearchTargetBranch(e.target.value as any)}
+                className="border border-gray-300 rounded-md text-sm px-2 py-2 focus:ring-brand-500 focus:border-brand-500 bg-white"
+              >
+                <option value="weak">Weak Branch</option>
+                <option value="neutral">Neutral Branch</option>
+                <option value="strong">Strong Branch</option>
+              </select>
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-md text-sm focus:ring-brand-500 focus:border-brand-500"
+                  placeholder={`Search to add to ${searchTargetBranch} branch (min 3 chars)...`}
+                />
+                {searchResults.length > 0 && (
+                  <div className="absolute z-10 w-full mt-1 bg-white shadow-lg border border-gray-200 rounded-md max-h-60 overflow-y-auto">
+                    {searchResults.map(res => (
+                      <div key={res._id} className="p-3 hover:bg-gray-50 border-b border-gray-100 flex justify-between items-center group">
+                        <div className="text-sm text-gray-900 line-clamp-1">{res.text}</div>
+                        <button 
+                          type="button"
+                          onClick={() => {
+                            setFollowUps(prev => ({
+                              ...prev,
+                              [searchTargetBranch]: [...prev[searchTargetBranch], res]
+                            }));
+                            setSearchQuery('');
+                            setSearchResults([]);
+                          }}
+                          className="opacity-0 group-hover:opacity-100 text-xs bg-brand-100 text-brand-700 px-2 py-1 rounded font-medium"
+                        >
+                          Add
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
 
-            <div className="space-y-2 mt-4">
-              {followUps.map(f => (
-                <div key={f._id} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg border border-gray-200">
-                  <div className="flex-1 mr-4">
-                    <p className="text-sm font-medium text-gray-900 line-clamp-1">{f.text}</p>
-                    <p className="text-xs text-gray-500">{f.type} • {f.difficulty}</p>
+            <div className="space-y-4 mt-4">
+              {['strong', 'neutral', 'weak'].map((branch) => (
+                <div key={branch}>
+                  <h4 className="text-sm font-semibold text-gray-700 capitalize mb-2 border-b pb-1">{branch} Branch</h4>
+                  <div className="space-y-2">
+                    {followUps[branch as keyof typeof followUps].map(f => (
+                      <div key={f._id} className="flex justify-between items-center p-2 bg-gray-50 rounded-lg border border-gray-200">
+                        <div className="flex-1 mr-4">
+                          <p className="text-xs font-medium text-gray-900 line-clamp-1">{f.text}</p>
+                        </div>
+                        <button type="button" onClick={() => setFollowUps(prev => ({
+                          ...prev,
+                          [branch]: prev[branch as keyof typeof prev].filter(x => x._id !== f._id)
+                        }))} className="text-gray-400 hover:text-red-500 p-1 rounded bg-white border border-gray-200 hover:border-red-200">
+                          <X className="h-3 w-3" />
+                        </button>
+                      </div>
+                    ))}
+                    {followUps[branch as keyof typeof followUps].length === 0 && (
+                      <p className="text-xs text-gray-500 italic">No {branch} follow-ups added.</p>
+                    )}
                   </div>
-                  <button type="button" onClick={() => setFollowUps(followUps.filter(x => x._id !== f._id))} className="text-gray-400 hover:text-red-500 p-1.5 rounded bg-white border border-gray-200 hover:border-red-200">
-                    <X className="h-4 w-4" />
-                  </button>
                 </div>
               ))}
             </div>
