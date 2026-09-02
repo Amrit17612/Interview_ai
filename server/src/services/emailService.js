@@ -1,9 +1,5 @@
-const brevo = require('@getbrevo/brevo');
+const { BrevoClient } = require('@getbrevo/brevo');
 const PDFDocument = require('pdfkit');
-
-// Configure Brevo API
-const defaultClient = brevo.ApiClient.instance;
-const apiKey = defaultClient.authentications['api-key'];
 
 /**
  * Generates the PDF in memory.
@@ -107,16 +103,16 @@ const sendInterviewReport = async (user, session) => {
     return;
   }
 
-  // Set API Key just in time to ensure env is loaded
-  apiKey.apiKey = process.env.BREVO_API_KEY;
-  const apiInstance = new brevo.TransactionalEmailsApi();
+  const apiInstance = new BrevoClient({
+    apiKey: process.env.BREVO_API_KEY
+  });
 
   try {
     const pdfBuffer = await generatePDFBuffer(session);
     
-    let sendSmtpEmail = new brevo.SendSmtpEmail();
-    sendSmtpEmail.subject = "Your Interview Report is Ready";
-    sendSmtpEmail.htmlContent = `
+    const sendSmtpEmail = {
+      subject: "Your Interview Report is Ready",
+      htmlContent: `
       <html>
         <body>
           <h2>Your Interview Report is Ready</h2>
@@ -130,22 +126,23 @@ const sendInterviewReport = async (user, session) => {
           <p>The Interviu AI Team</p>
         </body>
       </html>
-    `;
-    sendSmtpEmail.sender = {
-      name: process.env.BREVO_FROM_NAME || "Interview AI",
-      email: process.env.BREVO_FROM_EMAIL
+    `,
+      sender: {
+        name: process.env.BREVO_FROM_NAME || "Interview AI",
+        email: process.env.BREVO_FROM_EMAIL
+      },
+      to: [
+        { email: user.email, name: user.firstName ? `${user.firstName} ${user.lastName || ''}` : "Student" }
+      ],
+      attachment: [
+        {
+          name: `interview-report-${session._id}.pdf`,
+          content: pdfBuffer.toString('base64')
+        }
+      ]
     };
-    sendSmtpEmail.to = [
-      { email: user.email, name: user.firstName ? `${user.firstName} ${user.lastName || ''}` : "Student" }
-    ];
-    sendSmtpEmail.attachment = [
-      {
-        name: `interview-report-${session._id}.pdf`,
-        content: pdfBuffer.toString('base64')
-      }
-    ];
 
-    const data = await apiInstance.sendTransacEmail(sendSmtpEmail);
+    const data = await apiInstance.transactionalEmails.sendTransacEmail(sendSmtpEmail);
     console.log('[EMAIL] Successfully sent report email to', user.email, 'MessageId:', data.messageId);
   } catch (error) {
     console.error('[EMAIL] Failed to send interview report email:', error);
