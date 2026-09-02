@@ -17,7 +17,8 @@ import {
   Menu,
   X,
   Lock,
-  Tag
+  Tag,
+  MessageSquare
 } from 'lucide-react';
 import { Container } from '../components/ui/Container';
 
@@ -111,6 +112,7 @@ function AdminSidebar({ onClose }: { onClose: () => void }) {
       title: 'MANAGEMENT',
       items: [
         { name: 'Users', icon: Users, href: '/admin/users' },
+        { name: 'Feedback', icon: MessageSquare, href: ROUTES.ADMIN_FEEDBACK },
       ],
     },
     {

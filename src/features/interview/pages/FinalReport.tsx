@@ -155,6 +155,19 @@ export function FinalReport() {
     );
   }
 
+  // Polling logic for async report generation
+  useEffect(() => {
+    let interval: ReturnType<typeof setInterval>;
+    if (session && session.status === 'COMPLETED' && session.overallScore === null) {
+      interval = setInterval(() => {
+        loadSession(session._id);
+      }, 5000);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [session, loadSession]);
+
   if (session.status !== 'COMPLETED') {
     return (
       <Container className="py-8">
@@ -163,6 +176,20 @@ export function FinalReport() {
           <Button onClick={() => navigate(`${ROUTES.INTERVIEW_ACTIVE}?id=${session._id}`)}>
             Return to Interview
           </Button>
+        </div>
+      </Container>
+    );
+  }
+
+  if (session.status === 'COMPLETED' && session.overallScore === null) {
+    return (
+      <Container className="py-8 max-w-4xl">
+        <div className="text-center p-12 bg-white rounded-xl shadow-sm border border-gray-100 flex flex-col items-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-600 mb-6"></div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Your report is being generated...</h2>
+          <p className="text-gray-500 max-w-md mx-auto">
+            Our AI is carefully evaluating your responses. This usually takes about 15-30 seconds. This page will automatically update when your report is ready.
+          </p>
         </div>
       </Container>
     );

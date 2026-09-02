@@ -34,6 +34,8 @@ import { RefundPolicy } from '../features/landing/pages/RefundPolicy';
 import { CookiePolicy } from '../features/landing/pages/CookiePolicy';
 const ExplorePacks = Loadable(lazy(() => import('../features/landing/pages/ExplorePacks').then(m => ({ default: m.ExplorePacks }))));
 const ExplorePackDetails = Loadable(lazy(() => import('../features/landing/pages/ExplorePackDetails').then(m => ({ default: m.ExplorePackDetails }))));
+import { AdminFeedback } from '../features/admin/pages/AdminFeedback';
+import { AdminFeedbackDetail } from '../features/admin/pages/AdminFeedbackDetail';
 import { Login } from '../features/auth/pages/Login';
 import { Register } from '../features/auth/pages/Register';
 import { ForgotPassword } from '../features/auth/pages/ForgotPassword';
@@ -41,6 +43,7 @@ import { ResetPassword } from '../features/auth/pages/ResetPassword';
 import { VerifyEmail } from '../features/auth/pages/VerifyEmail';
 import { DashboardHome } from '../features/dashboard/pages/DashboardHome';
 import { InterviewHome } from '../features/interview/pages/InterviewHome';
+import { Feedback } from '../features/interview/pages/Feedback';
 
 // Lazy load onboarding
 const Welcome = Loadable(lazy(() => import('../features/onboarding/pages/Welcome').then(m => ({ default: m.Welcome }))));
@@ -178,6 +181,7 @@ export const router = createBrowserRouter([
       { path: ROUTES.INTERVIEW_INSTRUCTIONS, element: <InterviewInstructions /> },
       { path: ROUTES.INTERVIEW_REPORT, element: <FinalReport /> },
       { path: ROUTES.INTERVIEW_REPORT_DETAILS, element: <ReportDetails /> },
+      { path: ROUTES.INTERVIEW_FEEDBACK, element: <Feedback /> },
       { path: ROUTES.INTERVIEW_HISTORY, element: <InterviewHistory /> },
       { path: ROUTES.INTERVIEW_COMPARE, element: <InterviewComparison /> },
       { path: ROUTES.RESUME, element: <ResumeDashboard /> },
@@ -238,6 +242,8 @@ export const router = createBrowserRouter([
           { path: '/admin/promos', element: <PromoManagement /> },
           { path: ROUTES.ADMIN_USERS, element: <UserManagement /> },
           { path: ROUTES.ADMIN_AUDIT_LOGS, element: <AuditLogs /> },
+          { path: ROUTES.ADMIN_FEEDBACK, element: <AdminFeedback /> },
+          { path: `${ROUTES.ADMIN_FEEDBACK}/:id`, element: <AdminFeedbackDetail /> },
           { path: ROUTES.ADMIN_QUESTIONS, element: <QuestionLibrary /> },
           { path: ROUTES.ADMIN_QUESTIONS_NEW, element: <QuestionEditor /> },
           { path: ROUTES.ADMIN_QUESTIONS_EDIT, element: <QuestionEditor /> },

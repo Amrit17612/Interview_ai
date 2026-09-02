@@ -44,6 +44,7 @@ export const ROUTES = {
   ADMIN_TEMPLATES_EDIT: '/admin/templates/:id/edit',
   ADMIN_USERS: '/admin/users',
   ADMIN_AUDIT_LOGS: '/admin/audit-logs',
+  ADMIN_FEEDBACK: '/admin/feedback',
 
   // Mock Route for dynamic matching
   MOCK_INTERVIEW: '/mock/:type/:id',
@@ -61,6 +62,7 @@ export const ROUTES = {
   INTERVIEW_PROCESSING: '/interviews/processing',
   INTERVIEW_REPORT: '/interviews/report',
   INTERVIEW_REPORT_DETAILS: '/interviews/report-details',
+  INTERVIEW_FEEDBACK: '/interviews/feedback',
   INTERVIEW_HISTORY: '/interviews/history',
   INTERVIEW_COMPARE: '/interviews/compare',
 

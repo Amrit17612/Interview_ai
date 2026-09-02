@@ -433,144 +433,158 @@ const completeInterview = async (req, res) => {
       await session.save();
     }
 
-    // Context Binding for Phase 2
-    let resumeContext = null;
-    let atsContext = null;
-
-    const contextPromises = [];
-    if (session.resumeId) {
-      contextPromises.push(
-        Resume.findOne({ _id: session.resumeId, userId })
-          .then(resume => {
-            if (resume && resume.parsingStatus === 'COMPLETED' && resume.parsedText) {
-              resumeContext = resume.parsedText.substring(0, 8000); // Bounded size
-            }
-          })
-          .catch(err => console.error('[INTERVIEW ENGINE] Failed to retrieve resume context:', err))
-      );
-    }
-    
-    if (session.atsJobId) {
-      contextPromises.push(
-        JobDescription.findOne({ _id: session.atsJobId, userId })
-          .then(job => {
-            if (job && job.content) {
-              atsContext = `Title: ${job.title}\nCompany: ${job.company}\nContent: ${job.content}`.substring(0, 8000);
-            }
-          })
-          .catch(err => console.error('[INTERVIEW ENGINE] Failed to retrieve ATS context:', err))
-      );
-    }
-    
-    if (contextPromises.length > 0) {
-      await Promise.all(contextPromises);
-    }
-
-    const prompt = getFinalReportPrompt({
-      domain: session.configuration.domain,
-      difficulty: session.configuration.difficulty,
-      type: session.configuration.type,
-      evaluations: session.questions.map(q => ({
-        index: q.index,
-        question: q.text,
-        answer: q.userAnswer || '',
-        ...(q.expectedPoints && q.expectedPoints.length > 0 ? { expectedPoints: q.expectedPoints } : {})
-      })),
-      resumeContext,
-      atsContext,
-      company: session.configuration.company,
-      role: session.configuration.role
-    });
-
-    const aiResText = await generateText(prompt, { responseMimeType: 'application/json' });
-    const report = validateReportResponse(aiResText);
-
-    let totalScore = 0;
-    let evaluatedCount = 0;
-
-    session.questions.forEach((q) => {
-      if (q.userAnswer === '(Skipped)' || !q.userAnswer) {
-        q.evaluation = {
-          score: 0,
-          feedback: 'Question was skipped.'
-        };
-        q.status = 'EVALUATED';
-      } else {
-        const evalItem = report.question_evaluations.find(e => e.index === q.index);
-        if (evalItem) {
-          q.evaluation = {
-            score: evalItem.score,
-            feedback: evalItem.feedback
-          };
-          q.status = 'EVALUATED';
-        } else {
-          // Fallback if AI somehow misses an index, though validation should catch it
-          q.evaluation = {
-            score: 0,
-            feedback: 'Evaluation not generated.'
-          };
-          q.status = 'EVALUATED';
-        }
-      }
-      
-      totalScore += (q.evaluation.score || 0);
-      evaluatedCount++;
-    });
-
-    session.overallScore = evaluatedCount > 0 ? Math.round(totalScore / evaluatedCount) : 0;
-    session.feedbackSummary = report.summary;
-    session.strengths = report.strengths || [];
-    session.weaknesses = report.weaknesses || [];
-    session.recommendations = report.recommendations || [];
-
-    await session.save();
-
-    // Reward Logic (Max 5 times = 25 credits)
-    // We only reward if this is not a retry (session wasn't already in rewardedInterviews)
-    const user = await User.findById(userId);
-    if (user && user.rewardedInterviews && user.rewardedInterviews.length < 5) {
-      const alreadyRewarded = user.rewardedInterviews.some(rid => rid.equals(session._id));
-      if (!alreadyRewarded) {
-        const updatedUser = await User.findOneAndUpdate(
-          { _id: userId, 'rewardedInterviews.4': { $exists: false }, 'rewardedInterviews': { $ne: session._id } },
-          { 
-            $push: { rewardedInterviews: session._id },
-            $inc: { credits: 5 }
-          },
-          { new: true }
-        );
-
-        if (updatedUser) {
-          await CreditTransaction.create({
-            user: userId,
-            amount: 5,
-            type: 'EARN_INTERVIEW',
-            referenceId: session._id.toString(),
-            balanceBefore: updatedUser.credits - 5,
-            balanceAfter: updatedUser.credits
-          });
-        }
-      }
-    }
-
-    // Trigger email report asynchronously (fire-and-forget)
-    try {
-      const emailService = require('../services/emailService');
-      emailService.sendInterviewReport(req.user, session).catch(err => {
-        console.error('[EMAIL] Background email report failed:', err.message || err);
-      });
-    } catch (emailErr) {
-      console.error('[EMAIL] Failed to trigger email service:', emailErr);
-    }
-
+    // Return success immediately so the candidate doesn't wait for Gemini
     res.status(200).json({
       success: true,
+      message: 'Interview completed successfully',
       data: session
     });
+
+    // Background Report Generation
+    (async () => {
+      try {
+        console.log(`[REPORT] Background generation started for session ${session._id}`);
+        
+        // Context Binding for Phase 2
+        let resumeContext = null;
+        let atsContext = null;
+
+        const contextPromises = [];
+        if (session.resumeId) {
+          contextPromises.push(
+            Resume.findOne({ _id: session.resumeId, user: userId })
+              .then(resume => {
+                if (resume && resume.parsingStatus === 'COMPLETED' && resume.parsedText) {
+                  resumeContext = resume.parsedText.substring(0, 8000); // Bounded size
+                }
+              })
+              .catch(err => console.error('[INTERVIEW ENGINE] Failed to retrieve resume context:', err))
+          );
+        }
+        
+        if (session.atsJobId) {
+          contextPromises.push(
+            JobDescription.findOne({ _id: session.atsJobId, user: userId })
+              .then(job => {
+                if (job && job.content) {
+                  atsContext = `Title: ${job.title}\nCompany: ${job.company}\nContent: ${job.content}`.substring(0, 8000);
+                }
+              })
+              .catch(err => console.error('[INTERVIEW ENGINE] Failed to retrieve ATS context:', err))
+          );
+        }
+        
+        if (contextPromises.length > 0) {
+          await Promise.all(contextPromises);
+        }
+
+        const prompt = getFinalReportPrompt({
+          domain: session.configuration.domain,
+          difficulty: session.configuration.difficulty,
+          type: session.configuration.type,
+          evaluations: session.questions.map(q => ({
+            index: q.index,
+            question: q.text,
+            answer: q.userAnswer || '',
+            ...(q.expectedPoints && q.expectedPoints.length > 0 ? { expectedPoints: q.expectedPoints } : {})
+          })),
+          resumeContext,
+          atsContext,
+          company: session.configuration.company,
+          role: session.configuration.role
+        });
+
+        const aiResText = await generateText(prompt, { responseMimeType: 'application/json' });
+        const report = validateReportResponse(aiResText);
+        
+        console.log(`[REPORT] Gemini evaluation completed for session ${session._id}`);
+
+        let totalScore = 0;
+        let evaluatedCount = 0;
+
+        session.questions.forEach((q) => {
+          if (q.userAnswer === '(Skipped)' || !q.userAnswer) {
+            q.evaluation = {
+              score: 0,
+              feedback: 'Question was skipped.'
+            };
+            q.status = 'EVALUATED';
+          } else {
+            const evalItem = report.question_evaluations.find(e => e.index === q.index);
+            if (evalItem) {
+              q.evaluation = {
+                score: evalItem.score,
+                feedback: evalItem.feedback
+              };
+              q.status = 'EVALUATED';
+            } else {
+              // Fallback if AI somehow misses an index, though validation should catch it
+              q.evaluation = {
+                score: 0,
+                feedback: 'Evaluation not generated.'
+              };
+              q.status = 'EVALUATED';
+            }
+          }
+          
+          totalScore += (q.evaluation.score || 0);
+          evaluatedCount++;
+        });
+
+        session.overallScore = evaluatedCount > 0 ? Math.round(totalScore / evaluatedCount) : 0;
+        session.feedbackSummary = report.summary;
+        session.strengths = report.strengths || [];
+        session.weaknesses = report.weaknesses || [];
+        session.recommendations = report.recommendations || [];
+
+        await session.save();
+        console.log(`[REPORT] Session score updated for session ${session._id}`);
+
+        // Reward Logic (Max 5 times = 25 credits)
+        const user = await User.findById(userId);
+        if (user && user.rewardedInterviews && user.rewardedInterviews.length < 5) {
+          const alreadyRewarded = user.rewardedInterviews.some(rid => rid.equals(session._id));
+          if (!alreadyRewarded) {
+            const updatedUser = await User.findOneAndUpdate(
+              { _id: userId, 'rewardedInterviews.4': { $exists: false }, 'rewardedInterviews': { $ne: session._id } },
+              { 
+                $push: { rewardedInterviews: session._id },
+                $inc: { credits: 5 }
+              },
+              { new: true }
+            );
+
+            if (updatedUser) {
+              const CreditTransaction = require('../models/CreditTransaction');
+              await CreditTransaction.create({
+                user: userId,
+                amount: 5,
+                type: 'EARN_INTERVIEW',
+                referenceId: session._id.toString(),
+                balanceBefore: updatedUser.credits - 5,
+                balanceAfter: updatedUser.credits
+              });
+            }
+          }
+        }
+
+        // Trigger email report asynchronously
+        try {
+          // req.user might be lost in background context, fetch fresh user
+          const emailService = require('../services/emailService');
+          await emailService.sendInterviewReport(user, session);
+          console.log(`[REPORT] Background generation completed for session ${session._id}`);
+        } catch (emailErr) {
+          console.error('[EMAIL] Background email report failed:', emailErr.message || emailErr);
+        }
+      } catch (bgError) {
+        console.error(`[REPORT] Background generation failed for session ${session._id}:`, bgError);
+      }
+    })();
+
   } catch (error) {
     console.error('[INTERVIEW ENGINE] Complete Interview Error:', error);
-    const msg = error.message.includes('AI') ? error.message : 'Failed to complete interview.';
-    res.status(500).json({ success: false, message: msg, recoverable: true });
+    res.status(500).json({ success: false, message: 'Failed to complete interview.', recoverable: true });
   }
 };
 

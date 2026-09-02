@@ -153,8 +153,8 @@ export function ActiveInterview() {
 
   // If session is completed and has a score, auto-navigate
   useEffect(() => {
-    if (session?._id === sessionId && session?.status === 'COMPLETED' && session.overallScore !== undefined && session.overallScore !== null) {
-      navigate(`${ROUTES.INTERVIEW_REPORT}?id=${session._id}`);
+    if (session?.status === 'COMPLETED') {
+      navigate(`${ROUTES.INTERVIEW_FEEDBACK}?id=${session._id}`);
     }
   }, [session, sessionId, navigate]);
 
@@ -338,9 +338,11 @@ export function ActiveInterview() {
                       <Button onClick={() => retryReport()} variant="outline" className="w-full border-red-500/50 text-red-400 hover:bg-red-500/10 hover:text-red-300">Retry Generation</Button>
                     </div>
                   ) : (
-                    <Button onClick={() => navigate(`${ROUTES.INTERVIEW_REPORT}?id=${session._id}`)} size="lg" className="w-full bg-white text-slate-900 hover:bg-slate-200">
-                      View Full Report <ArrowRight className="w-4 h-4 ml-2" />
-                    </Button>
+                    <div className="mt-8 space-y-4">
+                      <Button onClick={() => navigate(`${ROUTES.INTERVIEW_FEEDBACK}?id=${session._id}`)} size="lg" className="w-full bg-white text-slate-900 hover:bg-slate-200">
+                        Give Feedback & View Results <ArrowRight className="w-4 h-4 ml-2" />
+                      </Button>
+                    </div>
                   )}
                 </>
               )}
