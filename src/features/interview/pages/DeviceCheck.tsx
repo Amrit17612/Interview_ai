@@ -19,7 +19,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { streamCache } from '../utils/streamCache';
 
-type Step = 1 | 2 | 3;
+type Step = 1 | 2 | 3 | 4;
 type CheckStatus = 'idle' | 'checking' | 'success' | 'error' | 'warning';
 
 export function DeviceCheck() {
@@ -281,8 +281,6 @@ export function DeviceCheck() {
 
 
   const handleContinue = () => {
-    // Navigate will unmount and clean up ONLY DeviceCheck local state.
-    // globalStream (cached in streamCache) survives.
     navigate(`${ROUTES.INTERVIEW_ACTIVE}?id=${sessionId}`);
   };
 
@@ -306,7 +304,7 @@ export function DeviceCheck() {
         <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-1 bg-gray-100 rounded-full z-0"></div>
         <div 
           className="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-brand-500 rounded-full z-0 transition-all duration-500"
-          style={{ width: currentStep === 1 ? '15%' : currentStep === 2 ? '50%' : '100%' }}
+          style={{ width: currentStep === 1 ? '10%' : currentStep === 2 ? '40%' : currentStep === 3 ? '70%' : '100%' }}
         ></div>
         
         {/* Step 1: Mic */}
@@ -328,9 +326,17 @@ export function DeviceCheck() {
         {/* Step 3: Browser */}
         <div className={`relative z-10 flex flex-col items-center transition-all duration-300 ${currentStep === 3 ? 'scale-110' : ''}`}>
           <div className={`w-14 h-14 rounded-full flex items-center justify-center border-2 transition-colors duration-300 ${getStepClass(3)} bg-white`}>
-            <Globe className="w-6 h-6" />
+            {currentStep > 3 ? <CheckCircle2 className="w-6 h-6 text-green-500" /> : <Globe className="w-6 h-6" />}
           </div>
-          <span className={`mt-3 text-sm font-semibold ${currentStep === 3 ? 'text-gray-900' : 'text-gray-400'}`}>Browser</span>
+          <span className={`mt-3 text-sm font-semibold ${currentStep >= 3 ? 'text-gray-900' : 'text-gray-400'}`}>Browser</span>
+        </div>
+
+        {/* Step 4: Security */}
+        <div className={`relative z-10 flex flex-col items-center transition-all duration-300 ${currentStep === 4 ? 'scale-110' : ''}`}>
+          <div className={`w-14 h-14 rounded-full flex items-center justify-center border-2 transition-colors duration-300 ${getStepClass(4)} bg-white`}>
+            <ShieldCheck className="w-6 h-6" />
+          </div>
+          <span className={`mt-3 text-sm font-semibold ${currentStep === 4 ? 'text-gray-900' : 'text-gray-400'}`}>Security</span>
         </div>
       </div>
 
@@ -501,6 +507,10 @@ export function DeviceCheck() {
                     ? <span className="text-green-500 font-medium flex items-center gap-1"><CheckCircle2 className="w-4 h-4" /> Supported</span> 
                     : <span className="text-amber-500 font-medium text-xs text-right max-w-[150px]">Some voice features unavailable. Type mode available.</span>}
                 </div>
+                <div className="flex items-center justify-between p-4 rounded-xl border border-gray-100 bg-gray-50">
+                  <span className="font-semibold text-gray-700 flex items-center gap-2"><ShieldCheck className="w-4 h-4 text-brand-500" /> Security Monitoring</span>
+                  <span className="text-green-500 font-medium flex items-center gap-1"><CheckCircle2 className="w-4 h-4" /> Ready</span>
+                </div>
               </div>
 
               {netStatus !== 'checking' && (
@@ -521,7 +531,7 @@ export function DeviceCheck() {
                       className="mt-1 rounded border-gray-300 text-brand-600 focus:ring-brand-500"
                     />
                     <span className="text-sm text-gray-700 leading-relaxed group-hover:text-gray-900 transition-colors">
-                      I consent to Interviu AI accessing my camera and microphone for the duration of this interview. Video and audio are processed locally in your browser and are not permanently recorded or stored.
+                      I consent to Interviu AI accessing my camera and microphone. I understand that my interview environment (tab switches, focus loss, clipboard usage) will be monitored for security purposes.
                     </span>
                   </label>
                   

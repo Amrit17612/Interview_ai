@@ -111,6 +111,8 @@ const QuestionLibrary = Loadable(lazy(() => import('../features/admin/pages/Ques
 const QuestionEditor = Loadable(lazy(() => import('../features/admin/pages/QuestionEditor').then(m => ({ default: m.QuestionEditor }))));
 const InterviewTemplateLibrary = Loadable(lazy(() => import('../features/admin/pages/InterviewTemplateLibrary').then(m => ({ default: m.InterviewTemplateLibrary }))));
 const TemplateBuilder = Loadable(lazy(() => import('../features/admin/pages/TemplateBuilder').then(m => ({ default: m.TemplateBuilder }))));
+const AdminSecurityAudit = Loadable(lazy(() => import('../features/admin/pages/AdminSecurityAudit').then(m => ({ default: m.AdminSecurityAudit }))));
+const AdminBatchSecurity = Loadable(lazy(() => import('../features/admin/pages/AdminBatchSecurity').then(m => ({ default: m.AdminBatchSecurity }))));
 
 export const router = createBrowserRouter([
   {
@@ -249,7 +251,9 @@ export const router = createBrowserRouter([
           { path: ROUTES.ADMIN_QUESTIONS_EDIT, element: <QuestionEditor /> },
           { path: ROUTES.ADMIN_TEMPLATES, element: <InterviewTemplateLibrary /> },
           { path: ROUTES.ADMIN_TEMPLATES_NEW, element: <TemplateBuilder /> },
-          { path: ROUTES.ADMIN_TEMPLATES_EDIT, element: <TemplateBuilder /> }
+          { path: ROUTES.ADMIN_TEMPLATES_EDIT, element: <TemplateBuilder /> },
+          { path: '/admin/security/session/:id', element: <AdminSecurityAudit /> },
+          { path: '/admin/security/batch/:id', element: <AdminBatchSecurity /> }
         ]
       }
     ]

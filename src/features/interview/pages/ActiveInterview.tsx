@@ -11,13 +11,15 @@ import { FloatingCamera } from '../components/FloatingCamera';
 import { AudioWaveform } from '../components/AudioWaveform';
 import { streamCache } from '../utils/streamCache';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useSecurityMonitor } from '../hooks/useSecurityMonitor';
+import { ShieldAlert } from 'lucide-react';
 
 export function ActiveInterview() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const sessionId = searchParams.get('id');
   const containerRef = useRef<HTMLDivElement>(null);
-  
+
   const {
     session,
     currentQuestion,
@@ -61,12 +63,43 @@ export function ActiveInterview() {
     answerText
   });
 
+  const hiddenVideoRef = useRef<HTMLVideoElement>(null);
+  useEffect(() => {
+    if (interviewStarted && hiddenVideoRef.current) {
+      const stream = streamCache.cameraStream;
+      if (stream) {
+        hiddenVideoRef.current.srcObject = stream;
+      }
+    }
+  }, [interviewStarted]);
+
+  const { warnings, flushPendingEvents } = useSecurityMonitor(session?._id || null, interviewStarted, hiddenVideoRef);
+
+  // Expose recent high/medium warning if any
+  const [activeWarning, setActiveWarning] = useState<string | null>(null);
+  useEffect(() => {
+    if (warnings.length > 0) {
+      const lastWarning = warnings[warnings.length - 1];
+      if (['MEDIUM', 'HIGH'].includes(lastWarning.severity)) {
+        let msg = 'Security violation detected.';
+        if (lastWarning.type === 'TAB_SWITCH' || lastWarning.type === 'FOCUS_LOST') msg = 'You have left the interview window. Please return to the interview.';
+        if (lastWarning.type.includes('COPY') || lastWarning.type.includes('PASTE')) msg = 'Clipboard operations are restricted.';
+        if (lastWarning.type === 'NO_FACE') msg = 'Face not detected. Please remain visible.';
+        if (lastWarning.type === 'MULTIPLE_FACES') msg = 'Multiple faces detected in camera view.';
+
+        setActiveWarning(msg);
+        const timer = setTimeout(() => setActiveWarning(null), 5000);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [warnings]);
+
   // 0. Network Listener & Body Scroll Lock
   useEffect(() => {
     // Disable document scrolling while in interview
     const originalOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
-    
+
     const handleOnline = () => setIsOnline(true);
     const handleOffline = () => setIsOnline(false);
     window.addEventListener('online', handleOnline);
@@ -102,7 +135,7 @@ export function ActiveInterview() {
   // Countdown Logic
   useEffect(() => {
     if (!session || session.status === 'COMPLETED' || error || isLoading) return;
-    
+
     if (countdown !== null && countdown > 0) {
       const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
       return () => clearTimeout(timer);
@@ -175,22 +208,23 @@ export function ActiveInterview() {
 
   const handleSubmit = async () => {
     if (!answerText.trim() && !isSpeakMode) return; // Allow empty submit if speak mode just hasn't transcribed perfectly but user forces submit, though ideally we disable submit
-    
+
     stopListening();
     stopSpeaking();
-    
+
     try {
       if (answerText.trim()) {
         await submitAnswer(answerText);
         clearDraft();
       }
-      
+
       const maxQ = session?.maxQuestions || 5;
       if (session && session.questions.length < maxQ) {
         setAnswerText('');
         resetTranscript();
         await generateNextQuestion();
       } else {
+        await flushPendingEvents();
         await completeInterview();
       }
     } catch (err) {
@@ -203,6 +237,7 @@ export function ActiveInterview() {
     stopSpeaking();
     setShowExitConfirm(false);
     try {
+      await flushPendingEvents();
       await completeInterview();
     } catch (err) {
       console.error('Failed to end interview', err);
@@ -255,7 +290,22 @@ export function ActiveInterview() {
 
   return (
     <div ref={containerRef} className="fixed top-0 left-0 w-full h-[100dvh] z-[100] bg-slate-950 text-white overflow-hidden flex flex-col font-sans selection:bg-brand-500/30 pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)]">
-      
+      <video ref={hiddenVideoRef} autoPlay playsInline muted className="hidden" />
+
+      <AnimatePresence>
+        {activeWarning && (
+          <motion.div
+            initial={{ opacity: 0, y: -50 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -50 }}
+            className="fixed top-20 left-1/2 -translate-x-1/2 z-[200] bg-red-500 text-white px-6 py-3 rounded-full shadow-2xl flex items-center gap-3 font-medium"
+          >
+            <ShieldAlert className="w-5 h-5" />
+            {activeWarning}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Background Visual Depth */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-brand-900/20 blur-[120px] mix-blend-screen" />
@@ -282,7 +332,7 @@ export function ActiveInterview() {
             Question {Math.max(1, session.questions.length)} / {session.maxQuestions || 5}
           </span>
         </div>
-        
+
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2 px-3 py-1.5 bg-black/40 rounded-full border border-white/5 backdrop-blur-sm shadow-inner">
             <div className="flex items-center gap-1.5">
@@ -298,10 +348,10 @@ export function ActiveInterview() {
 
       {/* Main Content Area */}
       <main className="flex-1 min-h-0 relative z-10 flex flex-col items-center w-full max-w-4xl mx-auto px-4 py-2 md:py-6 overflow-hidden">
-        
+
         <AnimatePresence mode="wait">
           {countdown !== null ? (
-            <motion.div 
+            <motion.div
               key="countdown"
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
@@ -313,7 +363,7 @@ export function ActiveInterview() {
               </div>
             </motion.div>
           ) : (session._id === sessionId && (session.status === 'COMPLETED' || isCompleting)) ? (
-            <motion.div 
+            <motion.div
               key="completed"
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -324,7 +374,7 @@ export function ActiveInterview() {
               </div>
               <h2 className="text-3xl font-bold mb-2">Interview Completed</h2>
               <p className="text-slate-400 mb-8 text-sm">Your responses have been successfully recorded.</p>
-              
+
               {isCompleting ? (
                 <div className="w-full flex flex-col items-center gap-4">
                   <Loader2 className="w-6 h-6 animate-spin text-brand-500" />
@@ -348,13 +398,13 @@ export function ActiveInterview() {
               )}
             </motion.div>
           ) : (
-            <motion.div 
+            <motion.div
               key="interview"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               className="w-full flex flex-col items-center flex-1"
             >
-              
+
               {/* AI Avatar Area */}
               <div className="flex flex-col items-center justify-center shrink-0 mb-4 md:mb-6 mt-2">
                 <div className="relative scale-75 md:scale-100 transform origin-top">
@@ -380,7 +430,7 @@ export function ActiveInterview() {
               <div className="w-full max-w-3xl shrink-0 max-h-[30vh] flex flex-col mb-4 md:mb-6">
                 <AnimatePresence mode="wait">
                   {currentQuestion ? (
-                    <motion.div 
+                    <motion.div
                       key={currentQuestion._id}
                       initial={{ opacity: 0, y: 20, scale: 0.98 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -389,13 +439,13 @@ export function ActiveInterview() {
                     >
                       {/* Subtle ambient glow inside card */}
                       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-32 bg-brand-500/5 blur-3xl rounded-full pointer-events-none" />
-                      
+
                       <div className="flex justify-between items-start mb-3 md:mb-6 shrink-0 relative z-10">
                         <span className="text-xs font-bold text-slate-500 tracking-widest uppercase">
                           Question {session.questions.length} / {session.maxQuestions || 5}
                         </span>
                         {ttsSupported && (
-                          <button 
+                          <button
                             onClick={() => speak(currentQuestion.text)}
                             disabled={isSpeaking || isSubmittingAnswer}
                             className="flex items-center gap-2 text-xs font-medium text-slate-400 hover:text-brand-400 disabled:opacity-50 transition-colors bg-white/5 hover:bg-brand-500/10 px-3 py-1.5 rounded-full border border-white/5"
@@ -405,7 +455,7 @@ export function ActiveInterview() {
                           </button>
                         )}
                       </div>
-                      
+
                       <div className="overflow-y-auto custom-scrollbar pr-2 relative z-10 min-h-0 flex-1">
                         <h3 className="text-lg md:text-2xl font-medium leading-relaxed text-white">
                           {currentQuestion.text}
@@ -413,7 +463,7 @@ export function ActiveInterview() {
                       </div>
                     </motion.div>
                   ) : (
-                    <motion.div 
+                    <motion.div
                       key="loading-question"
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
@@ -432,7 +482,7 @@ export function ActiveInterview() {
                 <div className="w-full max-w-3xl flex-1 min-h-0 flex flex-col pb-2">
                   <AnimatePresence mode="wait">
                     {isSpeakMode ? (
-                      <motion.div 
+                      <motion.div
                         key="speak-mode"
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -444,13 +494,13 @@ export function ActiveInterview() {
                             <div className="h-16 w-full max-w-xs mb-8 flex items-center justify-center">
                               <AudioWaveform isListening={isListening} stream={streamCache.cameraStream} />
                             </div>
-                            
+
                             <button
                               onClick={toggleListen}
                               disabled={isSubmittingAnswer || isSpeaking}
                               className={`w-20 h-20 rounded-full flex items-center justify-center transition-all duration-300 ${
-                                isListening 
-                                  ? 'bg-red-500 hover:bg-red-600 shadow-[0_0_40px_rgba(239,68,68,0.5)] scale-105' 
+                                isListening
+                                  ? 'bg-red-500 hover:bg-red-600 shadow-[0_0_40px_rgba(239,68,68,0.5)] scale-105'
                                   : 'bg-slate-800 hover:bg-slate-700 border border-white/10 shadow-xl'
                               } disabled:opacity-50 disabled:scale-100 disabled:cursor-not-allowed`}
                               aria-label={isListening ? "Stop listening" : "Start listening"}
@@ -474,7 +524,7 @@ export function ActiveInterview() {
                         )}
                       </motion.div>
                     ) : (
-                      <motion.div 
+                      <motion.div
                         key="type-mode"
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -505,7 +555,7 @@ export function ActiveInterview() {
       {interviewStarted && session?.status !== 'COMPLETED' && currentQuestion && (
         <footer className="shrink-0 w-full p-3 md:p-6 bg-slate-950 border-t border-white/5 z-20 flex justify-center">
           <div className="w-full max-w-4xl flex flex-col sm:flex-row items-center justify-between gap-3 md:gap-4">
-            
+
             {/* Left: Finish Early */}
             <Button
               variant="ghost"
@@ -543,7 +593,7 @@ export function ActiveInterview() {
               disabled={isSubmittingAnswer || isGeneratingQuestion || (!answerText.trim() && !isSpeakMode) || currentStatus === 'AI_SPEAKING' || isCompleting}
               className="w-full sm:w-auto bg-brand-500 hover:bg-brand-400 text-white shadow-[0_0_20px_rgba(14,165,233,0.3)] shrink-0 order-2 sm:order-3"
             >
-              {isSubmittingAnswer ? 'Analyzing...' : isFinalQuestion ? 'Submit & Finish' : 'Submit Answer'} 
+              {isSubmittingAnswer ? 'Analyzing...' : isFinalQuestion ? 'Submit & Finish' : 'Submit Answer'}
               {!isSubmittingAnswer && <ArrowRight className="w-4 h-4 ml-2" />}
             </Button>
           </div>
@@ -556,7 +606,7 @@ export function ActiveInterview() {
       {/* Exit Confirmation Modal */}
       {showExitConfirm && (
         <div className="fixed inset-0 z-[300] bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             className="bg-slate-900 border border-slate-700 p-8 rounded-3xl max-w-md w-full shadow-2xl text-center"
@@ -566,7 +616,7 @@ export function ActiveInterview() {
             </div>
             <h3 className="text-2xl font-bold mb-3 text-white">Finish Interview Early?</h3>
             <p className="text-slate-400 mb-8 leading-relaxed">
-              You have answered {Math.max(0, session?.questions.length ? session.questions.length - (currentQuestion ? 1 : 0) : 0)} of {session?.maxQuestions || 5} questions. 
+              You have answered {Math.max(0, session?.questions.length ? session.questions.length - (currentQuestion ? 1 : 0) : 0)} of {session?.maxQuestions || 5} questions.
               {currentQuestion && ' The current question will be skipped.'}
               <br/><br/>
               Your completed answers will be analyzed and included in your final report.
