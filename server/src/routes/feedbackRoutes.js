@@ -5,13 +5,14 @@ const {
   getAdminFeedbackList,
   getAdminFeedbackDetail
 } = require('../controllers/feedbackController');
-const { protect, admin } = require('../middleware/authMiddleware');
+const { protect } = require('../middleware/authMiddleware');
+const { requireAdmin } = require('../middleware/roleMiddleware');
 
 // Candidate route
 router.post('/', protect, submitFeedback);
 
 // Admin routes
-router.get('/admin', protect, admin, getAdminFeedbackList);
-router.get('/admin/:id', protect, admin, getAdminFeedbackDetail);
+router.get('/admin', protect, requireAdmin, getAdminFeedbackList);
+router.get('/admin/:id', protect, requireAdmin, getAdminFeedbackDetail);
 
 module.exports = router;
