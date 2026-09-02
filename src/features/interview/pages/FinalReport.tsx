@@ -130,6 +130,19 @@ export function FinalReport() {
     }
   }, [sessionId, session, loadSession]);
 
+  // Polling logic for async report generation
+  useEffect(() => {
+    let interval: ReturnType<typeof setInterval>;
+    if (session && session.status === 'COMPLETED' && session.overallScore === null) {
+      interval = setInterval(() => {
+        loadSession(session._id);
+      }, 5000);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [session, loadSession]);
+
   if (!sessionId) {
     return (
       <Container className="py-8">
@@ -154,19 +167,6 @@ export function FinalReport() {
       </Container>
     );
   }
-
-  // Polling logic for async report generation
-  useEffect(() => {
-    let interval: ReturnType<typeof setInterval>;
-    if (session && session.status === 'COMPLETED' && session.overallScore === null) {
-      interval = setInterval(() => {
-        loadSession(session._id);
-      }, 5000);
-    }
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [session, loadSession]);
 
   if (session.status !== 'COMPLETED') {
     return (
