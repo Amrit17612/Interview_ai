@@ -65,16 +65,16 @@ questionSchema.index({ type: 1, status: 1 });
  * Cycle detection to prevent indirect circular follow-ups.
  * e.g., A -> B -> C -> A
  */
-questionSchema.pre('save', async function(next) {
+questionSchema.pre('save', async function() {
   if (!this.isModified('followUps')) {
-    return next();
+    return;
   }
   
   if (!this.followUps || 
       (this.followUps.weak.length === 0 && 
        this.followUps.neutral.length === 0 && 
        this.followUps.strong.length === 0)) {
-    return next();
+    return;
   }
 
   // Combine all branches for cycle detection
@@ -86,7 +86,7 @@ questionSchema.pre('save', async function(next) {
 
   // Direct self-reference check
   if (allFollowUps.some(id => id && id.toString() === this._id.toString())) {
-    return next(new Error('Question cannot be a follow-up to itself.'));
+    throw new Error('Question cannot be a follow-up to itself.');
   }
 
   // Graph traversal to detect indirect cycles
@@ -124,11 +124,10 @@ questionSchema.pre('save', async function(next) {
   try {
     const hasCycle = await checkCycle(allFollowUps);
     if (hasCycle) {
-      return next(new Error('Adding this follow-up would create a circular reference cycle.'));
+      throw new Error('Adding this follow-up would create a circular reference cycle.');
     }
-    next();
   } catch (error) {
-    next(error);
+    throw error;
   }
 });
 
