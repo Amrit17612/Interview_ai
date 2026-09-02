@@ -553,6 +553,16 @@ const completeInterview = async (req, res) => {
       }
     }
 
+    // Trigger email report asynchronously (fire-and-forget)
+    try {
+      const emailService = require('../services/emailService');
+      emailService.sendInterviewReport(req.user, session).catch(err => {
+        console.error('[EMAIL] Background email report failed:', err.message || err);
+      });
+    } catch (emailErr) {
+      console.error('[EMAIL] Failed to trigger email service:', emailErr);
+    }
+
     res.status(200).json({
       success: true,
       data: session
