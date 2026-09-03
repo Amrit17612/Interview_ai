@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const Payment = require('../models/Payment');
+const InterviewSession = require('../models/InterviewSession');
 const AuditLog = require('../models/AuditLog');
 const TRUSTED_CATALOG = require('../config/catalog');
 
@@ -91,13 +92,20 @@ const getUserById = async (req, res, next) => {
       .sort({ createdAt: -1 })
       .lean();
 
+    // Get interview sessions
+    const interviewSessions = await InterviewSession.find({ user: user._id })
+      .sort({ createdAt: -1 })
+      .select('status createdAt configuration')
+      .lean();
+
     res.json({
       success: true,
       data: {
         ...user,
         totalSpent,
         lastPurchaseDate: lastPurchase ? lastPurchase.createdAt : null,
-        purchaseHistory: purchaseHistory.map(p => ({...p, amount: p.amount / 100}))
+        purchaseHistory: purchaseHistory.map(p => ({...p, amount: p.amount / 100})),
+        interviewSessions
       }
     });
   } catch (error) {
