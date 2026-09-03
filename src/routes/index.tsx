@@ -113,6 +113,8 @@ const InterviewTemplateLibrary = Loadable(lazy(() => import('../features/admin/p
 const TemplateBuilder = Loadable(lazy(() => import('../features/admin/pages/TemplateBuilder').then(m => ({ default: m.TemplateBuilder }))));
 const AdminSecurityAudit = Loadable(lazy(() => import('../features/admin/pages/AdminSecurityAudit').then(m => ({ default: m.AdminSecurityAudit }))));
 const AdminBatchSecurity = Loadable(lazy(() => import('../features/admin/pages/AdminBatchSecurity').then(m => ({ default: m.AdminBatchSecurity }))));
+const BatchManagement = Loadable(lazy(() => import('../features/admin/pages/BatchManagement').then(m => ({ default: m.BatchManagement }))));
+const BatchDetail = Loadable(lazy(() => import('../features/admin/pages/BatchDetail').then(m => ({ default: m.BatchDetail }))));
 
 export const router = createBrowserRouter([
   {
@@ -253,7 +255,9 @@ export const router = createBrowserRouter([
           { path: ROUTES.ADMIN_TEMPLATES_NEW, element: <TemplateBuilder /> },
           { path: ROUTES.ADMIN_TEMPLATES_EDIT, element: <TemplateBuilder /> },
           { path: '/admin/security/session/:id', element: <AdminSecurityAudit /> },
-          { path: '/admin/security/batch/:id', element: <AdminBatchSecurity /> }
+          { path: '/admin/security/batch/:id', element: <AdminBatchSecurity /> },
+          { path: '/admin/batches', element: <BatchManagement /> },
+          { path: '/admin/batches/:id', element: <BatchDetail /> }
         ]
       }
     ]
