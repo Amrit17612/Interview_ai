@@ -17,7 +17,7 @@ const interviewTemplateSchema = new mongoose.Schema({
   },
   visibility: { 
     type: String, 
-    enum: ['PUBLIC', 'PRIVATE', 'BUNDLE_ONLY'], 
+    enum: ['PUBLIC', 'PRIVATE', 'BUNDLE_ONLY', 'TOKEN_REQUIRED'], 
     default: 'PRIVATE' 
   },
   targetBundleId: { 

@@ -93,6 +93,11 @@ const interviewSessionSchema = new mongoose.Schema({
     ref: 'InterviewTemplate',
     default: null
   },
+  batchId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Batch',
+    default: null
+  },
   maxQuestions: {
     type: Number,
     default: 5
@@ -130,5 +135,7 @@ const interviewSessionSchema = new mongoose.Schema({
 // Prevent IDOR: always query with { _id: sessionId, user: userId }
 // Mongoose doesn't strictly enforce this at the schema level for reads, 
 // so controllers MUST include the user ObjectId in queries.
+
+interviewSessionSchema.index({ batchId: 1, templateId: 1, status: 1 });
 
 module.exports = mongoose.model('InterviewSession', interviewSessionSchema);
