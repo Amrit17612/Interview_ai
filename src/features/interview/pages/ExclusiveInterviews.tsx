@@ -6,6 +6,7 @@ import { Button } from '../../../components/ui/Button';
 import { Card } from '../../../components/ui/Card';
 import { Input } from '../../../components/ui/Input';
 import { Spinner } from '../../../components/ui/Spinner';
+import { ROUTES } from '../../../constants/routes';
 import { apiClient } from '../../../services/api.client';
 import { Lock, PlayCircle, Clock, CheckCircle2, AlertTriangle, Key } from 'lucide-react';
 
@@ -89,7 +90,7 @@ export function ExclusiveInterviews() {
       const res = await apiClient.post(`/interview-templates/${templateId}/start`, payload);
       
       if (res.data.success) {
-        navigate(`/interviews/active?session=${res.data.data.sessionId}`);
+        navigate(`${ROUTES.INTERVIEW_DEVICE_CHECK}?id=${res.data.data.sessionId}`);
       }
     } catch (error: any) {
       const msg = error.response?.data?.message || error.message || 'Failed to start interview.';
@@ -196,16 +197,18 @@ export function ExclusiveInterviews() {
                       </div>
                       <div className="flex flex-col items-end gap-3 min-w-[120px]">
                         {getStatusDisplay(session.status)}
-                        {session.status === 'IN_PROGRESS' && (
-                          <Button size="sm" onClick={() => navigate(`/interviews/active?session=${session._id}`)}>
-                            Resume
-                          </Button>
-                        )}
-                        {session.status === 'COMPLETED' && (
-                          <Button size="sm" variant="outline" onClick={() => navigate(`/interviews/report-details?session=${session._id}`)}>
-                            View Report
-                          </Button>
-                        )}
+                        <div className="flex gap-2 w-full sm:w-auto">
+                          {session.status === 'IN_PROGRESS' && (
+                            <Button size="sm" onClick={() => navigate(`${ROUTES.INTERVIEW_ACTIVE}?id=${session._id}`)}>
+                              <PlayCircle className="h-4 w-4 mr-2" /> Resume
+                            </Button>
+                          )}
+                          {session.status === 'COMPLETED' && (
+                            <Button size="sm" variant="outline" onClick={() => navigate(`${ROUTES.INTERVIEW_REPORT}?id=${session._id}`)}>
+                              <Clock className="h-4 w-4 mr-2" /> View Report
+                            </Button>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </Card>
