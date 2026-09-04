@@ -30,7 +30,7 @@ const getAvailableTemplates = async (req, res, next) => {
     // For now, let's just return PUBLIC and all BUNDLE_ONLY.
     const allQuery = {
       status: 'ACTIVE',
-      visibility: { $in: ['PUBLIC', 'BUNDLE_ONLY'] }
+      visibility: { $in: ['PUBLIC', 'BUNDLE_ONLY', 'TOKEN_REQUIRED'] }
     };
 
     const templates = await InterviewTemplate.find(allQuery)
@@ -84,6 +84,56 @@ const startTemplate = async (req, res, next) => {
       }
     }
 
+    let batchId = undefined;
+    if (template.visibility === 'TOKEN_REQUIRED') {
+      const { token } = req.body;
+      if (!token || typeof token !== 'string') {
+        return res.status(401).json({ success: false, message: 'Access token is required' });
+      }
+      
+      const normalizedToken = token.trim().toUpperCase();
+      const AccessToken = require('../models/AccessToken');
+      const tokenDoc = await AccessToken.findOne({ code: normalizedToken });
+      
+      if (!tokenDoc) {
+        return res.status(401).json({ success: false, message: 'Invalid access token' });
+      }
+      if (!tokenDoc.isActive) {
+        return res.status(401).json({ success: false, message: 'Access token has been revoked' });
+      }
+      if (tokenDoc.expiresAt && new Date(tokenDoc.expiresAt) < new Date()) {
+        return res.status(401).json({ success: false, message: 'Access token has expired' });
+      }
+      if (tokenDoc.templateId.toString() !== id) {
+        return res.status(401).json({ success: false, message: 'Access token is not valid for this interview' });
+      }
+      
+      batchId = tokenDoc.batchId;
+
+      // Duplicate / Resume Protection
+      const existingInProgress = await InterviewSession.findOne({
+        user: userId,
+        templateId: template._id,
+        batchId: batchId,
+        status: 'IN_PROGRESS'
+      }).lean();
+
+      if (existingInProgress) {
+        return res.status(200).json({ success: true, data: { sessionId: existingInProgress._id, resumed: true } });
+      }
+
+      const existingCompleted = await InterviewSession.findOne({
+        user: userId,
+        templateId: template._id,
+        batchId: batchId,
+        status: 'COMPLETED'
+      }).lean();
+
+      if (existingCompleted) {
+        return res.status(409).json({ success: false, message: 'You have already completed this interview for this batch.' });
+      }
+    }
+
     if (!template.questions || template.questions.length === 0) {
       return res.status(400).json({ success: false, message: 'Template has no questions' });
     }
@@ -121,6 +171,7 @@ const startTemplate = async (req, res, next) => {
       status: 'IN_PROGRESS',
       isTemplateDriven: true,
       templateId: template._id,
+      batchId: batchId,
       maxQuestions: template.questions.length,
       templateQuestions: questionSnapshots,
       questions: [] // Active questions start empty, frontend triggers first generation

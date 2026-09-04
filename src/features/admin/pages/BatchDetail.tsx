@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { PageHeader } from '../../../components/ui/PageHeader';
 import { Container } from '../../../components/ui/Container';
 import { Button } from '../../../components/ui/Button';
 import { Plus, ArrowLeft, Copy, Check, Ban } from 'lucide-react';
@@ -223,8 +222,8 @@ export function BatchDetail() {
       <Modal
         isOpen={isModalOpen}
         onClose={() => !isSubmitting && setIsModalOpen(false)}
-        title="Assign Interview & Generate Token"
       >
+        <h2 className="text-xl font-bold text-gray-900 mb-4">Assign Interview & Generate Token</h2>
         <form onSubmit={handleGenerateToken} className="space-y-4 mt-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Select Interview Template *</label>

@@ -130,8 +130,8 @@ export function BatchManagement() {
       <Modal
         isOpen={isModalOpen}
         onClose={() => !isSubmitting && setIsModalOpen(false)}
-        title="Create New Batch"
       >
+        <h2 className="text-xl font-bold text-gray-900 mb-4">Create New Batch</h2>
         <form onSubmit={handleCreateBatch} className="space-y-4 mt-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Batch Name *</label>

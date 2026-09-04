@@ -16,6 +16,7 @@ import { atsService } from '../../../services/ats.service';
 import { interviewService, type InterviewStatsData, type InterviewRoadmapResponse } from '../../../services/interview.service';
 import { apiClient } from '../../../services/api.client';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { TokenEntryModal } from '../components/TokenEntryModal';
 
 export function DashboardHome() {
   const { user } = useAuth();
@@ -29,6 +30,25 @@ export function DashboardHome() {
   const [successMsg] = useState<string | null>((location.state as any)?.message || null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const [tokenModalOpen, setTokenModalOpen] = useState(false);
+  const [selectedTokenTemplateId, setSelectedTokenTemplateId] = useState<string | null>(null);
+
+  const handleStartTemplate = async (templateId: string, token?: string) => {
+    try {
+      const payload = token ? { token } : {};
+      const res = await apiClient.post(`/api/interview-templates/${templateId}/start`, payload);
+      navigate(`${ROUTES.INTERVIEW_ACTIVE}?id=${res.data.data.sessionId}`);
+      setTokenModalOpen(false);
+      setSelectedTokenTemplateId(null);
+    } catch (err: any) {
+      if (token) {
+        throw err; // TokenEntryModal will catch this and display error
+      } else {
+        alert(err.response?.data?.message || 'Failed to start template');
+      }
+    }
+  };
 
   const fetchData = async () => {
     setIsLoading(true);
@@ -334,12 +354,12 @@ export function DashboardHome() {
                           <span className="text-xs font-medium bg-gray-100 text-gray-600 px-2 py-1 rounded">Locked</span>
                         ) : (
                           <button 
-                            onClick={async () => {
-                              try {
-                                const res = await apiClient.post(`/api/interview-templates/${t._id}/start`);
-                                navigate(`${ROUTES.INTERVIEW_ACTIVE}?id=${res.data.data.sessionId}`);
-                              } catch (err) {
-                                alert('Failed to start template');
+                            onClick={() => {
+                              if (t.visibility === 'TOKEN_REQUIRED') {
+                                setSelectedTokenTemplateId(t._id);
+                                setTokenModalOpen(true);
+                              } else {
+                                handleStartTemplate(t._id);
                               }
                             }}
                             className="text-xs font-semibold bg-brand-50 text-brand-700 hover:bg-brand-100 px-3 py-1.5 rounded transition-colors"
@@ -445,6 +465,19 @@ export function DashboardHome() {
 
         </div>
       </div>
+
+      <TokenEntryModal 
+        isOpen={tokenModalOpen}
+        onClose={() => {
+          setTokenModalOpen(false);
+          setSelectedTokenTemplateId(null);
+        }}
+        onSubmit={async (token) => {
+          if (selectedTokenTemplateId) {
+            await handleStartTemplate(selectedTokenTemplateId, token);
+          }
+        }}
+      />
     </Container>
   );
 }
