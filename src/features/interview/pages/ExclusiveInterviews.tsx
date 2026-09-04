@@ -73,7 +73,7 @@ export function ExclusiveInterviews() {
       }
     } catch (error: any) {
       console.error(error);
-      const msg = error.response?.data?.message || 'Invalid or expired access token.';
+      const msg = error.response?.data?.message || error.message || 'Invalid or expired access token.';
       setValidationError(msg);
     } finally {
       setIsVerifying(false);
@@ -92,7 +92,7 @@ export function ExclusiveInterviews() {
         navigate(`/interviews/active?session=${res.data.data.sessionId}`);
       }
     } catch (error: any) {
-      const msg = error.response?.data?.message || 'Failed to start interview.';
+      const msg = error.response?.data?.message || error.message || 'Failed to start interview.';
       setValidationError(msg);
       setIsVerifying(false);
     }
