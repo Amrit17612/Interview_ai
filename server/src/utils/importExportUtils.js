@@ -1,11 +1,6 @@
 const { parse } = require('csv-parse');
 const xlsx = require('xlsx');
 const pdfParse = require('pdf-parse');
-const { GoogleGenAI } = require('@google/genai');
-
-const ai = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY
-});
 
 // Helper to normalize array fields from a string
 const parseArrayField = (str) => {
@@ -59,55 +54,50 @@ const parseXLSX = (buffer) => {
 };
 
 /**
- * Parses a PDF buffer and uses Gemini to extract questions
+ * Parses a PDF buffer deterministically to extract questions
  */
-const parsePDFWithAI = async (buffer) => {
-  const pdfData = await pdfParse(buffer, { max: 15 }); // Limit to 15 pages for safety
+const parsePDFDeterministic = async (buffer) => {
+  const pdfData = await pdfParse(buffer, { max: 15 });
+  const text = pdfData.text;
   
-  const prompt = `You are a technical interview question extraction tool. 
-I am providing you with the text extracted from a PDF document.
-Extract all interview questions you can find and return them strictly as a JSON array of objects.
-
-Each object must EXACTLY match this schema:
-{
-  "text": "The actual question text",
-  "description": "Optional context or description, or null",
-  "type": "TECHNICAL" | "BEHAVIORAL" | "SYSTEM_DESIGN" | "GENERAL",
-  "difficulty": "BEGINNER" | "INTERMEDIATE" | "ADVANCED" | "EXPERT",
-  "companies": ["company names if mentioned"],
-  "domains": ["domains if mentioned"],
-  "roles": ["roles if mentioned"],
-  "expectedPoints": ["expected answer points or grading criteria if mentioned"],
-  "tags": ["relevant tags if mentioned"]
-}
-
-Do not include any other text, markdown blocks like \`\`\`json, or explanations. Only output the raw JSON array.
-
-TEXT TO EXTRACT FROM:
-${pdfData.text}`;
-
-  const response = await ai.models.generateContent({
-    model: 'gemini-2.5-flash',
-    contents: prompt,
-    config: {
-      temperature: 0.1,
+  const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+  const questions = [];
+  let currentQuestion = "";
+  
+  for (let i = 0; i < lines.length; i++) {
+    let line = lines[i];
+    
+    // Match common numbering patterns: "1. ", "1) ", "Q1: ", "Q: "
+    const isNewQuestion = /^(?:Q\d*:?\s*|\d+[\.)]\s+)/i.test(line);
+    
+    if (isNewQuestion) {
+      if (currentQuestion) {
+        questions.push(currentQuestion);
+      }
+      currentQuestion = line.replace(/^(?:Q\d*:?\s*|\d+[\.)]\s+)/i, '').trim();
+    } else {
+      if (currentQuestion && line.length > 3) {
+        currentQuestion += " " + line;
+      } else if (!currentQuestion && line.endsWith('?')) {
+        questions.push(line);
+      }
     }
-  });
-
-  let textResponse = response.text || '[]';
-  // Strip potential markdown JSON fences if Gemini adds them despite instructions
-  textResponse = textResponse.replace(/^```json/m, '').replace(/^```/m, '').trim();
-
-  const parsed = JSON.parse(textResponse);
-  if (!Array.isArray(parsed)) {
-    throw new Error('AI extraction failed to return an array.');
   }
-
-  return parsed.map(mapRowToDraft);
+  
+  if (currentQuestion) {
+    questions.push(currentQuestion);
+  }
+  
+  const validQuestions = questions.filter(q => q.length > 5);
+  if (validQuestions.length === 0) {
+    throw new Error('No valid questions could be extracted deterministically from this PDF.');
+  }
+  
+  return validQuestions.map(qText => mapRowToDraft({ text: qText }));
 };
 
 module.exports = {
   parseCSV,
   parseXLSX,
-  parsePDFWithAI
+  parsePDFDeterministic
 };

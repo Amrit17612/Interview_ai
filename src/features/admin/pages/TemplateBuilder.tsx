@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { apiClient } from '../../../services/api.client';
 import { ROUTES } from '../../../constants/routes';
-import { Save, ArrowLeft, X, ArrowUp, ArrowDown } from 'lucide-react';
+import { Save, ArrowLeft, X, ArrowUp, ArrowDown, Upload } from 'lucide-react';
+import { useRef } from 'react';
 
 export function TemplateBuilder() {
   const { id } = useParams();
@@ -12,6 +13,9 @@ export function TemplateBuilder() {
   const [loading, setLoading] = useState(isEditing);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [importing, setImporting] = useState(false);
 
   // Template Data
   const [title, setTitle] = useState('');
@@ -107,6 +111,38 @@ export function TemplateBuilder() {
     setSelectedQuestions(newArr);
   };
 
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      setImporting(true);
+      setError(null);
+      const res = await apiClient.post('/admin/questions/import/preview', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      if (res.data.success && res.data.data.rows) {
+        const newQs = res.data.data.rows
+          .filter((r: any) => r.isValid)
+          .map((r: any) => ({
+            ...r,
+            _id: 'tmp_' + Math.random().toString(36).substr(2, 9),
+            isTemporary: true
+          }));
+        setSelectedQuestions(prev => [...prev, ...newQs]);
+        alert(`Extracted ${newQs.length} valid questions from the file.`);
+      }
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Failed to extract questions from file');
+    } finally {
+      setImporting(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
   const handleSave = async () => {
     if (!title.trim()) return setError('Title is required');
     if (visibility === 'BUNDLE_ONLY' && !targetBundleId) return setError('Target Bundle is required for BUNDLE_ONLY visibility');
@@ -115,7 +151,29 @@ export function TemplateBuilder() {
     try {
       setSaving(true);
       setError(null);
-      
+
+      const tempQs = selectedQuestions.filter(q => q.isTemporary);
+      let insertedIds: string[] = [];
+
+      if (tempQs.length > 0) {
+        const importRes = await apiClient.post('/admin/questions/import/confirm', {
+          questions: tempQs.map(({ _id, isTemporary, isValid, errors, ...rest }) => rest)
+        });
+        if (importRes.data.success && importRes.data.data) {
+           insertedIds = importRes.data.data.map((q: any) => q._id);
+        }
+      }
+
+      let insertedIndex = 0;
+      const finalQuestionIds = selectedQuestions.map(q => {
+        if (typeof q === 'string') return q;
+        if (!q.isTemporary) return q._id;
+        if (insertedIndex < insertedIds.length) {
+          return insertedIds[insertedIndex++];
+        }
+        return null;
+      }).filter(Boolean) as string[];
+
       const payload = {
         title,
         description,
@@ -128,7 +186,7 @@ export function TemplateBuilder() {
         estimatedDuration,
         status,
         tags: tags.split(',').map(t => t.trim()).filter(Boolean),
-        questions: selectedQuestions.map(q => typeof q === 'string' ? q : q._id)
+        questions: finalQuestionIds
       };
 
       if (isEditing) {
@@ -264,9 +322,27 @@ export function TemplateBuilder() {
         <div className="lg:col-span-2 space-y-6">
           <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-200">
             <div className="flex justify-between items-center border-b pb-4 mb-4">
-              <h3 className="font-semibold text-gray-900">
-                Selected Questions <span className="bg-brand-100 text-brand-700 px-2 py-0.5 rounded-full text-xs ml-2">{selectedQuestions.length}</span>
+              <h3 className="font-semibold text-gray-900 flex items-center">
+                Questions <span className="bg-brand-100 text-brand-700 px-2 py-0.5 rounded-full text-xs ml-2">{selectedQuestions.length}</span>
               </h3>
+              <div className="flex space-x-2">
+                <input
+                  type="file"
+                  accept=".pdf,.xlsx,.csv"
+                  className="hidden"
+                  ref={fileInputRef}
+                  onChange={handleFileUpload}
+                />
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={importing}
+                  className="bg-gray-100 text-gray-700 px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-gray-200 disabled:opacity-50 flex items-center"
+                >
+                  <Upload className="h-4 w-4 mr-2" />
+                  {importing ? 'Extracting...' : 'Import PDF/Excel'}
+                </button>
+              </div>
             </div>
 
             {/* Selected Questions List */}
@@ -286,7 +362,10 @@ export function TemplateBuilder() {
                       </div>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 line-clamp-2">{typeof q === 'string' ? `Question ID: ${q}` : q.text}</p>
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm font-medium text-gray-900 line-clamp-2">{typeof q === 'string' ? `Question ID: ${q}` : q.text}</p>
+                        {q.isTemporary && <span className="text-[10px] bg-yellow-100 text-yellow-800 px-1.5 py-0.5 rounded-full whitespace-nowrap">Extracted (Unsaved)</span>}
+                      </div>
                       {typeof q !== 'string' && (
                         <div className="flex gap-2 mt-1">
                           <span className="text-[10px] bg-gray-100 px-1.5 rounded text-gray-600">{q.type}</span>

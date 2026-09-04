@@ -1,6 +1,6 @@
 const Question = require('../models/Question');
 const AuditLog = require('../models/AuditLog');
-const { parseCSV, parseXLSX, parsePDFWithAI } = require('../utils/importExportUtils');
+const { parseCSV, parseXLSX, parsePDFDeterministic } = require('../utils/importExportUtils');
 const { stringify } = require('csv-stringify/sync');
 
 // Validate row and check database duplicates
@@ -54,7 +54,7 @@ const previewImport = async (req, res, next) => {
     } else if (mimetype.includes('spreadsheetml') || originalname.endsWith('.xlsx')) {
       rawRows = await parseXLSX(buffer);
     } else if (mimetype === 'application/pdf' || originalname.endsWith('.pdf')) {
-      rawRows = await parsePDFWithAI(buffer);
+      rawRows = await parsePDFDeterministic(buffer);
     } else {
       return res.status(400).json({ success: false, message: 'Unsupported file type' });
     }
@@ -166,7 +166,8 @@ const confirmImport = async (req, res, next) => {
 
     res.json({
       success: true,
-      message: `Successfully imported ${inserted.length} questions as DRAFT.`
+      message: `Successfully imported ${inserted.length} questions as DRAFT.`,
+      data: inserted
     });
 
   } catch (error) {
