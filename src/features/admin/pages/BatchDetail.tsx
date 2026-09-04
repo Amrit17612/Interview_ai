@@ -64,7 +64,7 @@ export function BatchDetail() {
     try {
       const response = await apiClient.get<any>('/admin/interview-templates');
       // Only allow assigning ACTIVE templates
-      setTemplates((response.data.templates || []).filter((t: any) => t.status === 'ACTIVE'));
+      setTemplates((response.data.data || []).filter((t: any) => t.status === 'ACTIVE'));
     } catch (error) {
       console.error('Failed to fetch templates:', error);
     }
