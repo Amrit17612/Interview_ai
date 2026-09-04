@@ -179,10 +179,15 @@ export function FinalReport() {
     }
   }, [sessionId, session, loadSession]);
 
+  // Determine report generation state
+  const isGenerated = session?.reportStatus === 'GENERATED' || session?.overallScore !== null;
+  const isFailed = session?.reportStatus === 'FAILED';
+  const isPending = session?.status === 'COMPLETED' && !isGenerated && !isFailed;
+
   // Polling logic for async report generation
   useEffect(() => {
     let interval: ReturnType<typeof setInterval>;
-    if (session && session.status === 'COMPLETED' && session.overallScore === null) {
+    if (session && isPending) {
       interval = setInterval(() => {
         loadSession(session._id);
       }, 5000);
@@ -190,7 +195,7 @@ export function FinalReport() {
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [session, loadSession]);
+  }, [session, isPending, loadSession]);
 
   if (!sessionId) {
     return (
@@ -230,7 +235,7 @@ export function FinalReport() {
     );
   }
 
-  if (session.status === 'COMPLETED' && session.overallScore === null) {
+  if (isPending) {
     return (
       <Container className="py-8 max-w-4xl">
         <div className="text-center p-12 bg-white rounded-xl shadow-sm border border-gray-100 flex flex-col items-center">
@@ -239,6 +244,27 @@ export function FinalReport() {
           <p className="text-gray-500 max-w-md mx-auto">
             Our AI is carefully evaluating your responses. This usually takes about 15-30 seconds. This page will automatically update when your report is ready.
           </p>
+        </div>
+      </Container>
+    );
+  }
+
+  if (isFailed) {
+    return (
+      <Container className="py-8 max-w-4xl">
+        <div className="text-center p-12 bg-white rounded-xl shadow-sm border border-gray-100 flex flex-col items-center">
+          <div className="h-12 w-12 text-red-500 mb-6">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Report Generation Failed</h2>
+          <p className="text-gray-500 max-w-md mx-auto mb-6">
+            {session.reportError || 'Your interview was completed, but the AI report could not be generated.'}
+          </p>
+          <Button onClick={() => navigate(ROUTES.DASHBOARD)}>
+            Return to Dashboard
+          </Button>
         </div>
       </Container>
     );

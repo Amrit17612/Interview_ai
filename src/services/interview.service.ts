@@ -46,6 +46,8 @@ export interface InterviewSession {
   strengths?: string[];
   weaknesses?: string[];
   recommendations?: string[];
+  reportStatus?: 'PENDING' | 'GENERATED' | 'FAILED';
+  reportError?: string | null;
   createdAt: string;
   maxQuestions?: number;
   updatedAt: string;

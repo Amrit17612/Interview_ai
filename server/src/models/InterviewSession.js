@@ -110,6 +110,15 @@ const interviewSessionSchema = new mongoose.Schema({
     type: [questionSchema],
     default: []
   },
+  reportStatus: {
+    type: String,
+    enum: ['PENDING', 'GENERATED', 'FAILED'],
+    default: 'PENDING'
+  },
+  reportError: {
+    type: String,
+    default: null
+  },
   overallScore: {
     type: Number,
     default: null

@@ -245,7 +245,7 @@ const generateQuestion = async (req, res) => {
           index: nextIndex,
           text: nextQ.text,
           questionId: nextQ.questionId, // This might just be the string ID from the snapshot
-          expectedPoints: nextQ.expectedPoints || [],
+          expectedPoints: Array.isArray(nextQ.expectedPoints) ? [...nextQ.expectedPoints] : [],
           status: 'PENDING'
         };
         session.questions.push(newQuestion);
@@ -536,6 +536,7 @@ const completeInterview = async (req, res) => {
         session.strengths = report.strengths || [];
         session.weaknesses = report.weaknesses || [];
         session.recommendations = report.recommendations || [];
+        session.reportStatus = 'GENERATED';
 
         await session.save();
         console.log(`[REPORT] Session score updated for session ${session._id}`);
@@ -579,6 +580,21 @@ const completeInterview = async (req, res) => {
         }
       } catch (bgError) {
         console.error(`[REPORT] Background generation failed for session ${session._id}:`, bgError);
+        
+        // Fallback to unblock the frontend explicitly
+        try {
+          await mongoose.model('InterviewSession').updateOne(
+            { _id: session._id },
+            { 
+              $set: { 
+                reportStatus: 'FAILED', 
+                reportError: 'The AI report generation failed to complete.' 
+              }
+            }
+          );
+        } catch (fallbackErr) {
+          console.error(`[REPORT] Failed to save fallback state for session ${session._id}:`, fallbackErr);
+        }
       }
     })();
 
