@@ -275,6 +275,25 @@ export function ActiveInterview() {
     return `${m}:${s}`;
   };
 
+  if (error) {
+    return (
+      <div className="fixed inset-0 z-[100] bg-slate-950 flex items-center justify-center text-white p-6">
+        <div className="max-w-md w-full bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center space-y-6">
+          <div className="w-16 h-16 bg-red-500/10 text-red-500 rounded-full flex items-center justify-center mx-auto">
+            <XCircle className="w-8 h-8" />
+          </div>
+          <div>
+            <h2 className="text-xl font-bold mb-2">Failed to load session</h2>
+            <p className="text-slate-400">{error}</p>
+          </div>
+          <Button onClick={() => navigate(ROUTES.DASHBOARD)} className="w-full bg-white text-slate-900 hover:bg-slate-200">
+            Return to Dashboard
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   if (!sessionId || isLoading || !session) {
     return (
       <div className="fixed inset-0 z-[100] bg-slate-950 flex items-center justify-center text-white">
