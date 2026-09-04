@@ -13,7 +13,7 @@ const getQuestions = async (req, res, next) => {
 
     const query = {};
     if (req.query.search) {
-      query.$text = { $search: req.query.search };
+      query.text = { $regex: req.query.search, $options: 'i' };
     }
     if (req.query.status) query.status = req.query.status;
     if (req.query.type) query.type = req.query.type;
@@ -21,7 +21,7 @@ const getQuestions = async (req, res, next) => {
 
     const total = await Question.countDocuments(query);
     const questions = await Question.find(query)
-      .sort(req.query.search ? { score: { $meta: 'textScore' } } : { updatedAt: -1 })
+      .sort({ updatedAt: -1 })
       .skip(skip)
       .limit(limit)
       .populate('createdBy', 'firstName lastName email')

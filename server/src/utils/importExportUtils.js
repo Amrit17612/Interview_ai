@@ -12,16 +12,21 @@ const parseArrayField = (str) => {
 
 // Map row to a valid Question draft object
 const mapRowToDraft = (row) => {
+  const textVal = row.text || row.Question || row.question || row.Q || '';
+  const descVal = row.description || row.Description || row.description || '';
+  const typeVal = row.type || row.Type || 'TECHNICAL';
+  const diffVal = row.difficulty || row.Difficulty || 'INTERMEDIATE';
+
   return {
-    text: row.text?.trim() || '',
-    description: row.description?.trim() || null,
-    type: row.type?.trim().toUpperCase() || 'TECHNICAL',
-    difficulty: row.difficulty?.trim().toUpperCase() || 'INTERMEDIATE',
-    companies: parseArrayField(row.companies),
-    domains: parseArrayField(row.domains),
-    roles: parseArrayField(row.roles),
-    expectedPoints: parseArrayField(row.expectedPoints),
-    tags: parseArrayField(row.tags),
+    text: String(textVal).trim(),
+    description: descVal ? String(descVal).trim() : null,
+    type: String(typeVal).trim().toUpperCase(),
+    difficulty: String(diffVal).trim().toUpperCase(),
+    companies: parseArrayField(row.companies || row.Companies),
+    domains: parseArrayField(row.domains || row.Domains),
+    roles: parseArrayField(row.roles || row.Roles),
+    expectedPoints: parseArrayField(row.expectedPoints || row.ExpectedPoints || row['Expected Points']),
+    tags: parseArrayField(row.tags || row.Tags),
     status: 'DRAFT'
   };
 };
@@ -59,22 +64,23 @@ const parseXLSX = (buffer) => {
 const parsePDFDeterministic = async (buffer) => {
   const pdfData = await pdfParse(buffer, { max: 15 });
   const text = pdfData.text;
-  
+
   const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
   const questions = [];
   let currentQuestion = "";
-  
+
   for (let i = 0; i < lines.length; i++) {
     let line = lines[i];
-    
-    // Match common numbering patterns: "1. ", "1) ", "Q1: ", "Q: "
-    const isNewQuestion = /^(?:Q\d*:?\s*|\d+[\.)]\s+)/i.test(line);
-    
+
+    // Match common numbering patterns: "1. ", "1) ", "Q1: ", "Q: ", "Question 1:"
+    const regexPattern = /^(?:Q(?:uestion)?\s*\d*:?\s*|\d+[\.)]\s+)/i;
+    const isNewQuestion = regexPattern.test(line);
+
     if (isNewQuestion) {
       if (currentQuestion) {
         questions.push(currentQuestion);
       }
-      currentQuestion = line.replace(/^(?:Q\d*:?\s*|\d+[\.)]\s+)/i, '').trim();
+      currentQuestion = line.replace(regexPattern, '').trim();
     } else {
       if (currentQuestion && line.length > 3) {
         currentQuestion += " " + line;
@@ -83,16 +89,16 @@ const parsePDFDeterministic = async (buffer) => {
       }
     }
   }
-  
+
   if (currentQuestion) {
     questions.push(currentQuestion);
   }
-  
+
   const validQuestions = questions.filter(q => q.length > 5);
   if (validQuestions.length === 0) {
     throw new Error('No valid questions could be extracted deterministically from this PDF.');
   }
-  
+
   return validQuestions.map(qText => mapRowToDraft({ text: qText }));
 };
 
