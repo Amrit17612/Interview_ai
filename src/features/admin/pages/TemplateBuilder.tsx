@@ -4,6 +4,7 @@ import { apiClient } from '../../../services/api.client';
 import { ROUTES } from '../../../constants/routes';
 import { Save, ArrowLeft, X, ArrowUp, ArrowDown, Upload } from 'lucide-react';
 import { useRef } from 'react';
+import { QuestionLibraryModal } from '../components/QuestionLibraryModal';
 
 export function TemplateBuilder() {
   const { id } = useParams();
@@ -33,10 +34,8 @@ export function TemplateBuilder() {
   // Selected Questions Array
   const [selectedQuestions, setSelectedQuestions] = useState<any[]>([]);
 
-  // Search State for Question Library
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState<any[]>([]);
-  const [searching, setSearching] = useState(false);
+  // Modal State for Question Library
+  const [isLibraryModalOpen, setIsLibraryModalOpen] = useState(false);
 
   useEffect(() => {
     if (isEditing) {
@@ -70,27 +69,10 @@ export function TemplateBuilder() {
     }
   };
 
-  const handleSearchQuestions = async () => {
-    if (!searchQuery.trim()) return;
-    try {
-      setSearching(true);
-      // Fetch ACTIVE/DRAFT questions
-      const res = await apiClient.get(`/admin/questions?search=${encodeURIComponent(searchQuery)}&limit=10`);
-      if (res.data.success) {
-        // Filter out already selected
-        const selectedIds = new Set(selectedQuestions.map(q => typeof q === 'string' ? q : q._id));
-        setSearchResults(res.data.data.filter((q: any) => !selectedIds.has(q._id)));
-      }
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setSearching(false);
-    }
-  };
+
 
   const addQuestion = (q: any) => {
     setSelectedQuestions([...selectedQuestions, q]);
-    setSearchResults(searchResults.filter(res => res._id !== q._id));
   };
 
   const removeQuestion = (index: number) => {
@@ -381,47 +363,27 @@ export function TemplateBuilder() {
               )}
             </div>
 
-            {/* Question Search */}
+            {/* Browse Library Button */}
             <div className="border-t pt-6 mt-6">
               <h4 className="text-sm font-medium text-gray-900 mb-3">Add Questions from Library</h4>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  placeholder="Search questions by text..."
-                  value={searchQuery}
-                  onChange={e => setSearchQuery(e.target.value)}
-                  onKeyDown={e => e.key === 'Enter' && handleSearchQuestions()}
-                  className="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm"
-                />
-                <button onClick={handleSearchQuestions} disabled={searching} className="bg-gray-100 border border-gray-300 px-4 py-2 rounded-md hover:bg-gray-200 text-sm font-medium">
-                  {searching ? '...' : 'Search'}
-                </button>
-              </div>
-
-              {searchResults.length > 0 && (
-                <div className="mt-4 space-y-2 max-h-96 overflow-y-auto pr-2 border rounded-md p-2 bg-gray-50">
-                  {searchResults.map(res => (
-                    <div key={res._id} className="flex items-center justify-between p-3 bg-white border rounded shadow-sm">
-                      <div className="flex-1 pr-4">
-                        <p className="text-sm text-gray-800 line-clamp-2">{res.text}</p>
-                        <div className="flex gap-2 mt-1 text-[10px] text-gray-500">
-                          <span>{res.type}</span>
-                          <span>•</span>
-                          <span>{res.difficulty}</span>
-                        </div>
-                      </div>
-                      <button onClick={() => addQuestion(res)} className="bg-brand-50 text-brand-700 hover:bg-brand-100 px-3 py-1.5 rounded text-xs font-medium flex-shrink-0">
-                        Add
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
+              <button
+                onClick={() => setIsLibraryModalOpen(true)}
+                className="w-full bg-gray-100 border border-gray-300 py-3 rounded-md hover:bg-gray-200 text-sm font-medium transition-colors"
+              >
+                Browse Question Library
+              </button>
             </div>
           </div>
         </div>
 
       </div>
+
+      <QuestionLibraryModal
+        isOpen={isLibraryModalOpen}
+        onClose={() => setIsLibraryModalOpen(false)}
+        onAddQuestion={addQuestion}
+        selectedIds={new Set(selectedQuestions.map(q => typeof q === 'string' ? q : q._id))}
+      />
     </div>
   );
 }
