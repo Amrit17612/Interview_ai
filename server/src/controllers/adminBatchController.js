@@ -1,6 +1,8 @@
 const Batch = require('../models/Batch');
 const AccessToken = require('../models/AccessToken');
 const InterviewTemplate = require('../models/InterviewTemplate');
+const InterviewSession = require('../models/InterviewSession');
+const SecurityAudit = require('../models/SecurityAudit');
 const crypto = require('crypto');
 const mongoose = require('mongoose');
 
@@ -157,11 +159,98 @@ const updateAccessTokenStatus = async (req, res, next) => {
   }
 };
 
+const getBatchResults = async (req, res, next) => {
+  try {
+    const { id: batchId, templateId } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(batchId)) {
+      return res.status(400).json({ success: false, message: 'Invalid batch ID' });
+    }
+    if (!mongoose.Types.ObjectId.isValid(templateId)) {
+      return res.status(400).json({ success: false, message: 'Invalid template ID' });
+    }
+
+    const batch = await Batch.findById(batchId).lean();
+    if (!batch) {
+      return res.status(404).json({ success: false, message: 'Batch not found' });
+    }
+
+    const template = await InterviewTemplate.findById(templateId).select('title').lean();
+    if (!template) {
+      return res.status(404).json({ success: false, message: 'Template not found' });
+    }
+
+    // Verify token relationship (ignores active status)
+    const token = await AccessToken.findOne({ batchId, templateId }).lean();
+    if (!token) {
+      return res.status(404).json({ success: false, message: 'Template is not assigned to this batch' });
+    }
+
+    // Fetch ranked completed sessions
+    const sessions = await InterviewSession.find({
+      batchId,
+      templateId,
+      status: 'COMPLETED'
+    })
+    .populate('user', 'firstName lastName email')
+    .sort({ overallScore: -1, updatedAt: 1 })
+    .lean();
+
+    if (sessions.length === 0) {
+      return res.json({ 
+        success: true, 
+        data: {
+          batch: batch.name,
+          template: template.title,
+          totalStudents: 0,
+          results: []
+        }
+      });
+    }
+
+    // Fetch security audits in bulk
+    const sessionIds = sessions.map(s => s._id);
+    const audits = await SecurityAudit.find({ session: { $in: sessionIds } }).lean();
+    const auditMap = {};
+    audits.forEach(a => {
+      // summarize violations (warnings + violations)
+      const count = (a.warningCount || 0) + (a.violationCount || 0);
+      auditMap[a.session.toString()] = count;
+    });
+
+    // Build the results array
+    const results = sessions.map((s, index) => ({
+      rank: index + 1,
+      sessionId: s._id,
+      userId: s.user?._id,
+      studentName: s.user ? `${s.user.firstName} ${s.user.lastName}` : 'Unknown Student',
+      email: s.user?.email || 'N/A',
+      score: s.overallScore || 0,
+      completedAt: s.updatedAt,
+      securityViolations: auditMap[s._id.toString()] || 0
+    }));
+
+    res.json({
+      success: true,
+      data: {
+        batch: batch.name,
+        template: template.title,
+        totalStudents: results.length,
+        results
+      }
+    });
+
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getBatches,
   createBatch,
   getBatchById,
   updateBatch,
   generateAccessToken,
-  updateAccessTokenStatus
+  updateAccessTokenStatus,
+  getBatchResults
 };

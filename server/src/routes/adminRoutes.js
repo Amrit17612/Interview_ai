@@ -9,7 +9,7 @@ const { getAuditLogs } = require('../controllers/adminAuditController');
 const { previewImport, confirmImport, exportQuestions } = require('../controllers/adminImportExportController');
 const { bulkUpdateStatus, bulkAddTags } = require('../controllers/adminBulkController');
 const { getPromos, createPromo, updatePromoStatus } = require('../controllers/adminPromoController');
-const { getBatches, createBatch, getBatchById, updateBatch, generateAccessToken, updateAccessTokenStatus } = require('../controllers/adminBatchController');
+const { getBatches, createBatch, getBatchById, updateBatch, generateAccessToken, updateAccessTokenStatus, getBatchResults } = require('../controllers/adminBatchController');
 const multer = require('multer');
 
 // Configure Multer for memory storage (max 10MB)
@@ -72,4 +72,5 @@ router.get('/batches/:id', getBatchById);
 router.put('/batches/:id', updateBatch);
 router.post('/batches/:id/tokens', generateAccessToken);
 router.patch('/tokens/:id/status', updateAccessTokenStatus);
+router.get('/batches/:id/results/:templateId', getBatchResults);
 module.exports = router;
