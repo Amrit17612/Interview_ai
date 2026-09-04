@@ -44,6 +44,7 @@ const SIDEBAR_CATEGORIES: SidebarCategory[] = [
     items: [
       { name: 'Dashboard', path: ROUTES.DASHBOARD, icon: LayoutDashboard },
       { name: 'Start Interview', path: ROUTES.INTERVIEW, icon: Video },
+      { name: 'Exclusive Interviews', path: ROUTES.EXCLUSIVE_INTERVIEWS, icon: Lock },
       { name: 'Resume Intelligence', path: ROUTES.RESUME, icon: FileText },
       { name: 'Reports & Analytics', path: ROUTES.PROGRESS_ANALYTICS, icon: BarChart },
       { name: 'Learning Roadmap', path: ROUTES.LEARNING_ROADMAP, icon: Map },

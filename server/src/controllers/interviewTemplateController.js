@@ -183,7 +183,67 @@ const startTemplate = async (req, res, next) => {
   }
 };
 
+
+/**
+ * Validate an access token
+ * @route POST /api/interview-templates/validate-token
+ */
+const validateToken = async (req, res, next) => {
+  try {
+    const { token } = req.body;
+    if (!token || typeof token !== 'string') {
+      return res.status(401).json({ success: false, message: 'Access token is required' });
+    }
+    
+    const normalizedToken = token.trim().toUpperCase();
+    const AccessToken = require('../models/AccessToken');
+    const tokenDoc = await AccessToken.findOne({ code: normalizedToken }).populate('templateId', 'title category type questions status difficulty visibility domain').populate('batchId', 'name').lean();
+    
+    if (!tokenDoc) {
+      return res.status(401).json({ success: false, message: 'Invalid access token' });
+    }
+    if (!tokenDoc.isActive) {
+      return res.status(401).json({ success: false, message: 'Access token has been revoked' });
+    }
+    if (tokenDoc.expiresAt && new Date(tokenDoc.expiresAt) < new Date()) {
+      return res.status(401).json({ success: false, message: 'Access token has expired' });
+    }
+    
+    // Attach question count
+    if (tokenDoc.templateId) {
+      tokenDoc.templateId.questionCount = tokenDoc.templateId.questions ? tokenDoc.templateId.questions.length : 0;
+      delete tokenDoc.templateId.questions;
+    }
+    
+    res.json({ success: true, data: { token: tokenDoc.code, template: tokenDoc.templateId, batch: tokenDoc.batchId } });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Get exclusive templates (already started or completed via batch token)
+ * @route GET /api/interview-templates/exclusive
+ */
+const getExclusiveTemplates = async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+    // Find all interview sessions for this user that belong to a batch
+    const sessions = await InterviewSession.find({ user: userId, batchId: { $exists: true, $ne: null } })
+      .populate('templateId', 'title category type difficulty visibility domain')
+      .populate('batchId', 'name')
+      .sort({ updatedAt: -1 })
+      .lean();
+      
+    res.json({ success: true, data: sessions });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
+  validateToken,
+  getExclusiveTemplates,
   getAvailableTemplates,
   startTemplate
 };

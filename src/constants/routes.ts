@@ -65,6 +65,7 @@ export const ROUTES = {
   INTERVIEW_FEEDBACK: '/interviews/feedback',
   INTERVIEW_HISTORY: '/interviews/history',
   INTERVIEW_COMPARE: '/interviews/compare',
+  EXCLUSIVE_INTERVIEWS: '/exclusive-interviews',
 
   // Resumes
   RESUME: '/resumes',

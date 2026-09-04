@@ -69,6 +69,7 @@ const FinalReport = Loadable(lazy(() => import('../features/interview/pages/Fina
 const ReportDetails = Loadable(lazy(() => import('../features/interview/pages/ReportDetails').then(m => ({ default: m.ReportDetails }))));
 const InterviewHistory = Loadable(lazy(() => import('../features/interview/pages/InterviewHistory').then(m => ({ default: m.InterviewHistory }))));
 const InterviewComparison = Loadable(lazy(() => import('../features/interview/pages/InterviewComparison').then(m => ({ default: m.InterviewComparison }))));
+const ExclusiveInterviews = Loadable(lazy(() => import('../features/interview/pages/ExclusiveInterviews').then(m => ({ default: m.ExclusiveInterviews }))));
 
 const ResumeDashboard = Loadable(lazy(() => import('../features/resume/pages/ResumeDashboard').then(m => ({ default: m.ResumeDashboard }))));
 const UploadResume = Loadable(lazy(() => import('../features/resume/pages/UploadResume').then(m => ({ default: m.UploadResume }))));
@@ -177,6 +178,7 @@ export const router = createBrowserRouter([
             children: [
       { path: ROUTES.DASHBOARD, element: <DashboardHome /> },
       { path: ROUTES.INTERVIEW, element: <InterviewHome /> },
+      { path: ROUTES.EXCLUSIVE_INTERVIEWS, element: <ExclusiveInterviews /> },
       { path: ROUTES.INTERVIEW_RESUME, element: <ResumeSelection /> },
       { path: ROUTES.INTERVIEW_DOMAIN, element: <DomainSelection /> },
       { path: ROUTES.INTERVIEW_COMPANY, element: <CompanySelection /> },
