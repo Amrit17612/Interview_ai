@@ -59,7 +59,14 @@ export function BundlePractice() {
       };
 
       const session = await interviewService.createInterview(payload);
-      navigate(`${ROUTES.INTERVIEW_ACTIVE}?id=${session._id}`);
+      
+      try {
+        if (document.documentElement.requestFullscreen) {
+          document.documentElement.requestFullscreen().catch(() => {});
+        }
+      } catch (err) {}
+
+      navigate(`${ROUTES.INTERVIEW_DEVICE_CHECK}?id=${session._id}`);
     } catch (err: any) {
       setError(err.message || 'Failed to start the interview session.');
       setIsStarting(false);

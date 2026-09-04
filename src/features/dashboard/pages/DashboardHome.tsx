@@ -37,8 +37,15 @@ export function DashboardHome() {
   const handleStartTemplate = async (templateId: string, token?: string) => {
     try {
       const payload = token ? { token } : {};
-      const res = await apiClient.post(`/api/interview-templates/${templateId}/start`, payload);
-      navigate(`${ROUTES.INTERVIEW_ACTIVE}?id=${res.data.data.sessionId}`);
+      const res = await apiClient.post(`/interview-templates/${templateId}/start`, payload);
+      
+      try {
+        if (document.documentElement.requestFullscreen) {
+          document.documentElement.requestFullscreen().catch(() => {});
+        }
+      } catch (err) {}
+
+      navigate(`${ROUTES.INTERVIEW_DEVICE_CHECK}?id=${res.data.data.sessionId}`);
       setTokenModalOpen(false);
       setSelectedTokenTemplateId(null);
     } catch (err: any) {

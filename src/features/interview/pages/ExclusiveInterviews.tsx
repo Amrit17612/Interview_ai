@@ -90,6 +90,11 @@ export function ExclusiveInterviews() {
       const res = await apiClient.post(`/interview-templates/${templateId}/start`, payload);
       
       if (res.data.success) {
+        try {
+          if (document.documentElement.requestFullscreen) {
+            document.documentElement.requestFullscreen().catch(() => {});
+          }
+        } catch (err) {}
         navigate(`${ROUTES.INTERVIEW_DEVICE_CHECK}?id=${res.data.data.sessionId}`);
       }
     } catch (error: any) {
