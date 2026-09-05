@@ -79,6 +79,19 @@ const createBundle = async (req, res, next) => {
     if (!type || !name) {
       return res.status(400).json({ success: false, message: 'Type and name are required' });
     }
+
+    const validCompanyCategories = ['FAANG', 'FAANG_PLUS', 'PRODUCT_BASED', 'SERVICE_BASED', 'FINTECH', 'BANKING', 'E_COMMERCE', 'IT_SERVICES', 'CONSULTING', 'STARTUP', 'SAAS', 'CLOUD_INFRASTRUCTURE', 'AI_ML_COMPANIES', 'DATA_ANALYTICS', 'CYBERSECURITY', 'OTHER'];
+    const validDomainCategories = ['SOFTWARE_ENGINEERING', 'DSA', 'WEB_DEVELOPMENT', 'BACKEND_DEVELOPMENT', 'FRONTEND_DEVELOPMENT', 'FULL_STACK', 'MOBILE_DEVELOPMENT', 'AI_ML', 'DATA_SCIENCE', 'DATA_ANALYTICS', 'CLOUD_COMPUTING', 'DEVOPS', 'CYBERSECURITY', 'SYSTEM_DESIGN', 'DATABASE', 'PROGRAMMING_LANGUAGES', 'TESTING_QA', 'PRODUCT_MANAGEMENT', 'OTHER'];
+
+    if (category) {
+      if (type === 'COMPANY' && !validCompanyCategories.includes(category)) {
+        return res.status(400).json({ success: false, message: 'Invalid company category' });
+      }
+      if (type === 'DOMAIN' && !validDomainCategories.includes(category)) {
+        return res.status(400).json({ success: false, message: 'Invalid domain category' });
+      }
+    }
+
     
     // Auto-generate a bundleId if not provided (for backward compat with string IDs)
     const newBundleId = bundleId || `${type.toLowerCase().substring(0,3)}_${Date.now()}`;
@@ -120,6 +133,28 @@ const updateBundle = async (req, res, next) => {
     
     // Do NOT allow changing bundleId if it breaks purchases, so we omit it from updates
     const { name, description, category, price, originalPrice, iconType, features, visibility, active } = req.body;
+
+    const existingBundle = await Bundle.findById(id);
+    if (!existingBundle) {
+      return res.status(404).json({ success: false, message: 'Bundle not found' });
+    }
+
+    const validCompanyCategories = ['FAANG', 'FAANG_PLUS', 'PRODUCT_BASED', 'SERVICE_BASED', 'FINTECH', 'BANKING', 'E_COMMERCE', 'IT_SERVICES', 'CONSULTING', 'STARTUP', 'SAAS', 'CLOUD_INFRASTRUCTURE', 'AI_ML_COMPANIES', 'DATA_ANALYTICS', 'CYBERSECURITY', 'OTHER'];
+    const validDomainCategories = ['SOFTWARE_ENGINEERING', 'DSA', 'WEB_DEVELOPMENT', 'BACKEND_DEVELOPMENT', 'FRONTEND_DEVELOPMENT', 'FULL_STACK', 'MOBILE_DEVELOPMENT', 'AI_ML', 'DATA_SCIENCE', 'DATA_ANALYTICS', 'CLOUD_COMPUTING', 'DEVOPS', 'CYBERSECURITY', 'SYSTEM_DESIGN', 'DATABASE', 'PROGRAMMING_LANGUAGES', 'TESTING_QA', 'PRODUCT_MANAGEMENT', 'OTHER'];
+
+    if (category) {
+      if (existingBundle.type === 'COMPANY' && !validCompanyCategories.includes(category)) {
+        // Allow legacy categories if they haven't changed, but block invalid new ones
+        if (existingBundle.category !== category) {
+          return res.status(400).json({ success: false, message: 'Invalid company category' });
+        }
+      }
+      if (existingBundle.type === 'DOMAIN' && !validDomainCategories.includes(category)) {
+        if (existingBundle.category !== category) {
+          return res.status(400).json({ success: false, message: 'Invalid domain category' });
+        }
+      }
+    }
 
     const bundle = await Bundle.findByIdAndUpdate(
       id,
