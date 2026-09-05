@@ -1,13 +1,21 @@
 import axios from 'axios';
 
-// Backend runs on a separate hosting service (e.g., Render / Railway / Fly.io).
-// Set VITE_API_BASE_URL in Vercel project environment variables to the backend URL,
-// e.g. https://interview-ai-backend.onrender.com/api
-// In local development this is controlled by the .env file (VITE_API_BASE_URL=http://localhost:5001/api).
-const rawApiUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5001/api';
+// Backend runs on a SEPARATE service (Render / Railway / Fly.io).
+// REQUIRED: Set VITE_API_BASE_URL in Vercel project environment variables.
+// Example: https://interview-ai-backend.onrender.com/api
+// Local dev: controlled by .env file (VITE_API_BASE_URL=http://localhost:5001/api)
+const rawApiUrl = import.meta.env.VITE_API_BASE_URL || (
+  import.meta.env.DEV
+    ? 'http://localhost:5001/api'
+    : '' // Empty string in production forces a clear network error, not a silent localhost fallback
+);
+
+if (!rawApiUrl && !import.meta.env.DEV) {
+  console.error('[API] CRITICAL: VITE_API_BASE_URL is not set. All API calls will fail. Set this in your Vercel project environment variables.');
+}
 
 let API_BASE_URL = rawApiUrl;
-if (!API_BASE_URL.endsWith('/api') && !API_BASE_URL.endsWith('/api/')) {
+if (API_BASE_URL && !API_BASE_URL.endsWith('/api') && !API_BASE_URL.endsWith('/api/')) {
   API_BASE_URL = API_BASE_URL.replace(/\/$/, '') + '/api';
 }
 
