@@ -1,4 +1,4 @@
-export type BundleType = 'company' | 'domain';
+export type BundleType = 'company' | 'domain' | 'COMPANY' | 'DOMAIN';
 
 export interface BundleMetadata {
   id: string;

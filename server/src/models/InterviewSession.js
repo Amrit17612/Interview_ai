@@ -44,6 +44,11 @@ const interviewSessionSchema = new mongoose.Schema({
     ref: 'Resume',
     default: null
   },
+  templateId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'InterviewTemplate',
+    default: null
+  },
   atsJobId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'JobDescription',

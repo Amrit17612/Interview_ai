@@ -205,7 +205,8 @@ export const interviewService = {
   async createInterview(payload: {
     resumeId?: string | null;
     atsJobId?: string | null;
-    configuration: InterviewConfiguration;
+    templateId?: string | null;
+    configuration?: Partial<InterviewConfiguration>;
   }): Promise<InterviewSession> {
     const response = await apiClient.post<InterviewAPIResponse<InterviewSession>>('/interviews', payload);
     return response.data.data;

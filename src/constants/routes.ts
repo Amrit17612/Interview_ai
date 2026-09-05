@@ -45,6 +45,8 @@ export const ROUTES = {
   ADMIN_USERS: '/admin/users',
   ADMIN_AUDIT_LOGS: '/admin/audit-logs',
   ADMIN_FEEDBACK: '/admin/feedback',
+  ADMIN_COMPANY_BUNDLES: '/admin/company-bundles',
+  ADMIN_DOMAIN_BUNDLES: '/admin/domain-bundles',
 
   // Mock Route for dynamic matching
   MOCK_INTERVIEW: '/mock/:type/:id',

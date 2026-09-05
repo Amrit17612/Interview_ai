@@ -1,18 +1,30 @@
 import { Container } from '../../../components/ui/Container';
 import { PageHeader } from '../../../components/ui/PageHeader';
-import { MOCK_COMPANY_BUNDLES } from '../../../types/bundle.types';
 import { BundleCard } from '../components/BundleCard';
 import { motion } from 'framer-motion';
 import { useCheckout } from '../hooks/useCheckout';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '../../../constants/routes';
 import { CheckoutModal } from '../components/CheckoutModal';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { bundleService } from '../../../services/bundle.service';
 
 export function CompanyBundles() {
   const { handleCheckout, isProcessing } = useCheckout();
-
   const navigate = useNavigate();
+  
+  const [bundles, setBundles] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    bundleService.getPublicBundles().then(data => {
+      const companyBundles = data
+        .filter(b => b.type === 'COMPANY')
+        .map(b => ({ ...b, id: b.bundleId })); // Map bundleId to id for compatibility
+      setBundles(companyBundles);
+      setIsLoading(false);
+    });
+  }, []);
 
   const handlePreview = (bundleId: string) => {
     alert(`Preview modal for bundle: ${bundleId} would open here.`);
@@ -25,7 +37,7 @@ export function CompanyBundles() {
   const [checkoutBundle, setCheckoutBundle] = useState<any>(null);
 
   const handlePurchase = (bundleId: string) => {
-    const bundle = MOCK_COMPANY_BUNDLES.find(b => b.id === bundleId);
+    const bundle = bundles.find(b => b.id === bundleId);
     if (bundle) {
       setCheckoutBundle(bundle);
     }
@@ -49,18 +61,24 @@ export function CompanyBundles() {
           description="Master the exact interview formats, rubrics, and behavioral expectations of top tech companies." 
         />
         
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mt-8">
-          {MOCK_COMPANY_BUNDLES.map((bundle) => (
-            <BundleCard
-              key={bundle.id}
-              bundle={bundle}
-              onPreviewClick={handlePreview}
-              onStartPracticing={handleStartPracticing}
-              onPurchaseClick={handlePurchase}
-              isProcessing={isProcessing === bundle.id}
-            />
-          ))}
-        </div>
+        {isLoading ? (
+          <div className="flex justify-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-600"></div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mt-8">
+            {bundles.map((bundle) => (
+              <BundleCard
+                key={bundle.id}
+                bundle={bundle}
+                onPreviewClick={handlePreview}
+                onStartPracticing={handleStartPracticing}
+                onPurchaseClick={handlePurchase}
+                isProcessing={isProcessing === bundle.id}
+              />
+            ))}
+          </div>
+        )}
       </motion.div>
 
       {checkoutBundle && (

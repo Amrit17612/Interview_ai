@@ -1,11 +1,12 @@
 const mongoose = require('mongoose');
 const Razorpay = require('razorpay');
 const crypto = require('crypto');
-const Payment = require('../models/Payment');
 const User = require('../models/User');
+const Payment = require('../models/Payment');
 const PromoCode = require('../models/PromoCode');
 const PromoUsage = require('../models/PromoUsage');
 const CreditTransaction = require('../models/CreditTransaction');
+const Bundle = require('../models/Bundle');
 const TRUSTED_CATALOG = require('../config/catalog');
 
 const PAYMENT_CHECKOUT_EXPIRY_MINUTES = 15;
@@ -24,6 +25,22 @@ const getRazorpay = () => {
   
   razorpayInstance = new Razorpay({ key_id, key_secret });
   return razorpayInstance;
+};
+
+const getCatalogItem = async (bundleId) => {
+  const dbBundle = await Bundle.findOne({ bundleId, active: true }).lean();
+  if (dbBundle) {
+    return {
+      bundleId: dbBundle.bundleId,
+      bundleType: dbBundle.type,
+      title: dbBundle.name,
+      description: dbBundle.description,
+      amount: Math.round(dbBundle.price * 100), // convert dollars to paise for Razorpay
+      currency: 'INR',
+      active: dbBundle.active
+    };
+  }
+  return TRUSTED_CATALOG[bundleId];
 };
 
 /**
@@ -164,7 +181,7 @@ const finalizeSuccessfulPayment = async (paymentId, userId) => {
     }
 
     // 4. Purchase Reward (+20 credits)
-    const catalogItem = TRUSTED_CATALOG[payment.bundleId];
+    const catalogItem = await getCatalogItem(payment.bundleId);
     if (catalogItem) {
       const postRewardUser = await User.findByIdAndUpdate(
         userId,
@@ -286,7 +303,7 @@ exports.createOrder = async (req, res, next) => {
       throw new Error('Bundle ID and Type are required');
     }
 
-    const catalogItem = TRUSTED_CATALOG[bundleId];
+    const catalogItem = await getCatalogItem(bundleId);
     if (!catalogItem || catalogItem.bundleType !== bundleType || !catalogItem.active) {
       res.status(400);
       throw new Error('Invalid or inactive bundle requested');
@@ -569,12 +586,12 @@ exports.getPaymentHistory = async (req, res, next) => {
       .select('-razorpaySignature')
       .sort({ createdAt: -1 });
 
-    const enrichedPayments = payments.map(p => {
+    const enrichedPayments = await Promise.all(payments.map(async p => {
       const pObj = p.toObject();
-      const catalogItem = TRUSTED_CATALOG[p.bundleId];
+      const catalogItem = await getCatalogItem(p.bundleId);
       if (catalogItem) pObj.bundleTitle = catalogItem.title;
       return pObj;
-    });
+    }));
 
     res.json({ success: true, payments: enrichedPayments });
   } catch (error) {

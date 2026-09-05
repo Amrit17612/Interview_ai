@@ -132,9 +132,16 @@ const grantBundle = async (req, res, next) => {
       throw new Error('A valid reason (5-500 characters) is required for manual grants');
     }
 
-    // Validate bundleId against catalog
-    const bundleInfo = TRUSTED_CATALOG[bundleId];
-    
+    // Validate bundleId against catalog or db
+    const Bundle = require('../models/Bundle');
+    const TRUSTED_CATALOG = require('../config/catalog');
+    const dbBundle = await Bundle.findOne({ bundleId, active: true }).lean();
+    let bundleInfo;
+    if (dbBundle) {
+      bundleInfo = { bundleId: dbBundle.bundleId, bundleType: dbBundle.type, title: dbBundle.name, amount: dbBundle.price * 100 };
+    } else {
+      bundleInfo = TRUSTED_CATALOG[bundleId];
+    }
     if (!bundleInfo) {
       res.status(400);
       throw new Error('Invalid bundle ID. Not found in trusted catalog.');

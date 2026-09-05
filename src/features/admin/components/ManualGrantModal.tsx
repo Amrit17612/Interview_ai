@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X, Loader2, ShieldAlert } from 'lucide-react';
 import { apiClient } from '../../../services/api.client';
-import { MOCK_COMPANY_BUNDLES, MOCK_DOMAIN_BUNDLES } from '../../../types/bundle.types';
+import { bundleService } from '../../../services/bundle.service';
+import type { BundleData } from '../../../services/bundle.service';
 
 interface Props {
   user: any;
@@ -14,8 +15,16 @@ export function ManualGrantModal({ user, onClose, onSuccess }: Props) {
   const [reason, setReason] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  const [bundles, setBundles] = useState<BundleData[]>([]);
+  const [isLoadingBundles, setIsLoadingBundles] = useState(true);
 
-
+  useEffect(() => {
+    bundleService.getAllBundles()
+      .then((data: BundleData[]) => setBundles(data))
+      .catch((err: any) => console.error("Failed to fetch admin bundles", err))
+      .finally(() => setIsLoadingBundles(false));
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,6 +54,9 @@ export function ManualGrantModal({ user, onClose, onSuccess }: Props) {
       setLoading(false);
     }
   };
+
+  const companyBundles = bundles.filter(b => b.type === 'COMPANY' || b.type === 'company');
+  const domainBundles = bundles.filter(b => b.type === 'DOMAIN' || b.type === 'domain');
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm">
@@ -82,17 +94,17 @@ export function ManualGrantModal({ user, onClose, onSuccess }: Props) {
                 value={bundleId}
                 onChange={(e) => setBundleId(e.target.value)}
                 className="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:ring-brand-500 focus:border-brand-500 bg-white"
-                disabled={loading}
+                disabled={loading || isLoadingBundles}
               >
-                <option value="">-- Choose a bundle --</option>
+                <option value="">{isLoadingBundles ? 'Loading bundles...' : '-- Choose a bundle --'}</option>
                 <optgroup label="Company Bundles">
-                  {MOCK_COMPANY_BUNDLES.map((b: any) => (
-                    <option key={b.id} value={b.id}>{b.name}</option>
+                  {companyBundles.map(b => (
+                    <option key={b.bundleId} value={b.bundleId}>{b.name}</option>
                   ))}
                 </optgroup>
                 <optgroup label="Domain Bundles">
-                  {MOCK_DOMAIN_BUNDLES.map((b: any) => (
-                    <option key={b.id} value={b.id}>{b.name}</option>
+                  {domainBundles.map(b => (
+                    <option key={b.bundleId} value={b.bundleId}>{b.name}</option>
                   ))}
                 </optgroup>
               </select>

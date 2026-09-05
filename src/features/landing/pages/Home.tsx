@@ -31,9 +31,9 @@ import {
 import { NavLink } from 'react-router-dom';
 import { ROUTES } from '../../../constants/routes';
 import lpuLogo from '../../../assets/logos/lpu-logo.svg';
-import { MOCK_COMPANY_BUNDLES, MOCK_DOMAIN_BUNDLES } from '../../../types/bundle.types';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { InteractiveDemoModal } from '../components/InteractiveDemoModal';
+import { bundleService } from '../../../services/bundle.service';
 
 // Motion variants
 const fadeInUp: any = {
@@ -52,13 +52,15 @@ const staggerContainer: any = {
 };
 
 export function Home() {
-  // Fetch dynamic preview bundles securely (static mock data acts as our available source)
-  const previewBundles = [
-    ...MOCK_COMPANY_BUNDLES,
-    ...MOCK_DOMAIN_BUNDLES
-  ].slice(0, 4);
-
+  const [previewBundles, setPreviewBundles] = useState<any[]>([]);
   const [isDemoModalOpen, setIsDemoModalOpen] = useState(false);
+
+  useEffect(() => {
+    bundleService.getPublicBundles().then(data => {
+      // Get a mix of bundles, limit to 4
+      setPreviewBundles(data.map(b => ({ ...b, id: b.bundleId })).slice(0, 4));
+    });
+  }, []);
 
   return (
     <div className="flex flex-col min-h-screen">

@@ -1,20 +1,29 @@
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Container } from '../../../components/ui/Container';
 import { PageHeader } from '../../../components/ui/PageHeader';
 import { useAccess } from '../hooks/useAccess';
 import { BundleCard } from '../components/BundleCard';
-import { MOCK_COMPANY_BUNDLES, MOCK_DOMAIN_BUNDLES } from '../../../types/bundle.types';
 import { ROUTES } from '../../../constants/routes';
 import { motion } from 'framer-motion';
+import { bundleService } from '../../../services/bundle.service';
 
 export function MyPurchases() {
   const { purchasedBundles } = useAccess();
   const navigate = useNavigate();
 
+  const [allBundles, setAllBundles] = useState<any[]>([]);
+  const [_isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    bundleService.getPublicBundles().then(data => {
+      setAllBundles(data.map(b => ({ ...b, id: b.bundleId })));
+      setIsLoading(false);
+    });
+  }, []);
+
   // Combine both mock sets and filter by what the user actually owns
   const ownedBundles = useMemo(() => {
-    const allBundles = [...MOCK_COMPANY_BUNDLES, ...MOCK_DOMAIN_BUNDLES];
     return allBundles.filter(bundle => 
       purchasedBundles.some(
         owned => 
@@ -23,7 +32,7 @@ export function MyPurchases() {
           owned.purchaseStatus === 'active'
       )
     );
-  }, [purchasedBundles]);
+  }, [purchasedBundles, allBundles]);
 
   const handlePreview = (_bundleId: string) => {
     // We can leave this as a no-op or reuse the start practice flow since they own it

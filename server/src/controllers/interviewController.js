@@ -3,6 +3,8 @@ const Resume = require('../models/Resume');
 const JobDescription = require('../models/JobDescription');
 const User = require('../models/User');
 const CreditTransaction = require('../models/CreditTransaction');
+const InterviewTemplate = require('../models/InterviewTemplate');
+const Question = require('../models/Question');
 const mongoose = require('mongoose');
 const { getGenerateQuestionPrompt, getEvaluateAnswerPrompt, getFinalReportPrompt } = require('../utils/prompts');
 const { generateText, validateQuestionResponse, validateEvaluationResponse, validateReportResponse } = require('../services/geminiService');
@@ -17,9 +19,89 @@ const MAX_QUESTIONS = 5; // Fixed bound as per instruction to define a minimal e
  */
 const createInterviewSession = async (req, res) => {
   try {
-    const { resumeId, atsJobId, configuration } = req.body;
+    const { resumeId, atsJobId, configuration, templateId } = req.body;
     const userId = req.user._id;
 
+    const { normalizeCompany, sanitizeRole } = require('../utils/companyDictionary');
+
+    // ==========================================
+    // CASE A: TEMPLATE-BASED INTERVIEW
+    // ==========================================
+    if (templateId) {
+      if (!mongoose.Types.ObjectId.isValid(templateId)) {
+        return res.status(400).json({ success: false, message: 'Invalid templateId format' });
+      }
+
+      const template = await InterviewTemplate.findById(templateId).populate('questions');
+      if (!template) {
+        return res.status(404).json({ success: false, message: 'Interview template not found' });
+      }
+
+      if (template.status !== 'ACTIVE' && req.user.role !== 'admin') {
+        return res.status(403).json({ success: false, message: 'Interview template is not active' });
+      }
+
+      // Check access control if not admin
+      if (req.user.role !== 'admin') {
+        const Bundle = require('../models/Bundle');
+        const bundle = await Bundle.findOne({ modules: templateId });
+        
+        let hasAccess = false;
+        if (bundle) {
+          const user = await User.findById(userId);
+          hasAccess = user.purchasedBundles.some(
+            b => b.bundleId === bundle.bundleId && b.purchaseStatus === 'active'
+          );
+        }
+
+        if (!hasAccess && template.visibility !== 'PUBLIC') {
+          return res.status(403).json({ success: false, message: 'You do not have access to this interview module' });
+        }
+      }
+
+      if (!template.questions || template.questions.length === 0) {
+        return res.status(400).json({ success: false, message: 'Template has no questions configured' });
+      }
+
+      // Map template questions into session snapshot
+      const templateQuestions = template.questions.map((q, idx) => ({
+        index: idx + 1,
+        questionId: q._id.toString(),
+        text: q.text,
+        expectedPoints: q.expectedPoints || [],
+        status: 'PENDING',
+        userAnswer: null,
+        evaluation: { score: null, feedback: null }
+      }));
+
+      const session = await InterviewSession.create({
+        user: userId,
+        resumeId: resumeId || null,
+        atsJobId: atsJobId || null,
+        templateId: templateId,
+        isTemplateDriven: true,
+        templateQuestions: templateQuestions,
+        maxQuestions: templateQuestions.length,
+        configuration: {
+          type: configuration?.type || template.category,
+          domain: configuration?.domain || template.domain || 'General',
+          difficulty: configuration?.difficulty || template.difficulty,
+          company: configuration?.company ? normalizeCompany(configuration.company) : null,
+          role: configuration?.role ? sanitizeRole(configuration.role) : null
+        },
+        status: 'IN_PROGRESS',
+        questions: []
+      });
+
+      return res.status(201).json({
+        success: true,
+        data: session
+      });
+    }
+
+    // ==========================================
+    // CASE B: GENERIC AI-GENERATED INTERVIEW
+    // ==========================================
     if (!configuration || !configuration.type || !configuration.domain || !configuration.difficulty) {
       return res.status(400).json({ success: false, message: 'Missing required configuration fields.' });
     }
@@ -58,14 +140,13 @@ const createInterviewSession = async (req, res) => {
         return res.status(404).json({ success: false, message: 'JobDescription not found or does not belong to user' });
       }
     }
-
-    const { normalizeCompany, sanitizeRole } = require('../utils/companyDictionary');
     
     // Create session
     const session = await InterviewSession.create({
       user: userId,
       resumeId: resumeId || null,
       atsJobId: atsJobId || null,
+      templateId: null,
       configuration: {
         ...configuration,
         company: configuration.company ? normalizeCompany(configuration.company) : null,
@@ -254,6 +335,8 @@ const generateQuestion = async (req, res) => {
         session.questions.push(newQuestion);
         await session.save();
         return res.status(200).json({ success: true, data: newQuestion });
+      } else {
+        return res.status(400).json({ success: false, message: 'Template questions exhausted' });
       }
     }
 

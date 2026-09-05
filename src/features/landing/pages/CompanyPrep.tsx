@@ -1,10 +1,22 @@
+import { useState, useEffect } from 'react';
 import { Container } from '../../../components/ui/Container';
 import { NavLink } from 'react-router-dom';
 import { ROUTES } from '../../../constants/routes';
-import { MOCK_COMPANY_BUNDLES } from '../../../types/bundle.types';
 import { Building2, ChevronRight, Star } from 'lucide-react';
+import { bundleService } from '../../../services/bundle.service';
 
 export function CompanyPrep() {
+  const [bundles, setBundles] = useState<any[]>([]);
+
+  useEffect(() => {
+    bundleService.getPublicBundles().then(data => {
+      setBundles(
+        data.filter(b => b.type === 'COMPANY' || b.type === 'company')
+          .map(b => ({ ...b, id: b.bundleId }))
+      );
+    });
+  }, []);
+
   return (
     <div className="flex flex-col min-h-screen bg-gray-50/30">
       <section className="pt-24 pb-16 bg-white border-b border-gray-100">
@@ -22,7 +34,7 @@ export function CompanyPrep() {
       <section className="py-16">
         <Container>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {MOCK_COMPANY_BUNDLES.map(bundle => (
+            {bundles.map(bundle => (
               <div key={bundle.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all p-6 flex flex-col group relative overflow-hidden">
                 {bundle.isPopular && (
                   <span className="absolute top-4 right-4 flex items-center gap-1 text-[10px] font-bold text-white bg-brand-600 px-2 py-1 uppercase tracking-wider rounded-md">

@@ -103,6 +103,8 @@ function AdminSidebar({ onClose }: { onClose: () => void }) {
     {
       title: 'CONTENT',
       items: [
+        { name: 'Company Bundles', icon: BookOpen, href: ROUTES.ADMIN_COMPANY_BUNDLES },
+        { name: 'Domain Bundles', icon: BookOpen, href: ROUTES.ADMIN_DOMAIN_BUNDLES },
         { name: 'Question Library', icon: BookOpen, href: ROUTES.ADMIN_QUESTIONS },
         { name: 'Interview Templates', icon: Settings, href: ROUTES.ADMIN_TEMPLATES },
         { name: 'Custom Interviews', icon: PlusSquare, href: '/admin/custom-interviews', disabled: true },

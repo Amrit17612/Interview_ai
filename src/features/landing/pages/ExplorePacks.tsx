@@ -1,25 +1,31 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import { Container } from '../../../components/ui/Container';
 import { Search, Code2, Building2, Star, ChevronRight, FilterX } from 'lucide-react';
 import { ROUTES } from '../../../constants/routes';
-import { MOCK_COMPANY_BUNDLES, MOCK_DOMAIN_BUNDLES } from '../../../types/bundle.types';
+import { bundleService } from '../../../services/bundle.service';
 
 type FilterType = 'ALL' | 'COMPANY' | 'DOMAIN' | 'POPULAR';
 
 export function ExplorePacks() {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState<FilterType>('ALL');
+  
+  const [allBundles, setAllBundles] = useState<any[]>([]);
+  const [_isLoading, setIsLoading] = useState(true);
 
-  const allBundles = useMemo(() => {
-    return [...MOCK_COMPANY_BUNDLES, ...MOCK_DOMAIN_BUNDLES];
+  useEffect(() => {
+    bundleService.getPublicBundles().then(data => {
+      setAllBundles(data.map(b => ({ ...b, id: b.bundleId })));
+      setIsLoading(false);
+    });
   }, []);
 
   const stats = useMemo(() => {
     return {
       total: allBundles.length,
-      company: MOCK_COMPANY_BUNDLES.length,
-      domain: MOCK_DOMAIN_BUNDLES.length,
+      company: allBundles.filter(b => b.type === 'COMPANY').length,
+      domain: allBundles.filter(b => b.type === 'DOMAIN').length,
       popular: allBundles.filter(b => b.isPopular).length
     };
   }, [allBundles]);
@@ -39,8 +45,8 @@ export function ExplorePacks() {
 
       // 2. Filter by tab
       switch (activeFilter) {
-        case 'COMPANY': return bundle.type === 'company';
-        case 'DOMAIN': return bundle.type === 'domain';
+        case 'COMPANY': return bundle.type === 'COMPANY' || bundle.type === 'company';
+        case 'DOMAIN': return bundle.type === 'DOMAIN' || bundle.type === 'domain';
         case 'POPULAR': return bundle.isPopular === true;
         case 'ALL':
         default:

@@ -1,16 +1,39 @@
-import { useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, NavLink } from 'react-router-dom';
 import { Container } from '../../../components/ui/Container';
 import { ArrowLeft, CheckCircle2, Building2, Code2, Star, Play, Settings } from 'lucide-react';
 import { ROUTES } from '../../../constants/routes';
-import { MOCK_COMPANY_BUNDLES, MOCK_DOMAIN_BUNDLES } from '../../../types/bundle.types';
+import { bundleService } from '../../../services/bundle.service';
+import type { BundleData } from '../../../services/bundle.service';
 
 export function ExplorePackDetails() {
   const { id } = useParams<{ id: string }>();
+  
+  const [bundle, setBundle] = useState<BundleData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const bundle = useMemo(() => {
-    return [...MOCK_COMPANY_BUNDLES, ...MOCK_DOMAIN_BUNDLES].find(b => b.id === id);
+  useEffect(() => {
+    if (!id) return;
+    bundleService.getPublicBundles().then(data => {
+      const found = data.find(b => b.bundleId === id);
+      if (found) {
+        setBundle({ ...found, id: found.bundleId } as BundleData);
+      }
+      setIsLoading(false);
+    }).catch(() => {
+      setIsLoading(false);
+    });
   }, [id]);
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col min-h-screen bg-gray-50/30">
+        <Container className="py-24 flex justify-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-600"></div>
+        </Container>
+      </div>
+    );
+  }
 
   if (!bundle) {
     return (
@@ -34,14 +57,14 @@ export function ExplorePackDetails() {
     );
   }
 
-  const isFrontend = bundle.id.includes('frontend');
-  const isBackend = bundle.id.includes('backend');
-  const isData = bundle.id.includes('data');
+  const isFrontend = (bundle as any).id.includes('frontend');
+  const isBackend = (bundle as any).id.includes('backend');
+  const isData = (bundle as any).id.includes('data');
   
   let accentColor = 'bg-gray-50 text-gray-600 border-gray-200';
   let Icon = Building2;
   
-  if (bundle.type === 'domain') {
+  if (bundle.type === 'domain' || bundle.type === 'DOMAIN') {
     Icon = Code2;
     if (isFrontend) accentColor = 'bg-blue-50 text-blue-600 border-blue-200';
     else if (isBackend) accentColor = 'bg-indigo-50 text-indigo-600 border-indigo-200';
@@ -105,20 +128,20 @@ export function ExplorePackDetails() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div>
                   <p className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-1">Total Modules</p>
-                  <p className="text-lg font-medium text-gray-900">{bundle.interviewsCount} preparation modules</p>
+                  <p className="text-lg font-medium text-gray-900">{bundle.modules?.length || 0} preparation modules</p>
                 </div>
                 <div>
                   <p className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-1">Target Role</p>
-                  <p className="text-lg font-medium text-gray-900">{bundle.interviewConfig.role}</p>
+                  <p className="text-lg font-medium text-gray-900">{bundle.category || 'Software Engineer'}</p>
                 </div>
                 <div>
                   <p className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-1">Difficulty</p>
-                  <p className="text-lg font-medium text-gray-900 capitalize">{bundle.interviewConfig.difficulty?.toLowerCase() || 'Intermediate'}</p>
+                  <p className="text-lg font-medium text-gray-900 capitalize">Intermediate</p>
                 </div>
                 <div>
                   <p className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-1">Module Types</p>
                   <div className="flex flex-wrap gap-2 mt-1.5">
-                    {bundle.interviewConfig.allowedTypes.map(type => (
+                    {Array.from(new Set(bundle.modules?.map((m: any) => m.category || 'TECHNICAL') || [])).map((type: any) => (
                       <span key={type} className="px-2 py-1 bg-gray-100 text-gray-700 text-xs font-semibold rounded-md capitalize">
                         {type.replace('_', ' ').toLowerCase()}
                       </span>
@@ -136,7 +159,7 @@ export function ExplorePackDetails() {
                 <Icon className="w-8 h-8" />
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-2">{bundle.name}</h3>
-              <p className="text-gray-500 mb-6 font-medium">Includes {bundle.interviewsCount} preparation modules.</p>
+              <p className="text-gray-500 mb-6 font-medium">Includes {bundle.modules?.length || 0} preparation modules.</p>
               
               <NavLink 
                 to={ROUTES.REGISTER}

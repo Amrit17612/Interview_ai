@@ -22,6 +22,8 @@ const Loadable = (Component: React.ComponentType<any>) => (props: any) => (
 import { Home } from '../features/landing/pages/Home';
 import { Features } from '../features/landing/pages/Features';
 import { Pricing } from '../features/landing/pages/Pricing';
+import { AdminCompanyBundles } from '../features/admin/pages/AdminCompanyBundles';
+import { AdminDomainBundles } from '../features/admin/pages/AdminDomainBundles';
 import { InterviewDomains } from '../features/landing/pages/InterviewDomains';
 import { CompanyPrep } from '../features/landing/pages/CompanyPrep';
 import { Roadmap } from '../features/landing/pages/Roadmap';
@@ -248,6 +250,8 @@ export const router = createBrowserRouter([
           { path: ROUTES.ADMIN_DASHBOARD, element: <AdminDashboard /> },
           { path: ROUTES.ADMIN_PAYMENTS, element: <TransactionList /> },
           { path: '/admin/promos', element: <PromoManagement /> },
+          { path: ROUTES.ADMIN_COMPANY_BUNDLES, element: <AdminCompanyBundles /> },
+          { path: ROUTES.ADMIN_DOMAIN_BUNDLES, element: <AdminDomainBundles /> },
           { path: ROUTES.ADMIN_USERS, element: <UserManagement /> },
           { path: ROUTES.ADMIN_AUDIT_LOGS, element: <AuditLogs /> },
           { path: ROUTES.ADMIN_FEEDBACK, element: <AdminFeedback /> },

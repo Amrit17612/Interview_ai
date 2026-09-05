@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const CreditTransaction = require('../models/CreditTransaction');
 const Payment = require('../models/Payment');
 const TRUSTED_CATALOG = require('../config/catalog');
+const Bundle = require('../models/Bundle');
 
 const getWalletHistory = async (req, res, next) => {
   try {
@@ -17,11 +18,24 @@ const getWalletHistory = async (req, res, next) => {
     let paymentMap = {};
     if (paymentIds.length > 0) {
       const payments = await Payment.find({ _id: { $in: paymentIds } }).lean();
+      
+      // Collect all unique bundleIds from payments
+      const bundleIds = [...new Set(payments.map(p => p.bundleId).filter(Boolean))];
+      const dbBundles = await Bundle.find({ bundleId: { $in: bundleIds } }).lean();
+      const bundleMap = dbBundles.reduce((acc, b) => {
+        acc[b.bundleId] = b.name;
+        return acc;
+      }, {});
+
       payments.forEach(p => {
         let bundleTitle = 'Unknown Bundle';
-        const cat = TRUSTED_CATALOG[p.bundleId];
-        if (cat) {
-          bundleTitle = cat.title || cat.name;
+        if (p.bundleId && bundleMap[p.bundleId]) {
+          bundleTitle = bundleMap[p.bundleId];
+        } else {
+          const cat = TRUSTED_CATALOG[p.bundleId];
+          if (cat) {
+            bundleTitle = cat.title || cat.name;
+          }
         }
         paymentMap[p._id.toString()] = {
           bundleTitle: bundleTitle
