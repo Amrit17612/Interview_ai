@@ -19,11 +19,23 @@ export function FinalReport() {
     session,
     isLoading,
     error,
-    loadSession
+    loadSession,
+    retryReport,
+    isCompleting
   } = useInterview();
 
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const [securityAudit, setSecurityAudit] = useState<any>(null);
+  const [retryError, setRetryError] = useState<string | null>(null);
+
+  const handleRetry = async () => {
+    setRetryError(null);
+    try {
+      await retryReport();
+    } catch (err: any) {
+      setRetryError(err?.message || 'Retry failed. Please try again.');
+    }
+  };
 
   useEffect(() => {
     const fetchAudit = async () => {
@@ -239,11 +251,22 @@ export function FinalReport() {
     return (
       <Container className="py-8 max-w-4xl">
         <div className="text-center p-12 bg-white rounded-xl shadow-sm border border-gray-100 flex flex-col items-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-600 mb-6"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-600 mb-6" />
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Your report is being generated...</h2>
-          <p className="text-gray-500 max-w-md mx-auto">
-            Our AI is carefully evaluating your responses. This usually takes about 15-30 seconds. This page will automatically update when your report is ready.
+          <p className="text-gray-500 max-w-md mx-auto mb-6">
+            Our AI is carefully evaluating your responses. This usually takes about 15–30 seconds.
+            This page will automatically update when your report is ready.
           </p>
+          {retryError && (
+            <p className="text-red-500 text-sm mb-3">{retryError}</p>
+          )}
+          <button
+            onClick={handleRetry}
+            disabled={isCompleting}
+            className="text-sm text-brand-600 underline hover:text-brand-800 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isCompleting ? 'Retrying...' : 'Taking too long? Click to retry report generation'}
+          </button>
         </div>
       </Container>
     );

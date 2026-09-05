@@ -204,7 +204,17 @@ export function ExclusiveInterviews() {
                         {getStatusDisplay(session.status)}
                         <div className="flex gap-2 w-full sm:w-auto">
                           {session.status === 'IN_PROGRESS' && (
-                            <Button size="sm" onClick={() => navigate(`${ROUTES.INTERVIEW_ACTIVE}?id=${session._id}`)}>
+                            <Button 
+                              size="sm" 
+                              onClick={() => {
+                                try {
+                                  if (document.documentElement.requestFullscreen) {
+                                    document.documentElement.requestFullscreen().catch(() => {});
+                                  }
+                                } catch (err) {}
+                                navigate(`${ROUTES.INTERVIEW_DEVICE_CHECK}?id=${session._id}`);
+                              }}
+                            >
                               <PlayCircle className="h-4 w-4 mr-2" /> Resume
                             </Button>
                           )}

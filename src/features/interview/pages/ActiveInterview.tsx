@@ -56,6 +56,13 @@ export function ActiveInterview() {
   const [showExitConfirm, setShowExitConfirm] = useState(false);
   const [elapsedTime, setElapsedTime] = useState(0);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [validationError, setValidationError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (answerText.trim()) {
+      setValidationError(null);
+    }
+  }, [answerText]);
 
   const { getDraft, clearDraft } = useAutosave({
     sessionId: session?._id,
@@ -184,9 +191,12 @@ export function ActiveInterview() {
     }
   }, [transcript, isListening, isSpeakMode]);
 
-  // If session is completed and has a score, auto-navigate
+  // If session is completed and has a score, auto-navigate to feedback.
+  // Restored from pre-regression (7fd0223c^): requires session._id === sessionId
+  // (prevents stale context from firing), status === COMPLETED, and overallScore
+  // present (fires only after async report generation completes, not immediately).
   useEffect(() => {
-    if (session?.status === 'COMPLETED') {
+    if (session?._id === sessionId && session?.status === 'COMPLETED' && session.overallScore !== undefined && session.overallScore !== null) {
       navigate(`${ROUTES.INTERVIEW_FEEDBACK}?id=${session._id}`);
     }
   }, [session, sessionId, navigate]);
@@ -207,16 +217,19 @@ export function ActiveInterview() {
   }, [stopListening, stopSpeaking]);
 
   const handleSubmit = async () => {
-    if (!answerText.trim() && !isSpeakMode) return; // Allow empty submit if speak mode just hasn't transcribed perfectly but user forces submit, though ideally we disable submit
+    const finalAnswer = answerText.trim();
+    if (!finalAnswer) {
+      setValidationError('Please answer the current question before continuing.');
+      return;
+    }
 
+    setValidationError(null);
     stopListening();
     stopSpeaking();
 
     try {
-      if (answerText.trim()) {
-        await submitAnswer(answerText);
-        clearDraft();
-      }
+      await submitAnswer(finalAnswer);
+      clearDraft();
 
       const maxQ = session?.maxQuestions || 5;
       if (session && session.questions.length < maxQ) {
@@ -569,6 +582,15 @@ export function ActiveInterview() {
           )}
         </AnimatePresence>
       </main>
+
+      {/* Validation Error Message */}
+      {validationError && (
+        <div className="w-full flex justify-center px-4 pb-2 z-20">
+          <div className="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-2 rounded-lg text-sm font-medium shadow-lg animate-in fade-in slide-in-from-bottom-2">
+            {validationError}
+          </div>
+        </div>
+      )}
 
       {/* Bottom Footer Control Bar */}
       {interviewStarted && session?.status !== 'COMPLETED' && currentQuestion && (
