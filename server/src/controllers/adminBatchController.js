@@ -186,14 +186,13 @@ const getBatchResults = async (req, res, next) => {
       return res.status(404).json({ success: false, message: 'Template is not assigned to this batch' });
     }
 
-    // Fetch ranked completed sessions
+    // Fetch all completed sessions
     const sessions = await InterviewSession.find({
       batchId,
       templateId,
       status: 'COMPLETED'
     })
     .populate('user', 'firstName lastName email')
-    .sort({ overallScore: -1, updatedAt: 1 })
     .lean();
 
     if (sessions.length === 0) {
@@ -213,21 +212,83 @@ const getBatchResults = async (req, res, next) => {
     const audits = await SecurityAudit.find({ session: { $in: sessionIds } }).lean();
     const auditMap = {};
     audits.forEach(a => {
-      // summarize violations (warnings + violations)
       const count = (a.warningCount || 0) + (a.violationCount || 0);
       auditMap[a.session.toString()] = count;
     });
 
-    // Build the results array
-    const results = sessions.map((s, index) => ({
+    // Group by user and find the best attempt per user
+    const userBestAttempts = new Map();
+
+    sessions.forEach(session => {
+      // Ignore sessions without a score (e.g. still generating)
+      if (session.overallScore == null) return;
+      
+      const userId = session.user ? session.user._id.toString() : `anon_${session._id.toString()}`;
+      const currentViolations = auditMap[session._id.toString()] || 0;
+      const currentScore = session.overallScore;
+      const currentTime = new Date(session.updatedAt).getTime();
+
+      const existing = userBestAttempts.get(userId);
+
+      if (!existing) {
+        userBestAttempts.set(userId, { ...session, violations: currentViolations });
+      } else {
+        const existingScore = existing.overallScore;
+        const existingViolations = existing.violations;
+        const existingTime = new Date(existing.updatedAt).getTime();
+
+        let isBetter = false;
+
+        // 1. Primary: Score DESC
+        if (currentScore > existingScore) {
+          isBetter = true;
+        } 
+        else if (currentScore === existingScore) {
+          // 2. Secondary: Violations ASC
+          if (currentViolations < existingViolations) {
+            isBetter = true;
+          } 
+          else if (currentViolations === existingViolations) {
+            // 3. Tertiary: Completion time ASC
+            if (currentTime < existingTime) {
+              isBetter = true;
+            }
+          }
+        }
+
+        if (isBetter) {
+          userBestAttempts.set(userId, { ...session, violations: currentViolations });
+        }
+      }
+    });
+
+    // Convert map to array and sort using the exact same logic
+    const bestSessions = Array.from(userBestAttempts.values());
+    bestSessions.sort((a, b) => {
+      // 1. Score DESC
+      if (b.overallScore !== a.overallScore) {
+        return b.overallScore - a.overallScore;
+      }
+      // 2. Violations ASC
+      if (a.violations !== b.violations) {
+        return a.violations - b.violations;
+      }
+      // 3. Time ASC
+      const aTime = new Date(a.updatedAt).getTime();
+      const bTime = new Date(b.updatedAt).getTime();
+      return aTime - bTime;
+    });
+
+    // Build the results array and assign rank
+    const results = bestSessions.map((s, index) => ({
       rank: index + 1,
       sessionId: s._id,
-      userId: s.user?._id,
+      userId: s.user ? s.user._id : null,
       studentName: s.user ? `${s.user.firstName} ${s.user.lastName}` : 'Unknown Student',
       email: s.user?.email || 'N/A',
       score: s.overallScore || 0,
       completedAt: s.updatedAt,
-      securityViolations: auditMap[s._id.toString()] || 0
+      securityViolations: s.violations
     }));
 
     res.json({
