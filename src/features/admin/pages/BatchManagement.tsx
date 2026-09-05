@@ -49,6 +49,26 @@ export function BatchManagement() {
     fetchBatches();
   }, []);
 
+  // Ensure time strictly stays in HH:mm HTML format, even if browser fallback or paste emits AM/PM
+  const handleTimeChange = (val: string, setter: (v: string) => void) => {
+    if (!val) {
+      setter('');
+      return;
+    }
+    const match = val.match(/(\d{1,2}):(\d{2})(?:\s?(AM|PM))?/i);
+    if (match) {
+      let [_, h, m, ampm] = match;
+      if (ampm) {
+        let hours = parseInt(h, 10);
+        if (ampm.toUpperCase() === 'PM' && hours < 12) hours += 12;
+        if (ampm.toUpperCase() === 'AM' && hours === 12) hours = 0;
+        setter(`${hours.toString().padStart(2, '0')}:${m}`);
+        return;
+      }
+    }
+    setter(val);
+  };
+
   const handleCreateBatch = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
@@ -216,7 +236,10 @@ export function BatchManagement() {
                           <Calendar className="w-3.5 h-3.5" /> Date
                         </label>
                         <Input 
-                          type="date" 
+                          type={loginStartDate ? "date" : "text"}
+                          placeholder="DD/MM/YYYY"
+                          onFocus={(e) => (e.currentTarget.type = "date")}
+                          onBlur={(e) => { if (!e.currentTarget.value) e.currentTarget.type = "text"; }}
                           required={scheduleEnabled}
                           value={loginStartDate}
                           onChange={(e) => setLoginStartDate(e.target.value)}
@@ -230,7 +253,7 @@ export function BatchManagement() {
                           type="time" 
                           required={scheduleEnabled}
                           value={loginStartTime}
-                          onChange={(e) => setLoginStartTime(e.target.value)}
+                          onChange={(e) => handleTimeChange(e.target.value, setLoginStartTime)}
                         />
                       </div>
                     </div>
@@ -243,7 +266,10 @@ export function BatchManagement() {
                           <Calendar className="w-3.5 h-3.5" /> Date
                         </label>
                         <Input 
-                          type="date" 
+                          type={loginEndDate ? "date" : "text"}
+                          placeholder="DD/MM/YYYY"
+                          onFocus={(e) => (e.currentTarget.type = "date")}
+                          onBlur={(e) => { if (!e.currentTarget.value) e.currentTarget.type = "text"; }}
                           required={scheduleEnabled}
                           value={loginEndDate}
                           onChange={(e) => setLoginEndDate(e.target.value)}
@@ -257,7 +283,7 @@ export function BatchManagement() {
                           type="time" 
                           required={scheduleEnabled}
                           value={loginEndTime}
-                          onChange={(e) => setLoginEndTime(e.target.value)}
+                          onChange={(e) => handleTimeChange(e.target.value, setLoginEndTime)}
                         />
                       </div>
                     </div>
