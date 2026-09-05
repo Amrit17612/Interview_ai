@@ -128,7 +128,7 @@ export function BatchDetail() {
 
   const exportPDF = () => {
     if (!leaderboardData) return;
-    const doc = new jsPDF();
+    const doc = new jsPDF({ orientation: 'landscape' });
     
     doc.setFontSize(16);
     doc.text("Interviu AI - Batch Interview Ranking", 14, 20);
@@ -143,14 +143,14 @@ export function BatchDetail() {
     doc.setFontSize(10);
     doc.setFont('helvetica', 'bold');
     doc.text('Rank', 14, y);
-    doc.text('Student', 28, y);
-    doc.text('Email', 75, y);
-    doc.text('Score', 135, y);
-    doc.text('Completed At', 155, y);
-    doc.text('Violations', 185, y, { align: 'center' });
+    doc.text('Student', 30, y);
+    doc.text('Email', 90, y);
+    doc.text('Score', 160, y);
+    doc.text('Completed At', 190, y);
+    doc.text('Violations', 250, y, { align: 'center' });
     
     doc.setLineWidth(0.2);
-    doc.line(14, y + 2, 196, y + 2);
+    doc.line(14, y + 2, 280, y + 2);
     y += 8;
     
     doc.setFont('helvetica', 'normal');
@@ -160,18 +160,19 @@ export function BatchDetail() {
     } else {
       leaderboardData.results.forEach((row: any) => {
         doc.text(row.rank.toString(), 14, y);
-        doc.text(row.studentName.substring(0, 22), 28, y);
-        doc.text(row.email.substring(0, 28), 75, y);
-        doc.text(`${row.score}`, 135, y);
+        doc.text(row.studentName.substring(0, 35), 30, y);
+        doc.text(row.email.substring(0, 45), 90, y);
+        doc.text(`${row.score}`, 160, y);
         
         const dateStr = new Date(row.completedAt).toLocaleDateString();
         const timeStr = new Date(row.completedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        doc.text(`${dateStr} ${timeStr}`, 155, y);
+        doc.text(`${dateStr} ${timeStr}`, 190, y);
         
-        doc.text(row.securityViolations.toString(), 185, y, { align: 'center' });
+        doc.text(row.securityViolations.toString(), 250, y, { align: 'center' });
         y += 8;
         
-        if (y > 280) {
+        // In landscape, page height is 210. So check if y > 195
+        if (y > 195) {
           doc.addPage();
           y = 20;
         }
