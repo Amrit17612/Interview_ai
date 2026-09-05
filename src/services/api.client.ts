@@ -1,7 +1,12 @@
 import axios from 'axios';
 
-let API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+// Backend runs on a separate hosting service (e.g., Render / Railway / Fly.io).
+// Set VITE_API_BASE_URL in Vercel project environment variables to the backend URL,
+// e.g. https://interview-ai-backend.onrender.com/api
+// In local development this is controlled by the .env file (VITE_API_BASE_URL=http://localhost:5001/api).
+const rawApiUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5001/api';
 
+let API_BASE_URL = rawApiUrl;
 if (!API_BASE_URL.endsWith('/api') && !API_BASE_URL.endsWith('/api/')) {
   API_BASE_URL = API_BASE_URL.replace(/\/$/, '') + '/api';
 }
