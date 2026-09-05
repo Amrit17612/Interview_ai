@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { PageHeader } from '../../../components/ui/PageHeader';
 import { Container } from '../../../components/ui/Container';
 import { Button } from '../../../components/ui/Button';
-import { Plus, Users, FolderOpen } from 'lucide-react';
+import { Plus, Users, FolderOpen, Calendar, Clock } from 'lucide-react';
 import { apiClient } from '../../../services/api.client';
 import { Modal } from '../../../components/ui/Modal';
 import { Input } from '../../../components/ui/Input';
@@ -26,8 +26,10 @@ export function BatchManagement() {
   const [description, setDescription] = useState('');
   
   const [scheduleEnabled, setScheduleEnabled] = useState(false);
-  const [loginStartAt, setLoginStartAt] = useState('');
-  const [loginEndAt, setLoginEndAt] = useState('');
+  const [loginStartDate, setLoginStartDate] = useState('');
+  const [loginStartTime, setLoginStartTime] = useState('');
+  const [loginEndDate, setLoginEndDate] = useState('');
+  const [loginEndTime, setLoginEndTime] = useState('');
   const [testDurationMinutes, setTestDurationMinutes] = useState('');
   const [forceStopAtEnd, setForceStopAtEnd] = useState(false);
 
@@ -56,10 +58,17 @@ export function BatchManagement() {
       
       const payload: any = { name, description };
       if (scheduleEnabled) {
+        if (!loginStartDate || !loginStartTime || !loginEndDate || !loginEndTime) {
+          throw new Error('Please select both date and time for Login Window Start and End.');
+        }
+        
+        const loginStartCombined = new Date(`${loginStartDate}T${loginStartTime}`);
+        const loginEndCombined = new Date(`${loginEndDate}T${loginEndTime}`);
+
         payload.schedule = {
           enabled: true,
-          loginStartAt: new Date(loginStartAt).toISOString(),
-          loginEndAt: new Date(loginEndAt).toISOString(),
+          loginStartAt: loginStartCombined.toISOString(),
+          loginEndAt: loginEndCombined.toISOString(),
           testDurationMinutes: testDurationMinutes ? parseInt(testDurationMinutes) : null,
           forceStopAtEnd
         };
@@ -73,15 +82,17 @@ export function BatchManagement() {
       setName('');
       setDescription('');
       setScheduleEnabled(false);
-      setLoginStartAt('');
-      setLoginEndAt('');
+      setLoginStartDate('');
+      setLoginStartTime('');
+      setLoginEndDate('');
+      setLoginEndTime('');
       setTestDurationMinutes('');
       setForceStopAtEnd(false);
       
       fetchBatches();
     } catch (error: any) {
       console.error(error);
-      alert(error.response?.data?.message || 'Failed to create batch');
+      alert(error.response?.data?.message || error.message || 'Failed to create batch');
     } finally {
       setIsSubmitting(false);
     }
@@ -196,24 +207,60 @@ export function BatchManagement() {
 
             {scheduleEnabled && (
               <div className="space-y-4 pl-6 border-l-2 border-brand-100">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">Login Window Start *</label>
-                    <Input 
-                      type="datetime-local" 
-                      required={scheduleEnabled}
-                      value={loginStartAt}
-                      onChange={(e) => setLoginStartAt(e.target.value)}
-                    />
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Login Window Start *</label>
+                    <div className="flex flex-col sm:flex-row gap-3">
+                      <div className="flex-1">
+                        <label className="flex items-center gap-1.5 text-xs text-gray-500 mb-1">
+                          <Calendar className="w-3.5 h-3.5" /> Date
+                        </label>
+                        <Input 
+                          type="date" 
+                          required={scheduleEnabled}
+                          value={loginStartDate}
+                          onChange={(e) => setLoginStartDate(e.target.value)}
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <label className="flex items-center gap-1.5 text-xs text-gray-500 mb-1">
+                          <Clock className="w-3.5 h-3.5" /> Time
+                        </label>
+                        <Input 
+                          type="time" 
+                          required={scheduleEnabled}
+                          value={loginStartTime}
+                          onChange={(e) => setLoginStartTime(e.target.value)}
+                        />
+                      </div>
+                    </div>
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">Login Window End *</label>
-                    <Input 
-                      type="datetime-local" 
-                      required={scheduleEnabled}
-                      value={loginEndAt}
-                      onChange={(e) => setLoginEndAt(e.target.value)}
-                    />
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Login Window End *</label>
+                    <div className="flex flex-col sm:flex-row gap-3">
+                      <div className="flex-1">
+                        <label className="flex items-center gap-1.5 text-xs text-gray-500 mb-1">
+                          <Calendar className="w-3.5 h-3.5" /> Date
+                        </label>
+                        <Input 
+                          type="date" 
+                          required={scheduleEnabled}
+                          value={loginEndDate}
+                          onChange={(e) => setLoginEndDate(e.target.value)}
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <label className="flex items-center gap-1.5 text-xs text-gray-500 mb-1">
+                          <Clock className="w-3.5 h-3.5" /> Time
+                        </label>
+                        <Input 
+                          type="time" 
+                          required={scheduleEnabled}
+                          value={loginEndTime}
+                          onChange={(e) => setLoginEndTime(e.target.value)}
+                        />
+                      </div>
+                    </div>
                   </div>
                 </div>
                 
