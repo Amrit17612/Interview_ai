@@ -138,6 +138,44 @@ const startTemplate = async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'Template has no questions' });
     }
 
+    let expiresAt = null;
+    if (batchId) {
+      const Batch = require('../models/Batch');
+      const batchDoc = await Batch.findById(batchId).lean();
+      
+      if (batchDoc && batchDoc.schedule && batchDoc.schedule.enabled) {
+        const now = new Date();
+        const startAt = batchDoc.schedule.loginStartAt ? new Date(batchDoc.schedule.loginStartAt) : null;
+        const endAt = batchDoc.schedule.loginEndAt ? new Date(batchDoc.schedule.loginEndAt) : null;
+
+        if (startAt && now < startAt) {
+          return res.status(403).json({ success: false, code: 'BATCH_NOT_STARTED', message: 'Batch has not started yet' });
+        }
+        if (endAt && now > endAt) {
+          return res.status(410).json({ success: false, code: 'BATCH_ACCESS_EXPIRED', message: 'Batch access window has expired' });
+        }
+
+        const actualStartTime = now.getTime();
+        const durationMinutes = batchDoc.schedule.testDurationMinutes;
+        const forceStop = batchDoc.schedule.forceStopAtEnd;
+        
+        let baseDeadline = null;
+        if (durationMinutes && durationMinutes > 0) {
+          baseDeadline = actualStartTime + (durationMinutes * 60 * 1000);
+        }
+        
+        const endAtTime = endAt ? endAt.getTime() : null;
+        
+        if (baseDeadline && !forceStop) {
+          expiresAt = new Date(baseDeadline);
+        } else if (baseDeadline && forceStop && endAtTime) {
+          expiresAt = new Date(Math.min(baseDeadline, endAtTime));
+        } else if (!baseDeadline && forceStop && endAtTime) {
+          expiresAt = new Date(endAtTime);
+        }
+      }
+    }
+
     // Resolve all question snapshots in exact order
     const questionSnapshots = [];
     for (let i = 0; i < template.questions.length; i++) {
@@ -174,7 +212,8 @@ const startTemplate = async (req, res, next) => {
       batchId: batchId,
       maxQuestions: template.questions.length,
       templateQuestions: questionSnapshots,
-      questions: [] // Active questions start empty, frontend triggers first generation
+      questions: [], // Active questions start empty, frontend triggers first generation
+      ...(expiresAt && { expiresAt })
     });
 
     res.status(201).json({ success: true, data: { sessionId: session._id } });
@@ -197,7 +236,10 @@ const validateToken = async (req, res, next) => {
     
     const normalizedToken = token.trim().toUpperCase();
     const AccessToken = require('../models/AccessToken');
-    const tokenDoc = await AccessToken.findOne({ code: normalizedToken }).populate('templateId', 'title category type questions status difficulty visibility domain').populate('batchId', 'name').lean();
+    const tokenDoc = await AccessToken.findOne({ code: normalizedToken })
+      .populate('templateId', 'title category type questions status difficulty visibility domain')
+      .populate('batchId')
+      .lean();
     
     if (!tokenDoc) {
       return res.status(401).json({ success: false, message: 'Invalid access token' });
@@ -208,6 +250,14 @@ const validateToken = async (req, res, next) => {
     if (tokenDoc.expiresAt && new Date(tokenDoc.expiresAt) < new Date()) {
       return res.status(401).json({ success: false, message: 'Access token has expired' });
     }
+
+    const batch = tokenDoc.batchId;
+    if (batch && batch.schedule && batch.schedule.enabled) {
+      const now = new Date();
+      if (batch.schedule.loginEndAt && now > new Date(batch.schedule.loginEndAt)) {
+        return res.status(410).json({ success: false, code: 'BATCH_ACCESS_EXPIRED', message: 'Batch access window has expired' });
+      }
+    }
     
     // Attach question count
     if (tokenDoc.templateId) {
@@ -215,7 +265,22 @@ const validateToken = async (req, res, next) => {
       delete tokenDoc.templateId.questions;
     }
     
-    res.json({ success: true, data: { token: tokenDoc.code, template: tokenDoc.templateId, batch: tokenDoc.batchId } });
+    // Send batch name and schedule to match frontend expectations
+    const batchData = batch ? {
+      _id: batch._id,
+      name: batch.name,
+      schedule: batch.schedule
+    } : null;
+
+    res.json({ 
+      success: true, 
+      data: { 
+        token: tokenDoc.code, 
+        template: tokenDoc.templateId, 
+        batch: batchData 
+      },
+      serverTime: Date.now()
+    });
   } catch (error) {
     next(error);
   }

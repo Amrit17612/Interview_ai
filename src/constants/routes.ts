@@ -51,6 +51,7 @@ export const ROUTES = {
 
   // Interview
   INTERVIEW: '/interviews',
+  INTERVIEW_WAITING: '/interviews/waiting',
   INTERVIEW_DEVICE_CHECK: '/interviews/device-check',
   INTERVIEW_RESUME: '/interviews/resume-selection',
   INTERVIEW_DOMAIN: '/interviews/domain-selection',

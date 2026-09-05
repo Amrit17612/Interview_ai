@@ -40,6 +40,7 @@ import { Login } from '../features/auth/pages/Login';
 import { Register } from '../features/auth/pages/Register';
 import { ForgotPassword } from '../features/auth/pages/ForgotPassword';
 import { ResetPassword } from '../features/auth/pages/ResetPassword';
+import { ExclusiveWaitingRoom } from '../features/interview/pages/ExclusiveWaitingRoom';
 import { VerifyEmail } from '../features/auth/pages/VerifyEmail';
 import { DashboardHome } from '../features/dashboard/pages/DashboardHome';
 import { InterviewHome } from '../features/interview/pages/InterviewHome';
@@ -226,7 +227,8 @@ export const router = createBrowserRouter([
       { path: ROUTES.FEEDBACK, element: <ComingSoon /> },
       { path: ROUTES.REPORT_BUG, element: <ComingSoon /> },
       { path: ROUTES.CREDITS, element: <Wallet /> },
-      { path: ROUTES.CREDITS_REFERRAL, element: <ComingSoon /> }
+      { path: ROUTES.CREDITS_REFERRAL, element: <ComingSoon /> },
+      { path: ROUTES.INTERVIEW_WAITING, element: <ExclusiveWaitingRoom /> }
         ]
       },
       { path: ROUTES.INTERVIEW_DEVICE_CHECK, element: <DeviceCheck /> },

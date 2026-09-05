@@ -51,6 +51,7 @@ export interface InterviewSession {
   createdAt: string;
   maxQuestions?: number;
   updatedAt: string;
+  expiresAt?: string;
 }
 
 export interface InterviewStatsSummary {

@@ -70,11 +70,34 @@ export function ExclusiveInterviews() {
       
       const res = await apiClient.post<any>('/interview-templates/validate-token', { token });
       if (res.data.success) {
-        setValidatedData(res.data.data);
+        const data = res.data.data;
+        const serverTime = res.data.serverTime || Date.now();
+        
+        if (data.batch && data.batch.schedule && data.batch.schedule.enabled) {
+          const loginStartAt = new Date(data.batch.schedule.loginStartAt).getTime();
+          if (serverTime < loginStartAt) {
+            // Persist state and navigate to waiting room
+            sessionStorage.setItem('waitingRoomState', JSON.stringify({
+              token,
+              schedule: data.batch.schedule,
+              serverTime,
+              template: data.template,
+              batchName: data.batch.name
+            }));
+            navigate(ROUTES.INTERVIEW_WAITING);
+            return;
+          }
+        }
+        
+        setValidatedData(data);
       }
     } catch (error: any) {
       console.error(error);
-      const msg = error.response?.data?.message || error.message || 'Invalid or expired access token.';
+      const code = error.response?.data?.code;
+      let msg = error.response?.data?.message || error.message || 'Invalid or expired access token.';
+      if (code === 'BATCH_ACCESS_EXPIRED') {
+        msg = 'The access window for this batch has expired.';
+      }
       setValidationError(msg);
     } finally {
       setIsVerifying(false);

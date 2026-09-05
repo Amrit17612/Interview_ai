@@ -17,13 +17,37 @@ const getBatches = async (req, res, next) => {
 
 const createBatch = async (req, res, next) => {
   try {
-    const { name, description } = req.body;
+    const { name, description, schedule } = req.body;
     if (!name || name.trim() === '') {
       return res.status(400).json({ success: false, message: 'Batch name is required' });
     }
+    
+    let validSchedule = undefined;
+    if (schedule && schedule.enabled) {
+      if (!schedule.loginStartAt || !schedule.loginEndAt) {
+        return res.status(400).json({ success: false, message: 'loginStartAt and loginEndAt are required when schedule is enabled' });
+      }
+      if (new Date(schedule.loginEndAt) <= new Date(schedule.loginStartAt)) {
+        return res.status(400).json({ success: false, message: 'loginEndAt must be after loginStartAt' });
+      }
+      if (schedule.testDurationMinutes !== undefined && schedule.testDurationMinutes <= 0) {
+        return res.status(400).json({ success: false, message: 'testDurationMinutes must be a positive number' });
+      }
+      validSchedule = {
+        enabled: true,
+        loginStartAt: new Date(schedule.loginStartAt),
+        loginEndAt: new Date(schedule.loginEndAt),
+        testDurationMinutes: schedule.testDurationMinutes || null,
+        forceStopAtEnd: !!schedule.forceStopAtEnd
+      };
+    } else if (schedule && schedule.enabled === false) {
+      validSchedule = { enabled: false };
+    }
+
     const batch = await Batch.create({ 
       name: name.trim(), 
-      description: description ? description.trim() : '' 
+      description: description ? description.trim() : '',
+      ...(validSchedule && { schedule: validSchedule })
     });
     res.status(201).json({ success: true, data: batch });
   } catch (error) {
@@ -57,7 +81,7 @@ const getBatchById = async (req, res, next) => {
 const updateBatch = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { name, description } = req.body;
+    const { name, description, schedule } = req.body;
     
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({ success: false, message: 'Invalid batch ID' });
@@ -67,6 +91,29 @@ const updateBatch = async (req, res, next) => {
     if (name && name.trim() !== '') updateData.name = name.trim();
     if (description !== undefined) updateData.description = description.trim();
     
+    if (schedule) {
+      if (schedule.enabled) {
+        if (!schedule.loginStartAt || !schedule.loginEndAt) {
+          return res.status(400).json({ success: false, message: 'loginStartAt and loginEndAt are required when schedule is enabled' });
+        }
+        if (new Date(schedule.loginEndAt) <= new Date(schedule.loginStartAt)) {
+          return res.status(400).json({ success: false, message: 'loginEndAt must be after loginStartAt' });
+        }
+        if (schedule.testDurationMinutes !== undefined && schedule.testDurationMinutes <= 0) {
+          return res.status(400).json({ success: false, message: 'testDurationMinutes must be a positive number' });
+        }
+        updateData.schedule = {
+          enabled: true,
+          loginStartAt: new Date(schedule.loginStartAt),
+          loginEndAt: new Date(schedule.loginEndAt),
+          testDurationMinutes: schedule.testDurationMinutes || null,
+          forceStopAtEnd: !!schedule.forceStopAtEnd
+        };
+      } else {
+        updateData.schedule = { enabled: false };
+      }
+    }
+
     const batch = await Batch.findByIdAndUpdate(id, updateData, { new: true, runValidators: true }).lean();
     if (!batch) {
       return res.status(404).json({ success: false, message: 'Batch not found' });

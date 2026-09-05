@@ -7,6 +7,7 @@ const mongoose = require('mongoose');
 const { getGenerateQuestionPrompt, getEvaluateAnswerPrompt, getFinalReportPrompt } = require('../utils/prompts');
 const { generateText, validateQuestionResponse, validateEvaluationResponse, validateReportResponse } = require('../services/geminiService');
 const { SKILL_DICTIONARY, extractSkills } = require('../utils/skillExtractor');
+const { enforceDeadline } = require('../utils/deadlineHelper');
 
 const MAX_QUESTIONS = 5; // Fixed bound as per instruction to define a minimal explicit configuration field.
 
@@ -221,11 +222,13 @@ const generateQuestion = async (req, res) => {
     }
 
     if (session.status !== 'IN_PROGRESS') {
-      return res.status(400).json({ success: false, message: `Cannot generate question for session in status: ${session.status}` });
+      return res.status(400).json({ success: false, message: 'Interview session is not in progress' });
     }
 
+    if (await enforceDeadline(session, res)) return;
+
     if (session.questions.length >= session.maxQuestions) {
-      return res.status(400).json({ success: false, message: 'Maximum number of questions reached.' });
+      return res.status(400).json({ success: false, message: 'Max questions reached' });
     }
 
     // Check if the last question is still pending
@@ -360,6 +363,8 @@ const submitAnswer = async (req, res) => {
       return res.status(400).json({ success: false, message: `Cannot submit answer for session in status: ${session.status}` });
     }
 
+    if (await enforceDeadline(session, res)) return;
+
     if (session.questions.length === 0) {
       return res.status(400).json({ success: false, message: 'No questions generated yet.' });
     }
@@ -415,6 +420,8 @@ const completeInterview = async (req, res) => {
       return res.status(400).json({ success: false, message: `Cannot complete session in status: ${session.status}` });
     }
 
+    if (await enforceDeadline(session, res)) return;
+
     if (session.questions.length === 0) {
       return res.status(400).json({ success: false, message: 'Cannot complete an empty interview session.' });
     }
@@ -441,167 +448,182 @@ const completeInterview = async (req, res) => {
     });
 
     // Background Report Generation
-    (async () => {
-      try {
-        console.log(`[REPORT] Background generation started for session ${session._id}`);
-        
-        // Context Binding for Phase 2
-        let resumeContext = null;
-        let atsContext = null;
+    triggerReportGeneration(session, userId);
 
-        const contextPromises = [];
-        if (session.resumeId) {
-          contextPromises.push(
-            Resume.findOne({ _id: session.resumeId, user: userId })
-              .then(resume => {
-                if (resume && resume.parsingStatus === 'COMPLETED' && resume.parsedText) {
-                  resumeContext = resume.parsedText.substring(0, 8000); // Bounded size
-                }
-              })
-              .catch(err => console.error('[INTERVIEW ENGINE] Failed to retrieve resume context:', err))
-          );
-        }
-        
-        if (session.atsJobId) {
-          contextPromises.push(
-            JobDescription.findOne({ _id: session.atsJobId, user: userId })
-              .then(job => {
-                if (job && job.content) {
-                  atsContext = `Title: ${job.title}\nCompany: ${job.company}\nContent: ${job.content}`.substring(0, 8000);
-                }
-              })
-              .catch(err => console.error('[INTERVIEW ENGINE] Failed to retrieve ATS context:', err))
-          );
-        }
-        
-        if (contextPromises.length > 0) {
-          await Promise.all(contextPromises);
-        }
+  } catch (error) {
+    next(error);
+  }
+};
 
-        const prompt = getFinalReportPrompt({
-          domain: session.configuration.domain,
-          difficulty: session.configuration.difficulty,
-          type: session.configuration.type,
-          evaluations: session.questions.map(q => ({
-            index: q.index,
-            question: q.text,
-            answer: q.userAnswer || '',
-            ...(q.expectedPoints && q.expectedPoints.length > 0 ? { expectedPoints: q.expectedPoints } : {})
-          })),
-          resumeContext,
-          atsContext,
-          company: session.configuration.company,
-          role: session.configuration.role
-        });
+/**
+ * Shared helper to trigger the background report generation.
+ * Can be called by completeInterview or the deadline enforcement system.
+ */
+const triggerReportGeneration = (session, userId) => {
+  (async () => {
+    try {
+      const { generateText, validateReportResponse } = require('../services/geminiService');
+      const { getFinalReportPrompt } = require('../utils/prompts');
+      const Resume = require('../models/Resume');
+      const JobDescription = require('../models/JobDescription');
+      const User = require('../models/User');
+      const mongoose = require('mongoose');
 
-        const aiResText = await generateText(prompt, { responseMimeType: 'application/json' });
-        const report = validateReportResponse(aiResText);
-        
-        console.log(`[REPORT] Gemini evaluation completed for session ${session._id}`);
+      console.log(`[REPORT] Background generation started for session ${session._id}`);
+      
+      // Context Binding for Phase 2
+      let resumeContext = null;
+      let atsContext = null;
 
-        let totalScore = 0;
-        let evaluatedCount = 0;
+      const contextPromises = [];
+      if (session.resumeId) {
+        contextPromises.push(
+          Resume.findOne({ _id: session.resumeId, user: userId })
+            .then(resume => {
+              if (resume && resume.parsingStatus === 'COMPLETED' && resume.parsedText) {
+                resumeContext = resume.parsedText.substring(0, 8000); // Bounded size
+              }
+            })
+            .catch(err => console.error('[INTERVIEW ENGINE] Failed to retrieve resume context:', err))
+        );
+      }
+      
+      if (session.atsJobId) {
+        contextPromises.push(
+          JobDescription.findOne({ _id: session.atsJobId, user: userId })
+            .then(job => {
+              if (job && job.content) {
+                atsContext = `Title: ${job.title}\nCompany: ${job.company}\nContent: ${job.content}`.substring(0, 8000);
+              }
+            })
+            .catch(err => console.error('[INTERVIEW ENGINE] Failed to retrieve ATS context:', err))
+        );
+      }
+      
+      if (contextPromises.length > 0) {
+        await Promise.all(contextPromises);
+      }
 
-        session.questions.forEach((q) => {
-          if (q.userAnswer === '(Skipped)' || !q.userAnswer) {
+      const prompt = getFinalReportPrompt({
+        domain: session.configuration.domain,
+        difficulty: session.configuration.difficulty,
+        type: session.configuration.type,
+        evaluations: session.questions.map(q => ({
+          index: q.index,
+          question: q.text,
+          answer: q.userAnswer || '',
+          ...(q.expectedPoints && q.expectedPoints.length > 0 ? { expectedPoints: q.expectedPoints } : {})
+        })),
+        resumeContext,
+        atsContext,
+        company: session.configuration.company,
+        role: session.configuration.role
+      });
+
+      const aiResText = await generateText(prompt, { responseMimeType: 'application/json' });
+      const report = validateReportResponse(aiResText);
+      
+      console.log(`[REPORT] Gemini evaluation completed for session ${session._id}`);
+
+      let totalScore = 0;
+      let evaluatedCount = 0;
+
+      session.questions.forEach((q) => {
+        if (q.userAnswer === '(Skipped)' || !q.userAnswer) {
+          q.evaluation = {
+            score: 0,
+            feedback: 'Question was skipped.'
+          };
+          q.status = 'EVALUATED';
+        } else {
+          const evalItem = report.question_evaluations.find(e => e.index === q.index);
+          if (evalItem) {
             q.evaluation = {
-              score: 0,
-              feedback: 'Question was skipped.'
+              score: evalItem.score,
+              feedback: evalItem.feedback
             };
             q.status = 'EVALUATED';
           } else {
-            const evalItem = report.question_evaluations.find(e => e.index === q.index);
-            if (evalItem) {
-              q.evaluation = {
-                score: evalItem.score,
-                feedback: evalItem.feedback
-              };
-              q.status = 'EVALUATED';
-            } else {
-              // Fallback if AI somehow misses an index, though validation should catch it
-              q.evaluation = {
-                score: 0,
-                feedback: 'Evaluation not generated.'
-              };
-              q.status = 'EVALUATED';
-            }
-          }
-          
-          totalScore += (q.evaluation.score || 0);
-          evaluatedCount++;
-        });
-
-        session.overallScore = evaluatedCount > 0 ? Math.round(totalScore / evaluatedCount) : 0;
-        session.feedbackSummary = report.summary;
-        session.strengths = report.strengths || [];
-        session.weaknesses = report.weaknesses || [];
-        session.recommendations = report.recommendations || [];
-        session.reportStatus = 'GENERATED';
-
-        await session.save();
-        console.log(`[REPORT] Session score updated for session ${session._id}`);
-
-        // Reward Logic (Max 5 times = 25 credits)
-        const user = await User.findById(userId);
-        if (user && user.rewardedInterviews && user.rewardedInterviews.length < 5) {
-          const alreadyRewarded = user.rewardedInterviews.some(rid => rid.equals(session._id));
-          if (!alreadyRewarded) {
-            const updatedUser = await User.findOneAndUpdate(
-              { _id: userId, 'rewardedInterviews.4': { $exists: false }, 'rewardedInterviews': { $ne: session._id } },
-              { 
-                $push: { rewardedInterviews: session._id },
-                $inc: { credits: 5 }
-              },
-              { new: true }
-            );
-
-            if (updatedUser) {
-              const CreditTransaction = require('../models/CreditTransaction');
-              await CreditTransaction.create({
-                user: userId,
-                amount: 5,
-                type: 'EARN_INTERVIEW',
-                referenceId: session._id.toString(),
-                balanceBefore: updatedUser.credits - 5,
-                balanceAfter: updatedUser.credits
-              });
-            }
+            // Fallback if AI somehow misses an index, though validation should catch it
+            q.evaluation = {
+              score: 0,
+              feedback: 'Evaluation not generated.'
+            };
+            q.status = 'EVALUATED';
           }
         }
-
-        // Trigger email report asynchronously
-        try {
-          // req.user might be lost in background context, fetch fresh user
-          const emailService = require('../services/emailService');
-          await emailService.sendInterviewReport(user, session);
-          console.log(`[REPORT] Background generation completed for session ${session._id}`);
-        } catch (emailErr) {
-          console.error('[EMAIL] Background email report failed:', emailErr.message || emailErr);
-        }
-      } catch (bgError) {
-        console.error(`[REPORT] Background generation failed for session ${session._id}:`, bgError);
         
-        // Fallback to unblock the frontend explicitly
-        try {
-          await mongoose.model('InterviewSession').updateOne(
-            { _id: session._id },
+        totalScore += (q.evaluation.score || 0);
+        evaluatedCount++;
+      });
+
+      session.overallScore = evaluatedCount > 0 ? Math.round(totalScore / evaluatedCount) : 0;
+      session.feedbackSummary = report.summary;
+      session.strengths = report.strengths || [];
+      session.weaknesses = report.weaknesses || [];
+      session.recommendations = report.recommendations || [];
+      session.reportStatus = 'GENERATED';
+
+      await session.save();
+      console.log(`[REPORT] Session score updated for session ${session._id}`);
+
+      // Reward Logic (Max 5 times = 25 credits)
+      const user = await User.findById(userId);
+      if (user && user.rewardedInterviews && user.rewardedInterviews.length < 5) {
+        const alreadyRewarded = user.rewardedInterviews.some(rid => rid.equals(session._id));
+        if (!alreadyRewarded) {
+          const updatedUser = await User.findOneAndUpdate(
+            { _id: userId, 'rewardedInterviews.4': { $exists: false }, 'rewardedInterviews': { $ne: session._id } },
             { 
-              $set: { 
-                reportStatus: 'FAILED', 
-                reportError: 'The AI report generation failed to complete.' 
-              }
-            }
+              $push: { rewardedInterviews: session._id },
+              $inc: { credits: 5 }
+            },
+            { new: true }
           );
-        } catch (fallbackErr) {
-          console.error(`[REPORT] Failed to save fallback state for session ${session._id}:`, fallbackErr);
+
+          if (updatedUser) {
+            const CreditTransaction = require('../models/CreditTransaction');
+            await CreditTransaction.create({
+              user: userId,
+              amount: 5,
+              type: 'EARN_INTERVIEW',
+              referenceId: session._id.toString(),
+              balanceBefore: updatedUser.credits - 5,
+              balanceAfter: updatedUser.credits
+            });
+          }
         }
       }
-    })();
 
-  } catch (error) {
-    console.error('[INTERVIEW ENGINE] Complete Interview Error:', error);
-    res.status(500).json({ success: false, message: 'Failed to complete interview.', recoverable: true });
-  }
+      // Trigger email report asynchronously
+      try {
+        // req.user might be lost in background context, fetch fresh user
+        const emailService = require('../services/emailService');
+        await emailService.sendInterviewReport(user, session);
+        console.log(`[REPORT] Background generation completed for session ${session._id}`);
+      } catch (emailErr) {
+        console.error('[EMAIL] Background email report failed:', emailErr.message || emailErr);
+      }
+    } catch (bgError) {
+      console.error(`[REPORT] Background generation failed for session ${session._id}:`, bgError);
+      
+      // Fallback to unblock the frontend explicitly
+      try {
+        const mongoose = require('mongoose');
+        await mongoose.model('InterviewSession').updateOne(
+          { _id: session._id },
+          { 
+            $set: { 
+              reportStatus: 'FAILED', 
+              reportError: 'The AI report generation failed to complete.' 
+            }
+          }
+        );
+      } catch (fallbackErr) {
+        console.error(`[REPORT] Failed to save fallback state for session ${session._id}:`, fallbackErr);
+      }
+    }
+  })();
 };
 
 /**
@@ -1387,4 +1409,5 @@ module.exports = {
   retryReport,
   getInterviewStats,
   compareInterviews,
+  triggerReportGeneration,
 };

@@ -138,6 +138,15 @@ const interviewSessionSchema = new mongoose.Schema({
   recommendations: {
     type: [String],
     default: []
+  },
+  expiresAt: {
+    type: Date,
+    default: null
+  },
+  completionReason: {
+    type: String,
+    enum: ['SUBMITTED', 'TIME_EXPIRED', 'FORCE_STOPPED'],
+    default: 'SUBMITTED'
   }
 }, { timestamps: true });
 

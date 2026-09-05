@@ -24,6 +24,12 @@ export function BatchManagement() {
   
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
+  
+  const [scheduleEnabled, setScheduleEnabled] = useState(false);
+  const [loginStartAt, setLoginStartAt] = useState('');
+  const [loginEndAt, setLoginEndAt] = useState('');
+  const [testDurationMinutes, setTestDurationMinutes] = useState('');
+  const [forceStopAtEnd, setForceStopAtEnd] = useState(false);
 
   const fetchBatches = async () => {
     try {
@@ -47,10 +53,31 @@ export function BatchManagement() {
     
     try {
       setIsSubmitting(true);
-      await apiClient.post('/admin/batches', { name, description });
+      
+      const payload: any = { name, description };
+      if (scheduleEnabled) {
+        payload.schedule = {
+          enabled: true,
+          loginStartAt: new Date(loginStartAt).toISOString(),
+          loginEndAt: new Date(loginEndAt).toISOString(),
+          testDurationMinutes: testDurationMinutes ? parseInt(testDurationMinutes) : null,
+          forceStopAtEnd
+        };
+      } else {
+        payload.schedule = { enabled: false };
+      }
+
+      await apiClient.post('/admin/batches', payload);
+      
       setIsModalOpen(false);
       setName('');
       setDescription('');
+      setScheduleEnabled(false);
+      setLoginStartAt('');
+      setLoginEndAt('');
+      setTestDurationMinutes('');
+      setForceStopAtEnd(false);
+      
       fetchBatches();
     } catch (error: any) {
       console.error(error);
@@ -152,6 +179,72 @@ export function BatchManagement() {
               placeholder="Internal notes about this batch..."
             />
           </div>
+
+          <div className="border-t border-gray-200 pt-4 mt-4">
+            <div className="flex items-center mb-4">
+              <input
+                type="checkbox"
+                id="enableSchedule"
+                checked={scheduleEnabled}
+                onChange={(e) => setScheduleEnabled(e.target.checked)}
+                className="h-4 w-4 text-brand-600 focus:ring-brand-500 border-gray-300 rounded"
+              />
+              <label htmlFor="enableSchedule" className="ml-2 block text-sm font-medium text-gray-700">
+                Enable Interview Schedule
+              </label>
+            </div>
+
+            {scheduleEnabled && (
+              <div className="space-y-4 pl-6 border-l-2 border-brand-100">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Login Window Start *</label>
+                    <Input 
+                      type="datetime-local" 
+                      required={scheduleEnabled}
+                      value={loginStartAt}
+                      onChange={(e) => setLoginStartAt(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Login Window End *</label>
+                    <Input 
+                      type="datetime-local" 
+                      required={scheduleEnabled}
+                      value={loginEndAt}
+                      onChange={(e) => setLoginEndAt(e.target.value)}
+                    />
+                  </div>
+                </div>
+                
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">Test Duration (Minutes, Optional)</label>
+                  <Input 
+                    type="number" 
+                    min="1"
+                    value={testDurationMinutes}
+                    onChange={(e) => setTestDurationMinutes(e.target.value)}
+                    placeholder="e.g. 60"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Leave empty for untimed tests.</p>
+                </div>
+
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    id="forceStopAtEnd"
+                    checked={forceStopAtEnd}
+                    onChange={(e) => setForceStopAtEnd(e.target.checked)}
+                    className="h-4 w-4 text-brand-600 focus:ring-brand-500 border-gray-300 rounded"
+                  />
+                  <label htmlFor="forceStopAtEnd" className="ml-2 block text-xs text-gray-700">
+                    Force submit test at Login Window End (even if duration is not finished)
+                  </label>
+                </div>
+              </div>
+            )}
+          </div>
+
           <div className="flex justify-end gap-3 mt-6">
             <Button type="button" variant="outline" onClick={() => setIsModalOpen(false)} disabled={isSubmitting}>
               Cancel

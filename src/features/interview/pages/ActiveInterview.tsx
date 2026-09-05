@@ -131,6 +131,27 @@ export function ActiveInterview() {
     return () => clearInterval(interval);
   }, [interviewStarted, session?.status, session?.createdAt]);
 
+  const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
+
+  // 1.5. Deadline Enforcement Timer
+  useEffect(() => {
+    if (!interviewStarted || session?.status === 'COMPLETED' || !session?.expiresAt) return;
+    
+    const interval = setInterval(() => {
+      const remainingMs = new Date(session.expiresAt!).getTime() - Date.now();
+      if (remainingMs <= 0) {
+        clearInterval(interval);
+        setTimeRemaining(0);
+        if (!isCompleting) {
+           completeInterview();
+        }
+      } else {
+        setTimeRemaining(Math.floor(remainingMs / 1000));
+      }
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [interviewStarted, session?.status, session?.expiresAt, isCompleting]);
+
   // Initial Load & Prune
   useEffect(() => {
     pruneOldDrafts();
@@ -384,9 +405,15 @@ export function ActiveInterview() {
               <div className={`w-1.5 h-1.5 rounded-full ${isOnline ? 'bg-green-500' : 'bg-red-500 animate-pulse'}`} />
               <span className="text-[10px] font-bold text-slate-400 tracking-wider">LIVE</span>
             </div>
-            <span className="text-xs font-medium text-slate-200 font-mono border-l border-white/10 pl-2 ml-1">
-              {formatTime(elapsedTime)}
-            </span>
+            {timeRemaining !== null ? (
+              <span className={`text-xs font-medium font-mono border-l border-white/10 pl-2 ml-1 ${timeRemaining < 60 ? 'text-red-400 animate-pulse' : 'text-slate-200'}`}>
+                {formatTime(timeRemaining)} left
+              </span>
+            ) : (
+              <span className="text-xs font-medium text-slate-200 font-mono border-l border-white/10 pl-2 ml-1">
+                {formatTime(elapsedTime)}
+              </span>
+            )}
           </div>
         </div>
       </header>
