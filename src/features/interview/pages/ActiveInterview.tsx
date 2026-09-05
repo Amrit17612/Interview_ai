@@ -201,6 +201,19 @@ export function ActiveInterview() {
     }
   }, [session, sessionId, navigate]);
 
+  // Polling logic for async report generation
+  useEffect(() => {
+    let interval: ReturnType<typeof setInterval>;
+    if (session && session.status === 'COMPLETED' && session.overallScore == null && session.reportStatus !== 'FAILED') {
+      interval = setInterval(() => {
+        loadSession(session._id);
+      }, 5000);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [session, loadSession]);
+
   // Clean up speech on mode switch
   useEffect(() => {
     if (!isSpeakMode && isListening) {
@@ -407,14 +420,14 @@ export function ActiveInterview() {
               <h2 className="text-3xl font-bold mb-2">Interview Completed</h2>
               <p className="text-slate-400 mb-8 text-sm">Your responses have been successfully recorded.</p>
 
-              {isCompleting ? (
+              {isCompleting || (session.overallScore == null && session.reportStatus !== 'FAILED' && !error) ? (
                 <div className="w-full flex flex-col items-center gap-4">
                   <Loader2 className="w-6 h-6 animate-spin text-brand-500" />
                   <p className="text-brand-400 text-sm font-medium animate-pulse">Building your personalized report...</p>
                 </div>
               ) : (
                 <>
-                  {(error || session.overallScore == null) ? (
+                  {(error || session.reportStatus === 'FAILED' || session.overallScore == null) ? (
                     <div className="w-full text-red-400 space-y-4">
                       <p className="text-sm bg-red-500/10 p-3 rounded-lg border border-red-500/20">{error || 'Report generation failed.'}</p>
                       <Button onClick={() => retryReport()} variant="outline" className="w-full border-red-500/50 text-red-400 hover:bg-red-500/10 hover:text-red-300">Retry Generation</Button>
