@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Container } from '../../../components/ui/Container';
 import { Button } from '../../../components/ui/Button';
-import { Plus, ArrowLeft, Copy, Check, Ban } from 'lucide-react';
+import { Plus, ArrowLeft, Copy, Check, Ban, X } from 'lucide-react';
 import { apiClient } from '../../../services/api.client';
 import { Modal } from '../../../components/ui/Modal';
 import jsPDF from 'jspdf';
@@ -351,11 +351,20 @@ export function BatchDetail() {
       >
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-bold text-gray-900">Interview Leaderboard</h2>
-          {leaderboardData && leaderboardData.results?.length > 0 && (
-            <Button onClick={exportPDF} size="sm" className="flex items-center">
-              Export Ranking PDF
-            </Button>
-          )}
+          <div className="flex items-center gap-3">
+            {leaderboardData && leaderboardData.results?.length > 0 && (
+              <Button onClick={exportPDF} size="sm" className="flex items-center">
+                Export Ranking PDF
+              </Button>
+            )}
+            <button
+              onClick={() => setLeaderboardModalOpen(false)}
+              className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-brand-500"
+              aria-label="Close leaderboard"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
         {loadingResults ? (
