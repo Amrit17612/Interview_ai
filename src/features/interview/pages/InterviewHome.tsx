@@ -20,7 +20,8 @@ import {
   ChevronUp, 
   CheckCircle2, 
   ArrowRight,
-  Building2
+  Building2,
+  Star
 } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 
@@ -505,16 +506,42 @@ export function InterviewHome() {
           </div>
         </section>
 
-        {/* Subtle Company CTA */}
-        <div className="text-center pt-8 border-t border-gray-100">
-          <p className="text-sm text-gray-500 mb-2">Preparing for a specific company?</p>
-          <NavLink 
-            to={ROUTES.COMPANY_PACKS} 
-            className="inline-flex items-center text-sm font-semibold text-gray-900 hover:text-brand-600 transition-colors bg-white px-4 py-2 border border-gray-200 rounded-full shadow-sm hover:border-brand-200 hover:bg-brand-50"
-          >
-            <Building2 className="w-4 h-4 mr-2 text-gray-400" />
-            Explore Company Bundles
-          </NavLink>
+        {/* Bundles CTA */}
+        <div className="pt-8 border-t border-gray-100">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="text-center">
+              <p className="text-sm text-gray-500 mb-2">Preparing for a specific company?</p>
+              <NavLink 
+                to={ROUTES.COMPANY_PACKS} 
+                className="inline-flex items-center text-sm font-semibold text-gray-900 hover:text-brand-600 transition-colors bg-white px-4 py-2 border border-gray-200 rounded-full shadow-sm hover:border-brand-200 hover:bg-brand-50"
+              >
+                <Building2 className="w-4 h-4 mr-2 text-gray-400" />
+                Explore Company Bundles
+              </NavLink>
+            </div>
+            
+            <div className="text-center">
+              <p className="text-sm text-gray-500 mb-2">Preparing for a specific domain?</p>
+              <NavLink 
+                to={ROUTES.DOMAIN_PACKS} 
+                className="inline-flex items-center text-sm font-semibold text-gray-900 hover:text-brand-600 transition-colors bg-white px-4 py-2 border border-gray-200 rounded-full shadow-sm hover:border-brand-200 hover:bg-brand-50"
+              >
+                <Briefcase className="w-4 h-4 mr-2 text-gray-400" />
+                Explore Domain Bundles
+              </NavLink>
+            </div>
+
+            <div className="text-center">
+              <p className="text-sm text-gray-500 mb-2">Preparing for an exclusive interview?</p>
+              <NavLink 
+                to={ROUTES.EXCLUSIVE_INTERVIEWS} 
+                className="inline-flex items-center text-sm font-semibold text-gray-900 hover:text-brand-600 transition-colors bg-white px-4 py-2 border border-gray-200 rounded-full shadow-sm hover:border-brand-200 hover:bg-brand-50"
+              >
+                <Star className="w-4 h-4 mr-2 text-gray-400" />
+                Explore Exclusive Interviews
+              </NavLink>
+            </div>
+          </div>
         </div>
 
       </div>
