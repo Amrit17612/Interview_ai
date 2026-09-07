@@ -83,9 +83,10 @@ export const bundleService = {
   },
 
   createBundle: async (data: Partial<BundleData>): Promise<BundleData> => {
+    const customId = `custom_${Date.now()}`;
     const newBundle: BundleData = {
-      _id: `custom_${Date.now()}`,
-      bundleId: data.bundleId || `custom_${Date.now()}`,
+      _id: data._id || data.bundleId || customId,
+      bundleId: data.bundleId || data._id || customId,
       type: data.type || 'company',
       name: data.name || '',
       description: data.description,
