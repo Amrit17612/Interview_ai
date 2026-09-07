@@ -2,9 +2,8 @@ import { useState, useEffect } from 'react';
 import { Dialog } from '../../../components/ui/Dialog';
 import { Button } from '../../../components/ui/Button';
 import { Input } from '../../../components/ui/Input';
-import type { BundleData } from '../../../services/bundle.service';
+import { bundleService, type BundleData } from '../../../services/bundle.service';
 import type { BundleType } from '../../../types/bundle.types';
-import { apiClient } from '../../../services/api.client';
 import { Save, AlertCircle, X } from 'lucide-react';
 import { getCategoryOptions } from '../../../constants/bundleCategories';
 
@@ -64,13 +63,13 @@ export function BundleFormModal({ bundle, type, isOpen, onClose, onSave }: Bundl
 
     try {
       if (isEditing && bundle) {
-        await apiClient.put(`/bundles/admin/${bundle.bundleId}`, payload);
+        await bundleService.updateBundle(bundle.bundleId || bundle._id, payload);
       } else {
-        await apiClient.post('/bundles/admin', payload);
+        await bundleService.createBundle(payload);
       }
       onSave();
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to save bundle.');
+      setError(err.message || 'Failed to save bundle.');
     } finally {
       setIsSubmitting(false);
     }
