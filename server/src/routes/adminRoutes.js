@@ -10,6 +10,7 @@ const { previewImport, confirmImport, exportQuestions } = require('../controller
 const { bulkUpdateStatus, bulkAddTags } = require('../controllers/adminBulkController');
 const { getPromos, createPromo, updatePromoStatus } = require('../controllers/adminPromoController');
 const { getBatches, createBatch, getBatchById, updateBatch, generateAccessToken, updateAccessTokenStatus, getBatchResults } = require('../controllers/adminBatchController');
+const { syncCustomBundlePrice } = require('../controllers/adminCustomBundleController');
 const multer = require('multer');
 
 // Configure Multer for memory storage (max 10MB)
@@ -73,4 +74,8 @@ router.put('/batches/:id', updateBatch);
 router.post('/batches/:id/tokens', generateAccessToken);
 router.patch('/tokens/:id/status', updateAccessTokenStatus);
 router.get('/batches/:id/results/:templateId', getBatchResults);
+
+// Custom Bundle Pricing (Admin sync only)
+router.post('/custom-bundle-prices', syncCustomBundlePrice);
+
 module.exports = router;

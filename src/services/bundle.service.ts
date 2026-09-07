@@ -1,5 +1,6 @@
 import { MOCK_COMPANY_BUNDLES, MOCK_DOMAIN_BUNDLES } from '../types/bundle.types';
 import type { BundleType, BundleMetadata } from '../types/bundle.types';
+import { apiClient } from './api.client';
 
 // Map BundleMetadata to BundleData format used by components
 const mapToBundleData = (bundle: BundleMetadata): BundleData => ({
@@ -121,5 +122,14 @@ export const bundleService = {
 
   setModules: async (id: string, moduleIds: string[]): Promise<BundleData> => {
     return bundleService.updateBundle(id, { modules: moduleIds.map(m => ({ _id: m })) });
+  },
+
+  syncBundlePrice: async (bundleId: string, price: number, active: boolean): Promise<void> => {
+    try {
+      await apiClient.post('/admin/custom-bundle-prices', { bundleId, price, active });
+    } catch (error) {
+      console.error('Failed to sync bundle price to backend', error);
+      throw error;
+    }
   }
 };

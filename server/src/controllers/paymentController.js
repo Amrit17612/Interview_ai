@@ -276,6 +276,8 @@ exports.validatePromo = async (req, res, next) => {
   }
 };
 
+const CustomBundlePrice = require('../models/CustomBundlePrice');
+
 exports.createOrder = async (req, res, next) => {
   try {
     const { bundleId, bundleType, promoCode, creditsToUse } = req.body;
@@ -286,7 +288,23 @@ exports.createOrder = async (req, res, next) => {
       throw new Error('Bundle ID and Type are required');
     }
 
-    const catalogItem = TRUSTED_CATALOG[bundleId];
+    let catalogItem = TRUSTED_CATALOG[bundleId];
+
+    // ONLY if not in TRUSTED_CATALOG and is a custom bundle, fetch authoritative price from DB
+    if (!catalogItem && bundleId.startsWith('custom_')) {
+      const customBundle = await CustomBundlePrice.findOne({ bundleId, active: true });
+      if (customBundle) {
+        catalogItem = {
+          bundleId: customBundle.bundleId,
+          bundleType: bundleType, // Use the type from request since it's validated elsewhere, or we could just pass it through
+          title: 'Custom Preparation Bundle', // Placeholder since the real title is on frontend
+          amount: customBundle.price * 100, // Convert INR to paise for Razorpay
+          currency: 'INR',
+          active: true
+        };
+      }
+    }
+
     if (!catalogItem || catalogItem.bundleType !== bundleType || !catalogItem.active) {
       res.status(400);
       throw new Error('Invalid or inactive bundle requested');
