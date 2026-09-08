@@ -53,8 +53,9 @@ export function BundlePreviewModal({ isOpen, onClose, bundle, onUnlock, isProces
             
             <div className="relative z-10 max-w-3xl">
               <div className="flex items-center gap-3 mb-6">
-                <div className="h-14 w-14 rounded-xl bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20 shadow-lg">
-                  <Icon className="h-7 w-7 text-brand-100" />
+                <div className="h-14 w-14 rounded-xl bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20 shadow-lg overflow-hidden">
+                  {/* @ts-ignore - optional property */}
+                  {bundle.logo ? <img src={bundle.logo} alt="Logo" className="w-full h-full object-cover" /> : <Icon className="h-7 w-7 text-brand-100" />}
                 </div>
                 <div>
                   <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-brand-500/30 text-brand-50 border border-brand-400/30">
@@ -250,9 +251,9 @@ export function BundlePreviewModal({ isOpen, onClose, bundle, onUnlock, isProces
                       Lifetime Access
                     </div>
                     <div className="flex items-end justify-center gap-2">
-                      <span className="text-5xl font-extrabold text-gray-900 tracking-tight">${price}</span>
+                      <span className="text-5xl font-extrabold text-gray-900 tracking-tight">₹{price}</span>
                       {originalPrice && (
-                        <span className="text-xl text-gray-400 line-through mb-1.5 font-medium">${originalPrice}</span>
+                        <span className="text-xl text-gray-400 line-through mb-1.5 font-medium">₹{originalPrice}</span>
                       )}
                     </div>
                     {originalPrice && originalPrice > price && (

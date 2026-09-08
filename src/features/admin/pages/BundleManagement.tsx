@@ -139,7 +139,7 @@ export function BundleManagement({ type, title }: BundleManagementProps) {
                       </td>
                       <td className="p-4">
                         <div className="text-sm font-medium text-gray-900">
-                          {bundle.price > 0 ? `$${bundle.price}` : 'Free'}
+                          {bundle.price > 0 ? `₹${bundle.price}` : 'Free'}
                         </div>
                       </td>
                       <td className="p-4">

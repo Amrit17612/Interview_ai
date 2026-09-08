@@ -44,8 +44,9 @@ export function BundleCard({ bundle, onPreviewClick, onStartPracticing, onPurcha
 
       <CardHeader className="pb-4">
         <div className="flex items-center gap-3 mb-2">
-          <div className="h-12 w-12 rounded-lg bg-brand-50 flex items-center justify-center flex-shrink-0">
-            {getIcon()}
+          <div className="h-12 w-12 rounded-lg bg-brand-50 flex items-center justify-center flex-shrink-0 overflow-hidden">
+            {/* @ts-ignore - optional property */}
+            {bundle.logo ? <img src={bundle.logo} alt="Logo" className="w-full h-full object-cover" /> : getIcon()}
           </div>
           <div>
             <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-0.5">

@@ -27,6 +27,7 @@ export function BundleFormModal({ bundle, type, isOpen, onClose, onSave }: Bundl
   const [price, setPrice] = useState(0);
   const [originalPrice, setOriginalPrice] = useState(0);
   const [features, setFeatures] = useState<string[]>([]);
+  const [logo, setLogo] = useState<string>('');
 
   useEffect(() => {
     if (isOpen) {
@@ -37,6 +38,7 @@ export function BundleFormModal({ bundle, type, isOpen, onClose, onSave }: Bundl
         setPrice(bundle.price || 0);
         setOriginalPrice(bundle.originalPrice || 0);
         setFeatures(bundle.features || []);
+        setLogo(bundle.logo || '');
       } else {
         // reset form
         setName('');
@@ -45,6 +47,7 @@ export function BundleFormModal({ bundle, type, isOpen, onClose, onSave }: Bundl
         setPrice(0);
         setOriginalPrice(0);
         setFeatures([]);
+        setLogo('');
       }
       setError(null);
     }
@@ -64,7 +67,8 @@ export function BundleFormModal({ bundle, type, isOpen, onClose, onSave }: Bundl
       price,
       originalPrice,
       type,
-      features: cleanedFeatures
+      features: cleanedFeatures,
+      logo
     };
 
     try {
@@ -110,6 +114,34 @@ export function BundleFormModal({ bundle, type, isOpen, onClose, onSave }: Bundl
           placeholder="e.g. Google SWE Prep"
           required
         />
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Bundle Logo (Optional)</label>
+          {logo ? (
+            <div className="flex items-center gap-4 mt-2 mb-2">
+              <img src={logo} alt="Bundle Logo" className="h-12 w-12 object-contain rounded bg-gray-50 border border-gray-200" />
+              <Button type="button" variant="outline" size="sm" onClick={() => setLogo('')}>
+                Remove Logo
+              </Button>
+            </div>
+          ) : (
+            <input 
+              type="file" 
+              accept="image/*" 
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  const reader = new FileReader();
+                  reader.onloadend = () => {
+                    setLogo(reader.result as string);
+                  };
+                  reader.readAsDataURL(file);
+                }
+              }}
+              className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100"
+            />
+          )}
+        </div>
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>

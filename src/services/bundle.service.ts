@@ -37,6 +37,7 @@ export interface BundleData {
   visibility: 'PUBLIC' | 'PRIVATE';
   modules: any[];
   interviewConfig?: any;
+  logo?: string;
   createdAt?: string;
   updatedAt?: string;
 }
