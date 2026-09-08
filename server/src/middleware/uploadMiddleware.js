@@ -30,16 +30,29 @@ const storage = multer.diskStorage({
   }
 });
 
-// File filter validation
+// Safari on macOS/iOS frequently sends 'application/octet-stream' or an empty
+// string ('') instead of the correct PDF/DOCX MIME type, especially when
+// uploading from iCloud Drive or Files.app. We accept those generic MIMEs
+// only when the filename extension is explicitly .pdf or .docx.
+// This does NOT globally whitelist 'application/octet-stream'—the extension
+// gate ensures only document files are allowed through. Downstream parsing
+// (pdf-parse / mammoth) will reject any binary that is not a real PDF/DOCX.
+const SAFARI_GENERIC_MIME_TYPES = ['application/octet-stream', ''];
+
 const fileFilter = (req, file, cb) => {
   const extension = path.extname(file.originalname).toLowerCase();
-  
-  if (!ALLOWED_MIME_TYPES.includes(file.mimetype)) {
-    return cb(new Error('Invalid file type. Only PDF and DOCX files are allowed.'), false);
-  }
-  
-  if (!ALLOWED_EXTENSIONS.includes(extension)) {
+  const isValidMime = ALLOWED_MIME_TYPES.includes(file.mimetype);
+  const isGenericMime = SAFARI_GENERIC_MIME_TYPES.includes(file.mimetype);
+  const isValidExtension = ALLOWED_EXTENSIONS.includes(extension);
+
+  // 1. Extension must always be .pdf or .docx
+  if (!isValidExtension) {
     return cb(new Error('Invalid file extension. Only .pdf and .docx are allowed.'), false);
+  }
+
+  // 2. MIME must be either a known document type OR a Safari generic type
+  if (!isValidMime && !isGenericMime) {
+    return cb(new Error('Invalid file type. Only PDF and DOCX files are allowed.'), false);
   }
 
   cb(null, true);
