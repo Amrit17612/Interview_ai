@@ -75,6 +75,7 @@ const getResumes = async (req, res, next) => {
       fileType: r.fileType,
       fileSize: r.fileSize,
       parsingStatus: r.parsingStatus,
+      analysisStatus: r.analysisStatus,
       createdAt: r.createdAt
     }));
 
@@ -130,6 +131,9 @@ const getResumeById = async (req, res, next) => {
   }
 };
 
+const JobDescription = require('../models/JobDescription');
+const analysisEngine = require('../services/analysisEngine');
+
 /**
  * @desc    Delete a resume
  * @route   DELETE /api/resumes/:id
@@ -177,9 +181,126 @@ const deleteResume = async (req, res, next) => {
   }
 };
 
+/**
+ * @desc    Start asynchronous resume analysis
+ * @route   POST /api/resumes/:id/analyze
+ * @access  Private
+ */
+const analyzeResume = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { jobId } = req.body;
+
+    if (!isValidObjectId(id)) {
+      res.status(400);
+      throw new Error('Invalid resume ID format.');
+    }
+
+    const resume = await Resume.findOne({
+      _id: id,
+      userId: req.user._id
+    });
+
+    if (!resume) {
+      res.status(404);
+      throw new Error('Resume not found.');
+    }
+
+    if (resume.parsingStatus !== 'COMPLETED' || !resume.parsedText) {
+      res.status(400);
+      throw new Error('Cannot analyze a resume that has not been successfully parsed.');
+    }
+
+    if (resume.analysisStatus === 'PROCESSING') {
+      res.status(400);
+      throw new Error('Resume is already being analyzed.');
+    }
+
+    let jdDoc = null;
+    if (jobId) {
+      if (!isValidObjectId(jobId)) {
+        res.status(400);
+        throw new Error('Invalid Job Description ID format.');
+      }
+      jdDoc = await JobDescription.findOne({
+        _id: jobId,
+        userId: req.user._id
+      });
+      if (!jdDoc) {
+        res.status(404);
+        throw new Error('Job Description not found.');
+      }
+    }
+
+    // Set to processing
+    resume.analysisStatus = 'PROCESSING';
+    await resume.save();
+
+    // Start background task
+    analysisEngine.runAsyncAnalysis(resume, jdDoc).catch(err => {
+      console.error('Unhandled background analysis error:', err);
+    });
+
+    res.status(202).json({
+      success: true,
+      message: 'Analysis started in the background.',
+      analysisStatus: resume.analysisStatus
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * @desc    Get resume analysis results
+ * @route   GET /api/resumes/:id/analysis
+ * @access  Private
+ */
+const getResumeAnalysis = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    if (!isValidObjectId(id)) {
+      res.status(400);
+      throw new Error('Invalid resume ID format.');
+    }
+
+    const resume = await Resume.findOne({
+      _id: id,
+      userId: req.user._id
+    });
+
+    if (!resume) {
+      res.status(404);
+      throw new Error('Resume not found.');
+    }
+
+    res.json({
+      success: true,
+      analysis: {
+        analysisStatus: resume.analysisStatus,
+        lastAnalyzedAt: resume.lastAnalyzedAt,
+        analyzedJobId: resume.analyzedJobId,
+        structuredData: resume.structuredData,
+        atsScore: resume.atsScore,
+        qualityScore: resume.qualityScore,
+        atsBreakdown: resume.atsBreakdown,
+        contentAnalysis: resume.contentAnalysis,
+        consistencyIssues: resume.consistencyIssues,
+        formattingIssues: resume.formattingIssues,
+        jdAnalysis: resume.jdAnalysis
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   createResume,
   getResumes,
   getResumeById,
-  deleteResume
+  deleteResume,
+  analyzeResume,
+  getResumeAnalysis
 };

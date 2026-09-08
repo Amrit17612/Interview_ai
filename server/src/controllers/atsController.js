@@ -210,6 +210,30 @@ const getJobReadiness = async (req, res, next) => {
       parsingStatus: 'COMPLETED'
     }).sort({ createdAt: -1 });
 
+    // Check if we have an AI analysis for this specific JD
+    if (resume && resume.analysisStatus === 'COMPLETED' && resume.analyzedJobId && resume.analyzedJobId.toString() === job._id.toString()) {
+      return res.json({
+        success: true,
+        data: {
+          readinessScore: resume.atsScore || 0,
+          readinessStatus: (resume.atsScore || 0) >= 80 ? 'EXCELLENT' : (resume.atsScore || 0) >= 60 ? 'STRONG' : (resume.atsScore || 0) >= 40 ? 'MODERATE' : 'NEEDS_PREPARATION',
+          scoreBreakdown: resume.atsBreakdown || {},
+          matchedSkills: (resume.jdAnalysis?.matchedKeywords || []).map(skill => ({ skill, actionableSkillKey: skill })),
+          missingSkills: (resume.jdAnalysis?.missingKeywords || []).map(skill => ({ skill, actionableSkillKey: skill })),
+          relevantStrengths: [], // AI analysis does not currently cross-reference historical interview sessions
+          relevantWeaknesses: [],
+          recommendedActions: (resume.jdAnalysis?.recommendations || []).map(r => ({
+            action: 'REVIEW_AI_RECOMMENDATION',
+            title: `Priority: ${r.priority}`,
+            description: r.message,
+            targetSkill: null
+          })),
+          summary: 'AI-powered ATS analysis completed.',
+          isFallback: false
+        }
+      });
+    }
+
     // 3. Fetch Completed Interview History
     const sessions = await InterviewSession.find({
       user: req.user._id,
@@ -385,7 +409,8 @@ const getJobReadiness = async (req, res, next) => {
         relevantStrengths: relevantStrengths.map(mapToReadinessSkill),
         relevantWeaknesses: relevantWeaknesses.map(mapToReadinessSkill),
         recommendedActions,
-        summary: summaryText
+        summary: summaryText,
+        isFallback: true
       }
     });
   } catch (error) {

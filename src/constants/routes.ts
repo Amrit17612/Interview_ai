@@ -73,7 +73,7 @@ export const ROUTES = {
   // Resumes
   RESUME: '/resumes',
   RESUME_UPLOAD: '/resumes/upload',
-  RESUME_ANALYSIS: '/resumes/analysis',
+  RESUME_ANALYSIS: '/resumes/:id/analysis',
   RESUME_SCORE: '/resumes/score',
   RESUME_SUGGESTIONS: '/resumes/suggestions',
   RESUME_HISTORY: '/resumes/history',

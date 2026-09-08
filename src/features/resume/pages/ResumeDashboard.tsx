@@ -233,13 +233,24 @@ export function ResumeDashboard() {
                 </div>
                 
                 <div className="flex items-center justify-between border-t border-gray-100 pt-3">
-                  {resume.parsingStatus === 'COMPLETED' ? (
-                    <Button variant="outline" size="sm" onClick={() => handleViewText(resume.id, resume.originalFileName)}>
-                      View Text
-                    </Button>
-                  ) : (
-                    <div />
-                  )}
+                  <div className="flex gap-2">
+                    {resume.parsingStatus === 'COMPLETED' ? (
+                      <Button variant="outline" size="sm" onClick={() => handleViewText(resume.id, resume.originalFileName)}>
+                        View Text
+                      </Button>
+                    ) : (
+                      <div />
+                    )}
+                    {resume.parsingStatus === 'COMPLETED' && (
+                      <Button 
+                        variant="primary" 
+                        size="sm" 
+                        onClick={() => window.location.href = `/resumes/${resume.id}/analysis`}
+                      >
+                        {resume.analysisStatus === 'COMPLETED' ? 'View Analysis' : 'Run Analysis'}
+                      </Button>
+                    )}
+                  </div>
                   <Button 
                     variant="outline" 
                     size="sm" 

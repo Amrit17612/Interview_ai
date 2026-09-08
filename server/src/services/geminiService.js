@@ -136,6 +136,34 @@ const validateReportResponse = (data) => {
   return data;
 };
 
+const validateParseResumeResponse = (data) => {
+  if (!data || !data.personal || !data.experience || !data.education) {
+    throw new Error('PROVIDER_ERROR: AI response missing required parsed fields.');
+  }
+  return data;
+};
+
+const validateEvaluateResumeResponse = (data) => {
+  if (!data || typeof data.qualityScore !== 'number' || !Array.isArray(data.grammarIssues)) {
+    throw new Error('PROVIDER_ERROR: AI response missing evaluate fields.');
+  }
+  return data;
+};
+
+const validateAnalyzeJDResponse = (data) => {
+  if (!data || !Array.isArray(data.requiredSkills)) {
+    throw new Error('PROVIDER_ERROR: AI response missing JD skills array.');
+  }
+  return data;
+};
+
+const validateMatchATSScoreResponse = (data) => {
+  if (!data || typeof data.atsScore !== 'number' || !data.breakdown) {
+    throw new Error('PROVIDER_ERROR: AI response missing ATS match fields.');
+  }
+  return data;
+};
+
 // ============================================================================
 // SERVICE METHODS
 // ============================================================================
@@ -190,5 +218,9 @@ module.exports = {
   validateQuestionResponse,
   validateEvaluationResponse,
   validateReportResponse,
+  validateParseResumeResponse,
+  validateEvaluateResumeResponse,
+  validateAnalyzeJDResponse,
+  validateMatchATSScoreResponse,
   TARGET_MODEL
 };

@@ -126,9 +126,142 @@ Required JSON Structure:
 `;
 };
 
+const getParseResumePrompt = (rawText) => {
+  return `You are an expert resume parser. Extract structured information from the following raw resume text.
+If a field is missing, return null or an empty array. Do NOT invent information.
+
+Raw Text:
+${rawText}
+
+Return EXACTLY in this JSON structure:
+{
+  "personal": {
+    "name": "Full Name",
+    "email": "Email",
+    "phone": "Phone",
+    "location": "Location",
+    "linkedin": "LinkedIn URL",
+    "github": "GitHub URL",
+    "portfolio": "Portfolio URL"
+  },
+  "summary": "Professional summary",
+  "skills": {
+    "technical": ["Skill 1", "Skill 2"],
+    "soft": ["Skill 1", "Skill 2"]
+  },
+  "experience": [
+    {
+      "company": "Company Name",
+      "title": "Job Title",
+      "dates": "Employment Dates",
+      "responsibilities": ["Resp 1", "Resp 2"],
+      "achievements": ["Achv 1", "Achv 2"]
+    }
+  ],
+  "education": [
+    {
+      "institution": "School",
+      "degree": "Degree",
+      "dates": "Dates",
+      "gpa": "GPA"
+    }
+  ],
+  "projects": [
+    {
+      "name": "Project Name",
+      "description": "Description",
+      "technologies": ["Tech 1"]
+    }
+  ],
+  "certifications": ["Cert 1"]
+}
+`;
+};
+
+const getEvaluateResumePrompt = (rawText) => {
+  return `You are an expert technical recruiter and resume reviewer.
+Analyze the following resume text for quality, grammar, weak bullets, and action verbs.
+Do NOT invent metrics. Suggest realistic improvements.
+
+Raw Text:
+${rawText}
+
+Return EXACTLY in this JSON structure:
+{
+  "qualityScore": <numeric_score_0_to_100>,
+  "grammarIssues": [
+    { "original": "text", "issue": "reason", "suggestion": "better text" }
+  ],
+  "repeatedVerbs": [
+    { "verb": "worked", "count": 5, "alternatives": ["developed", "engineered"] }
+  ],
+  "weakBullets": [
+    { "original": "bullet text", "problem": "vague/missing impact", "suggestion": "rewritten bullet" }
+  ],
+  "consistencyIssues": ["Inconsistent dates", "Tense mismatches"],
+  "formattingIssues": ["Lack of clear headings", "Unreadable text chunks"]
+}
+`;
+};
+
+const getAnalyzeJDPrompt = (jdText) => {
+  return `You are an expert technical recruiter. Analyze this Job Description.
+
+Job Description:
+${jdText}
+
+Return EXACTLY in this JSON structure:
+{
+  "role": "Job Title",
+  "seniority": "Seniority Level",
+  "requiredSkills": ["Skill 1"],
+  "preferredSkills": ["Skill 1"],
+  "toolsAndTech": ["Tech 1"],
+  "softSkills": ["Soft Skill 1"],
+  "experienceRequirements": "X years",
+  "educationRequirements": "Degree",
+  "importantKeywords": ["Keyword 1"]
+}
+`;
+};
+
+const getMatchATSScorePrompt = (structuredResume, structuredJD) => {
+  return `You are an expert ATS algorithm. Compare the parsed Resume against the parsed Job Description.
+Calculate an ATS Compatibility Score (0-100). Explain the breakdown.
+
+Resume: ${JSON.stringify(structuredResume)}
+Job Description: ${JSON.stringify(structuredJD)}
+
+Return EXACTLY in this JSON structure:
+{
+  "atsScore": <numeric_score_0_to_100>,
+  "breakdown": {
+    "keywordMatch": <0-25>,
+    "skillsAlignment": <0-25>,
+    "structure": <0-15>,
+    "readability": <0-10>,
+    "experienceRelevance": <0-25>
+  },
+  "matchedKeywords": ["Keyword 1"],
+  "missingKeywords": ["Keyword 1"],
+  "skillGaps": [
+    { "skill": "Skill", "priority": "HIGH" }
+  ],
+  "experienceGaps": ["Gap 1"],
+  "recommendations": [
+    { "priority": "HIGH", "message": "Add X to your resume" }
+  ]
+}
+`;
+};
+
 module.exports = {
   getTestPrompt,
   getGenerateQuestionPrompt,
   getEvaluateAnswerPrompt,
-  getFinalReportPrompt
+  getFinalReportPrompt,
+  getParseResumePrompt,
+  getEvaluateResumePrompt,
+  getAnalyzeJDPrompt,
+  getMatchATSScorePrompt
 };

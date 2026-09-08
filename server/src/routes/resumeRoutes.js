@@ -7,7 +7,9 @@ const {
   createResume,
   getResumes,
   getResumeById,
-  deleteResume
+  deleteResume,
+  analyzeResume,
+  getResumeAnalysis
 } = require('../controllers/resumeController');
 
 // All resume routes require authentication
@@ -20,5 +22,11 @@ router.route('/')
 router.route('/:id')
   .get(getResumeById)
   .delete(deleteResume);
+
+router.route('/:id/analyze')
+  .post(analyzeResume);
+
+router.route('/:id/analysis')
+  .get(getResumeAnalysis);
 
 module.exports = router;

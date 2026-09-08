@@ -40,6 +40,53 @@ const resumeSchema = new mongoose.Schema(
     parsedText: {
       type: String,
       default: null
+    },
+    // New AI Analysis Fields
+    analysisStatus: {
+      type: String,
+      enum: ['PENDING', 'PROCESSING', 'COMPLETED', 'FAILED'],
+      default: 'PENDING'
+    },
+    lastAnalyzedAt: {
+      type: Date,
+      default: null
+    },
+    analyzedJobId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'JobDescription',
+      default: null
+    },
+    structuredData: {
+      type: mongoose.Schema.Types.Mixed,
+      default: null
+    },
+    atsScore: {
+      type: Number,
+      default: null
+    },
+    qualityScore: {
+      type: Number,
+      default: null
+    },
+    atsBreakdown: {
+      type: mongoose.Schema.Types.Mixed,
+      default: null
+    },
+    contentAnalysis: {
+      type: mongoose.Schema.Types.Mixed,
+      default: null
+    },
+    consistencyIssues: {
+      type: Array,
+      default: []
+    },
+    formattingIssues: {
+      type: Array,
+      default: []
+    },
+    jdAnalysis: {
+      type: mongoose.Schema.Types.Mixed,
+      default: null
     }
   },
   {
