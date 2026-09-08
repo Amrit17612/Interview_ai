@@ -6,6 +6,7 @@ import { useCheckout } from '../hooks/useCheckout';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '../../../constants/routes';
 import { CheckoutModal } from '../components/CheckoutModal';
+import { BundlePreviewModal } from '../components/BundlePreviewModal';
 import { useState, useEffect } from 'react';
 import { bundleService } from '../../../services/bundle.service';
 
@@ -26,8 +27,13 @@ export function DomainBundles() {
     });
   }, []);
 
+  const [previewBundle, setPreviewBundle] = useState<any>(null);
+
   const handlePreview = (bundleId: string) => {
-    alert(`Preview modal for bundle: ${bundleId} would open here.`);
+    const bundle = bundles.find(b => b.id === bundleId || b.bundleId === bundleId);
+    if (bundle) {
+      setPreviewBundle(bundle);
+    }
   };
 
   const handleStartPracticing = (bundleId: string) => {
@@ -93,6 +99,17 @@ export function DomainBundles() {
           isProcessing={isProcessing === checkoutBundle.id}
         />
       )}
+
+      <BundlePreviewModal
+        isOpen={!!previewBundle}
+        onClose={() => setPreviewBundle(null)}
+        bundle={previewBundle}
+        onUnlock={(bundleId) => {
+          setPreviewBundle(null);
+          handlePurchase(bundleId);
+        }}
+        isProcessing={!!isProcessing}
+      />
     </Container>
   );
 }
