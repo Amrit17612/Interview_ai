@@ -4,7 +4,7 @@ import { Button } from '../../../components/ui/Button';
 import { Input } from '../../../components/ui/Input';
 import { bundleService, type BundleData } from '../../../services/bundle.service';
 import type { BundleType } from '../../../types/bundle.types';
-import { Save, AlertCircle, X } from 'lucide-react';
+import { Save, AlertCircle, X, Plus, Trash2 } from 'lucide-react';
 import { getCategoryOptions } from '../../../constants/bundleCategories';
 
 interface BundleFormModalProps {
@@ -26,6 +26,7 @@ export function BundleFormModal({ bundle, type, isOpen, onClose, onSave }: Bundl
   const [category, setCategory] = useState('');
   const [price, setPrice] = useState(0);
   const [originalPrice, setOriginalPrice] = useState(0);
+  const [features, setFeatures] = useState<string[]>([]);
 
   useEffect(() => {
     if (isOpen) {
@@ -35,6 +36,7 @@ export function BundleFormModal({ bundle, type, isOpen, onClose, onSave }: Bundl
         setCategory(bundle.category || '');
         setPrice(bundle.price || 0);
         setOriginalPrice(bundle.originalPrice || 0);
+        setFeatures(bundle.features || []);
       } else {
         // reset form
         setName('');
@@ -42,6 +44,7 @@ export function BundleFormModal({ bundle, type, isOpen, onClose, onSave }: Bundl
         setCategory('');
         setPrice(0);
         setOriginalPrice(0);
+        setFeatures([]);
       }
       setError(null);
     }
@@ -52,13 +55,16 @@ export function BundleFormModal({ bundle, type, isOpen, onClose, onSave }: Bundl
     setIsSubmitting(true);
     setError(null);
 
+    const cleanedFeatures = features.map(f => f.trim()).filter(f => f.length > 0);
+
     const payload = {
       name,
       description,
       category,
       price,
       originalPrice,
-      type
+      type,
+      features: cleanedFeatures
     };
 
     try {
@@ -150,6 +156,50 @@ export function BundleFormModal({ bundle, type, isOpen, onClose, onSave }: Bundl
             value={originalPrice.toString()}
             onChange={(e) => setOriginalPrice(Number(e.target.value))}
           />
+        </div>
+
+        <div>
+          <div className="flex justify-between items-center mb-2">
+            <label className="block text-sm font-medium text-gray-700">Features</label>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setFeatures([...features, ''])}
+              className="text-xs py-1 h-7"
+            >
+              <Plus className="h-3 w-3 mr-1" /> Add Feature
+            </Button>
+          </div>
+          <div className="space-y-2 max-h-40 overflow-y-auto pr-1">
+            {features.map((feature, idx) => (
+              <div key={idx} className="flex items-center gap-2">
+                <Input
+                  label=""
+                  value={feature}
+                  onChange={(e) => {
+                    const newF = [...features];
+                    newF[idx] = e.target.value;
+                    setFeatures(newF);
+                  }}
+                  placeholder={`Feature ${idx + 1}`}
+                  className="flex-grow mb-0"
+                />
+                <button
+                  type="button"
+                  onClick={() => setFeatures(features.filter((_, i) => i !== idx))}
+                  className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-md transition-colors mt-1"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
+            ))}
+            {features.length === 0 && (
+              <p className="text-sm text-gray-400 text-center py-2 bg-gray-50 rounded border border-dashed border-gray-200">
+                No features added yet.
+              </p>
+            )}
+          </div>
         </div>
 
         <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-100">

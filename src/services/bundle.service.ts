@@ -102,7 +102,7 @@ export const bundleService = {
       modules: data.modules || [],
       createdAt: new Date().toISOString()
     };
-    
+
     // Sync to backend first for atomicity
     await bundleService.syncBundlePrice(newBundle.bundleId, newBundle.price, newBundle.active);
 
@@ -114,17 +114,17 @@ export const bundleService = {
   updateBundle: async (id: string, data: Partial<BundleData>): Promise<BundleData> => {
     const locals = getLocalBundles();
     const idx = locals.findIndex(b => b._id === id || b.bundleId === id);
-    
+
     if (idx !== -1) {
       const originalBundle = locals[idx];
-      const updatedBundle = { 
-        ...originalBundle, 
-        ...data, 
-        _id: originalBundle._id, 
+      const updatedBundle = {
+        ...originalBundle,
+        ...data,
+        _id: originalBundle._id,
         bundleId: originalBundle.bundleId,
-        updatedAt: new Date().toISOString() 
+        updatedAt: new Date().toISOString()
       };
-      
+
       // Sync to backend first for atomicity
       if (id.startsWith('custom_')) {
         await bundleService.syncBundlePrice(updatedBundle.bundleId, updatedBundle.price, updatedBundle.active);
@@ -148,5 +148,34 @@ export const bundleService = {
       console.error('Failed to sync bundle price to backend', error);
       throw error;
     }
+  },
+
+  deactivateBundlePrice: async (bundleId: string): Promise<void> => {
+    try {
+      await apiClient.post('/admin/custom-bundle-prices', { bundleId, price: 0, active: false });
+    } catch (error) {
+      console.error('Failed to deactivate bundle price on backend', error);
+      throw error;
+    }
+  },
+
+  deleteBundle: async (id: string): Promise<void> => {
+    if (!id.startsWith('custom_')) {
+      throw new Error('Cannot delete predefined or mock bundles.');
+    }
+
+    const locals = getLocalBundles();
+    const idx = locals.findIndex(b => b._id === id || b.bundleId === id);
+
+    if (idx === -1) {
+      throw new Error('Custom bundle not found.');
+    }
+
+    // Atomicity: Deactivate on backend FIRST
+    await bundleService.deactivateBundlePrice(id);
+
+    // If backend succeeds, delete from local storage
+    const newLocals = locals.filter((_, i) => i !== idx);
+    saveLocalBundles(newLocals);
   }
 };

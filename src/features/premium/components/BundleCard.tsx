@@ -70,19 +70,21 @@ export function BundleCard({ bundle, onPreviewClick, onStartPracticing, onPurcha
           </div>
         </div>
         
-        <ul className="space-y-2">
-          {bundle.features.slice(0, 4).map((feature, idx) => (
-            <li key={idx} className="flex items-start gap-2 text-sm text-gray-600">
-              <Check className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-              <span>{feature}</span>
-            </li>
-          ))}
-          {bundle.features.length > 4 && (
-            <li className="text-xs text-gray-400 font-medium pl-6">
-              + {bundle.features.length - 4} more features
-            </li>
-          )}
-        </ul>
+        {bundle.features && bundle.features.length > 0 && (
+          <ul className="space-y-2 mt-4">
+            {bundle.features.slice(0, 4).map((feature, idx) => (
+              <li key={idx} className="flex items-start gap-2 text-sm text-gray-600">
+                <Check className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                <span>{feature}</span>
+              </li>
+            ))}
+            {bundle.features.length > 4 && (
+              <li className="text-xs text-gray-400 font-medium pl-6">
+                + {bundle.features.length - 4} more features
+              </li>
+            )}
+          </ul>
+        )}
       </CardContent>
       
       <CardFooter className="pt-0 border-t border-gray-50 mt-auto p-4 flex gap-2">

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { PageHeader } from '../../../components/ui/PageHeader';
 import { Container } from '../../../components/ui/Container';
 import { Button } from '../../../components/ui/Button';
-import { Plus, BookOpen, AlertCircle, Edit, Settings } from 'lucide-react';
+import { Plus, BookOpen, AlertCircle, Edit, Settings, Trash2 } from 'lucide-react';
 import type { BundleData } from '../../../services/bundle.service';
 import type { BundleType } from '../../../types/bundle.types';
 import { bundleService } from '../../../services/bundle.service';
@@ -24,6 +24,9 @@ export function BundleManagement({ type, title }: BundleManagementProps) {
   
   const [isModuleModalOpen, setIsModuleModalOpen] = useState(false);
   const [managingModulesBundle, setManagingModulesBundle] = useState<BundleData | null>(null);
+
+  const [deletingBundle, setDeletingBundle] = useState<BundleData | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const fetchBundles = async () => {
     try {
@@ -64,6 +67,20 @@ export function BundleManagement({ type, title }: BundleManagementProps) {
   const handleModulesSaved = () => {
     setIsModuleModalOpen(false);
     fetchBundles();
+  };
+
+  const handleDelete = async () => {
+    if (!deletingBundle) return;
+    try {
+      setIsDeleting(true);
+      await bundleService.deleteBundle(deletingBundle._id);
+      setDeletingBundle(null);
+      fetchBundles();
+    } catch (err: any) {
+      setError(err.message || 'Failed to delete bundle');
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   return (
@@ -154,6 +171,11 @@ export function BundleManagement({ type, title }: BundleManagementProps) {
                           <Button variant="outline" size="sm" onClick={() => handleEdit(bundle)}>
                             <Edit className="h-4 w-4 mr-2" /> Edit
                           </Button>
+                          {bundle._id.startsWith('custom_') && (
+                            <Button variant="outline" size="sm" onClick={() => setDeletingBundle(bundle)} className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200">
+                              <Trash2 className="h-4 w-4 mr-2" /> Delete
+                            </Button>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -182,6 +204,25 @@ export function BundleManagement({ type, title }: BundleManagementProps) {
           onClose={() => setIsModuleModalOpen(false)}
           onUpdate={handleModulesSaved}
         />
+      )}
+
+      {deletingBundle && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full shadow-xl">
+            <h3 className="text-lg font-bold text-gray-900 mb-2">Delete Bundle?</h3>
+            <p className="text-gray-600 mb-6">
+              Are you sure you want to delete this bundle? This action cannot be undone.
+            </p>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setDeletingBundle(null)} disabled={isDeleting}>
+                Cancel
+              </Button>
+              <Button className="bg-red-600 text-white hover:bg-red-700" onClick={handleDelete} disabled={isDeleting}>
+                {isDeleting ? 'Deleting...' : 'Delete'}
+              </Button>
+            </div>
+          </div>
+        </div>
       )}
     </Container>
   );
