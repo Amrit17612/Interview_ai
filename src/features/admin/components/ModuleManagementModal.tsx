@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Dialog } from '../../../components/ui/Dialog';
 import { Button } from '../../../components/ui/Button';
-import type { BundleData } from '../../../services/bundle.service';
+import { bundleService, type BundleData } from '../../../services/bundle.service';
 import { X, Search, Plus, Trash2 } from 'lucide-react';
 import { apiClient } from '../../../services/api.client';
 
@@ -68,13 +68,14 @@ export function ModuleManagementModal({ bundle, isOpen, onClose, onUpdate }: Mod
     try {
       setIsSaving(true);
       setError(null);
-      await apiClient.put(`/bundles/admin/${bundle.bundleId}/modules`, {
-        modules: modules.map(m => m._id)
-      });
+      
+      // Update locally (and sync pricing if necessary) via the standard bundle service
+      await bundleService.updateBundle(bundle._id, { modules });
+      
       onUpdate();
       onClose();
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to save modules');
+      setError(err.message || 'Failed to save modules');
     } finally {
       setIsSaving(false);
     }
