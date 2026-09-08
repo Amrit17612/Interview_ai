@@ -30,9 +30,9 @@ export function ModuleManagementModal({ bundle, isOpen, onClose, onUpdate }: Mod
   const fetchTemplates = async () => {
     try {
       setIsLoading(true);
-      const res = await apiClient.get('/admin/interview-templates?status=PUBLISHED');
+      const res = await apiClient.get('/admin/interview-templates?status=ACTIVE&limit=100');
       if (res.data.success) {
-        setAvailableTemplates(res.data.data.templates || []);
+        setAvailableTemplates(res.data.data || []);
       }
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to fetch templates');
@@ -147,11 +147,11 @@ export function ModuleManagementModal({ bundle, isOpen, onClose, onUpdate }: Mod
             {isLoading ? (
               <div className="text-center py-4 text-sm text-gray-500">Loading templates...</div>
             ) : availableTemplates
+              .filter(t => !modules.some(m => m._id === t._id)) // Remove already added
               .filter(t => t.title.toLowerCase().includes(searchQuery.toLowerCase()))
               .map(template => {
-                const isAdded = modules.some(m => m._id === template._id);
                 return (
-                  <div key={template._id} className={`p-3 bg-white border rounded-lg shadow-sm flex items-center justify-between ${isAdded ? 'border-brand-200 opacity-60' : 'border-gray-200'}`}>
+                  <div key={template._id} className="p-3 bg-white border border-gray-200 rounded-lg shadow-sm flex items-center justify-between">
                     <div className="pr-3">
                       <h4 className="text-sm font-semibold text-gray-900 line-clamp-1">{template.title}</h4>
                       <div className="flex gap-2 mt-1">
@@ -164,17 +164,29 @@ export function ModuleManagementModal({ bundle, isOpen, onClose, onUpdate }: Mod
                       </div>
                     </div>
                     <Button
-                      variant={isAdded ? 'outline' : 'primary'}
+                      variant="primary"
                       size="sm"
                       onClick={() => handleAddModule(template)}
-                      disabled={isAdded}
                       className="shrink-0 h-8 px-2"
                     >
-                      {isAdded ? 'Added' : <><Plus className="h-4 w-4 mr-1" /> Add</>}
+                      <Plus className="h-4 w-4 mr-1" /> Add
                     </Button>
                   </div>
                 );
             })}
+            
+            {!isLoading && availableTemplates.length === 0 && (
+              <div className="text-sm text-gray-500 italic p-4 bg-gray-50 rounded-lg text-center">
+                No templates available.
+              </div>
+            )}
+            
+            {!isLoading && availableTemplates.length > 0 && 
+             availableTemplates.filter(t => !modules.some(m => m._id === t._id)).filter(t => t.title.toLowerCase().includes(searchQuery.toLowerCase())).length === 0 && (
+              <div className="text-sm text-gray-500 italic p-4 bg-gray-50 rounded-lg text-center">
+                No templates match your search.
+              </div>
+            )}
           </div>
         </div>
       </div>
