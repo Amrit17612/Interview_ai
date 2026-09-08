@@ -86,8 +86,9 @@ export const bundleService = {
   createBundle: async (data: Partial<BundleData>): Promise<BundleData> => {
     const customId = `custom_${Date.now()}`;
     const newBundle: BundleData = {
-      _id: data._id || data.bundleId || customId,
-      bundleId: data.bundleId || data._id || customId,
+      ...data,
+      _id: customId,
+      bundleId: customId,
       type: data.type || 'company',
       name: data.name || '',
       description: data.description,
@@ -99,10 +100,12 @@ export const bundleService = {
       active: data.active ?? true,
       visibility: data.visibility || 'PUBLIC',
       modules: data.modules || [],
-      createdAt: new Date().toISOString(),
-      ...data
+      createdAt: new Date().toISOString()
     };
     
+    // Sync to backend first for atomicity
+    await bundleService.syncBundlePrice(newBundle.bundleId, newBundle.price, newBundle.active);
+
     const locals = getLocalBundles();
     saveLocalBundles([newBundle, ...locals]);
     return newBundle;
@@ -113,7 +116,21 @@ export const bundleService = {
     const idx = locals.findIndex(b => b._id === id || b.bundleId === id);
     
     if (idx !== -1) {
-      locals[idx] = { ...locals[idx], ...data, updatedAt: new Date().toISOString() };
+      const originalBundle = locals[idx];
+      const updatedBundle = { 
+        ...originalBundle, 
+        ...data, 
+        _id: originalBundle._id, 
+        bundleId: originalBundle.bundleId,
+        updatedAt: new Date().toISOString() 
+      };
+      
+      // Sync to backend first for atomicity
+      if (id.startsWith('custom_')) {
+        await bundleService.syncBundlePrice(updatedBundle.bundleId, updatedBundle.price, updatedBundle.active);
+      }
+
+      locals[idx] = updatedBundle;
       saveLocalBundles(locals);
       return locals[idx];
     }

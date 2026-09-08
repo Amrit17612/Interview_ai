@@ -63,21 +63,13 @@ export function BundleFormModal({ bundle, type, isOpen, onClose, onSave }: Bundl
 
     try {
       let savedBundleId = '';
-      let isActive = true;
       
       if (isEditing && bundle) {
         savedBundleId = bundle.bundleId || bundle._id;
-        isActive = bundle.active ?? true;
         await bundleService.updateBundle(savedBundleId, payload);
       } else {
         const newBundle = await bundleService.createBundle(payload);
         savedBundleId = newBundle.bundleId || newBundle._id;
-        isActive = newBundle.active ?? true;
-      }
-
-      // Sync payment authority for custom bundles
-      if (savedBundleId.startsWith('custom_')) {
-        await bundleService.syncBundlePrice(savedBundleId, price, isActive);
       }
 
       onSave();
