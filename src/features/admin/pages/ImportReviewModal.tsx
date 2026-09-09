@@ -4,7 +4,7 @@ import { X, Upload, FileText, AlertCircle, CheckCircle } from 'lucide-react';
 
 interface ImportReviewModalProps {
   onClose: () => void;
-  onSuccess: () => void;
+  onSuccess: (data?: any) => void;
 }
 
 export function ImportReviewModal({ onClose, onSuccess }: ImportReviewModalProps) {
@@ -67,7 +67,7 @@ export function ImportReviewModal({ onClose, onSuccess }: ImportReviewModalProps
       
       if (res.data.success) {
         alert(res.data.message);
-        onSuccess();
+        onSuccess(res.data.data);
         onClose();
       }
     } catch (err: any) {

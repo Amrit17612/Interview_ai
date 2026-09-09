@@ -277,7 +277,10 @@ const confirmImport = async (req, res, next) => {
     res.json({
       success: true,
       message: `Successfully imported ${inserted.length} new questions, updated ${updatedCount} existing questions, and added ${totalFollowUps} follow-ups.`,
-      data: inserted
+      data: {
+        inserted,
+        updated: questionsToUpdate.map(u => u.mainQ)
+      }
     });
 
   } catch (error) {
