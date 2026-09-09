@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const User = require('../models/User');
 const CreditTransaction = require('../models/CreditTransaction');
 const Payment = require('../models/Payment');
 const TRUSTED_CATALOG = require('../config/catalog');
@@ -52,6 +53,35 @@ const getWalletHistory = async (req, res, next) => {
   }
 };
 
+const updateProfile = async (req, res, next) => {
+  try {
+    const { firstName, lastName } = req.body;
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    let updated = false;
+    if (firstName && typeof firstName === 'string' && firstName.trim().length > 0) {
+      user.firstName = firstName.trim();
+      updated = true;
+    }
+    if (lastName && typeof lastName === 'string' && lastName.trim().length > 0) {
+      user.lastName = lastName.trim();
+      updated = true;
+    }
+
+    if (updated) {
+      await user.save();
+    }
+
+    res.status(200).json({ success: true, message: 'Profile updated successfully', user });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
-  getWalletHistory
+  getWalletHistory,
+  updateProfile
 };

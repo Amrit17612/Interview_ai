@@ -20,5 +20,10 @@ export const userService = {
   async getWalletHistory(): Promise<WalletHistoryResponse> {
     const response = await apiClient.get<WalletHistoryResponse>('/user/credits/history');
     return response.data;
+  },
+
+  async updateProfile(data: { firstName?: string; lastName?: string }): Promise<{ success: boolean; user: any; message?: string }> {
+    const response = await apiClient.put('/user/profile', data);
+    return response.data;
   }
 };
