@@ -604,6 +604,15 @@ const triggerReportGeneration = (session, userId) => {
       } catch (emailErr) {
         console.error('[EMAIL] Background email report failed:', emailErr.message || emailErr);
       }
+
+      // Evaluate achievements
+      try {
+        const achievementService = require('../services/achievementService');
+        await achievementService.evaluateAchievements(userId);
+        console.log(`[ACHIEVEMENTS] Evaluation completed for user ${userId}`);
+      } catch (achErr) {
+        console.error('[ACHIEVEMENTS] Evaluation failed:', achErr.message || achErr);
+      }
     } catch (bgError) {
       console.error(`[REPORT] Background generation failed for session ${session._id}:`, bgError);
       

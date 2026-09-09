@@ -53,35 +53,57 @@ const getWalletHistory = async (req, res, next) => {
   }
 };
 
-const updateProfile = async (req, res, next) => {
+const updateProfile = async (req, res) => {
   try {
     const { firstName, lastName } = req.body;
-    const user = await User.findById(req.user._id);
-    if (!user) {
-      return res.status(404).json({ success: false, message: 'User not found' });
+    
+    // Only allow updating specific fields
+    const updates = {};
+    if (firstName) updates.firstName = firstName;
+    if (lastName) updates.lastName = lastName;
+
+    if (Object.keys(updates).length === 0) {
+      return res.status(400).json({ success: false, message: 'No valid fields to update.' });
     }
 
-    let updated = false;
-    if (firstName && typeof firstName === 'string' && firstName.trim().length > 0) {
-      user.firstName = firstName.trim();
-      updated = true;
-    }
-    if (lastName && typeof lastName === 'string' && lastName.trim().length > 0) {
-      user.lastName = lastName.trim();
-      updated = true;
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user._id,
+      { $set: updates },
+      { new: true, runValidators: true }
+    ).select('-passwordHash -emailVerificationTokenHash -passwordResetTokenHash');
+
+    if (!updatedUser) {
+      return res.status(404).json({ success: false, message: 'User not found.' });
     }
 
-    if (updated) {
-      await user.save();
-    }
-
-    res.status(200).json({ success: true, message: 'Profile updated successfully', user });
+    res.status(200).json({
+      success: true,
+      message: 'Profile updated successfully',
+      user: updatedUser
+    });
   } catch (error) {
-    next(error);
+    console.error('Update Profile Error:', error);
+    res.status(500).json({ success: false, message: 'Failed to update profile.' });
+  }
+};
+
+const getAchievements = async (req, res) => {
+  try {
+    const achievementService = require('../services/achievementService');
+    const data = await achievementService.getAchievementsData(req.user._id);
+    
+    res.status(200).json({
+      success: true,
+      data
+    });
+  } catch (error) {
+    console.error('Get Achievements Error:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch achievements.' });
   }
 };
 
 module.exports = {
   getWalletHistory,
-  updateProfile
+  updateProfile,
+  getAchievements
 };

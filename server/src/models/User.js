@@ -77,7 +77,11 @@ const userSchema = new mongoose.Schema({
     enum: ['user', 'admin'],
     default: 'user'
   },
-  rewardedInterviews: [{ type: mongoose.Schema.Types.ObjectId, ref: 'InterviewSession' }]
+  rewardedInterviews: [{ type: mongoose.Schema.Types.ObjectId, ref: 'InterviewSession' }],
+  unlockedAchievements: [{
+    achievementId: { type: String, required: true },
+    unlockedAt: { type: Date, default: Date.now }
+  }]
 }, {
   timestamps: true,
 });

@@ -25,6 +25,7 @@ export function DashboardHome() {
   const [stats, setStats] = useState<InterviewStatsData | null>(null);
   const [roadmap, setRoadmap] = useState<InterviewRoadmapResponse | null>(null);
   const [templates, setTemplates] = useState<any[]>([]);
+  const [achievementStats, setAchievementStats] = useState<any>(null);
   
   const location = useLocation();
   const [successMsg] = useState<string | null>((location.state as any)?.message || null);
@@ -61,17 +62,19 @@ export function DashboardHome() {
     setIsLoading(true);
     setError(null);
     try {
-      const [, , statsData, roadmapData, templatesData] = await Promise.all([
+      const [, , statsData, roadmapData, templatesData, achievementsData] = await Promise.all([
         resumeService.getResumes().catch(() => []),
         atsService.getJobDescriptions().catch(() => []),
         interviewService.getInterviewStats(),
         interviewService.getInterviewRoadmap().catch(() => null),
-        apiClient.get('/api/interview-templates').then(res => res.data.data).catch(() => [])
+        apiClient.get('/api/interview-templates').then(res => res.data.data).catch(() => []),
+        apiClient.get('/api/user/achievements').then(res => res.data.data.stats).catch(() => null)
       ]);
       
       setStats(statsData);
       setRoadmap(roadmapData);
       setTemplates(templatesData);
+      setAchievementStats(achievementsData);
     } catch (err: any) {
       console.error(err);
       setError('Unable to load analytics.');
@@ -212,7 +215,11 @@ export function DashboardHome() {
               <Flame className="h-4 w-4" />
             </div>
             <p className="text-xs font-medium text-gray-500 mb-1">Practice Streak</p>
-            <h3 className="text-lg font-bold text-gray-400 text-sm mt-1">No data</h3>
+            {achievementStats?.currentStreak > 0 ? (
+              <h3 className="text-lg font-bold text-gray-900">{achievementStats.currentStreak} {achievementStats.currentStreak === 1 ? 'day' : 'days'}</h3>
+            ) : (
+              <h3 className="text-lg font-bold text-gray-400 text-sm mt-1">No streak yet</h3>
+            )}
           </CardContent>
         </Card>
 
@@ -222,7 +229,9 @@ export function DashboardHome() {
               <Award className="h-4 w-4" />
             </div>
             <p className="text-xs font-medium text-gray-500 mb-1">Achievements</p>
-            <h3 className="text-lg font-bold text-gray-400 text-sm mt-1">Locked</h3>
+            <h3 className="text-lg font-bold text-gray-900">
+              {achievementStats?.unlockedCount !== undefined ? achievementStats.unlockedCount : 'Locked'}
+            </h3>
           </CardContent>
         </Card>
       </div>
