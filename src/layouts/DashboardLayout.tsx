@@ -1,4 +1,4 @@
-import { Outlet, NavLink } from 'react-router-dom';
+import { Outlet, NavLink, Link } from 'react-router-dom';
 import { cn } from '../utils/cn';
 import { ROUTES } from '../constants/routes';
 import { 
@@ -191,9 +191,14 @@ export function DashboardLayout() {
             <div className="md:hidden text-lg font-bold text-brand-600 tracking-tight">IAI</div>
           </div>
           <div className="flex items-center space-x-4">
-            <div className="h-8 w-8 rounded-full bg-brand-100 flex items-center justify-center text-sm font-medium text-brand-700">
+            <Link 
+              to={ROUTES.PROFILE}
+              className="h-8 w-8 rounded-full bg-brand-100 flex items-center justify-center text-sm font-medium text-brand-700 hover:ring-2 hover:ring-brand-500 hover:ring-offset-2 transition-all focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2"
+              title="Open profile"
+              aria-label="Open profile"
+            >
               {initials}
-            </div>
+            </Link>
           </div>
         </header>
 
