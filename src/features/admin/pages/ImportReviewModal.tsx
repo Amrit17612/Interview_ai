@@ -38,15 +38,13 @@ export function ImportReviewModal({ onClose, onSuccess }: ImportReviewModalProps
       const formData = new FormData();
       formData.append('file', file);
       
-      const res = await apiClient.post('/admin/questions/import/preview', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
+      const res = await apiClient.post('/admin/questions/import/preview', formData);
       
       if (res.data.success) {
         setPreview(res.data.data);
       }
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to preview file');
+      setError(err.response?.data?.message || err.message || 'Failed to preview file');
     } finally {
       setLoading(false);
     }
