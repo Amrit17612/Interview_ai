@@ -3,7 +3,6 @@ const AuditLog = require('../models/AuditLog');
 const { parseCSV, parseXLSX, parsePDFDeterministic } = require('../utils/importExportUtils');
 const { stringify } = require('csv-stringify/sync');
 
-// Validate row and check database duplicates
 const validateAndCheckRow = async (row, existingMap, localSet) => {
   const errors = [];
   
@@ -25,13 +24,43 @@ const validateAndCheckRow = async (row, existingMap, localSet) => {
     localSet.add(normalizedText);
   }
 
+  let isExisting = false;
+  let existingId = null;
+  let newFollowUpsToAdd = [];
+
   if (existingMap.has(normalizedText)) {
-    errors.push('Already exists in database');
+    isExisting = true;
+    const existingDoc = existingMap.get(normalizedText);
+    existingId = existingDoc._id;
+    
+    // Check if there are new follow-ups to add
+    if (row.parsedFollowUps && row.parsedFollowUps.length > 0) {
+      const existingFUTs = new Set();
+      const addFUTs = (fus) => {
+        if (Array.isArray(fus)) {
+          fus.forEach(fu => { if (fu.text) existingFUTs.add(fu.text.toLowerCase().trim()) });
+        }
+      };
+      if (existingDoc.followUps) {
+        addFUTs(existingDoc.followUps.neutral);
+        addFUTs(existingDoc.followUps.weak);
+        addFUTs(existingDoc.followUps.strong);
+      }
+      
+      newFollowUpsToAdd = row.parsedFollowUps.filter(fuText => !existingFUTs.has(fuText.toLowerCase().trim()));
+    }
+
+    if (newFollowUpsToAdd.length === 0) {
+      errors.push('Already exists in database with no new follow-ups');
+    }
   }
 
   return {
     ...row,
     isValid: errors.length === 0,
+    isExisting,
+    existingId,
+    newFollowUpsToAdd,
     errors
   };
 };
@@ -69,14 +98,18 @@ const previewImport = async (req, res, next) => {
     const incomingTexts = rawRows.map(r => r.text?.trim() || '').filter(Boolean);
     
     // We fetch existing questions that match the incoming text (case-insensitive)
-    // To do this efficiently in MongoDB without regex on large arrays:
     const regexQueries = incomingTexts.map(t => ({ text: new RegExp('^' + t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$', 'i') }));
     let existingQuestions = [];
     if (regexQueries.length > 0) {
-      existingQuestions = await Question.find({ $or: regexQueries }).select('text').lean();
+      existingQuestions = await Question.find({ $or: regexQueries })
+        .populate('followUps.neutral', 'text')
+        .populate('followUps.weak', 'text')
+        .populate('followUps.strong', 'text')
+        .lean();
     }
 
-    const existingMap = new Set(existingQuestions.map(q => q.text.toLowerCase()));
+    const existingMap = new Map();
+    existingQuestions.forEach(q => existingMap.set(q.text.toLowerCase().trim(), q));
     const localSet = new Set();
 
     const processedRows = [];
@@ -122,41 +155,58 @@ const confirmImport = async (req, res, next) => {
     const regexQueries = incomingTexts.map(t => ({ text: new RegExp('^' + t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$', 'i') }));
     let existingQuestions = [];
     if (regexQueries.length > 0) {
-      existingQuestions = await Question.find({ $or: regexQueries }).select('text').lean();
+      existingQuestions = await Question.find({ $or: regexQueries })
+        .populate('followUps.neutral', 'text')
+        .populate('followUps.weak', 'text')
+        .populate('followUps.strong', 'text')
+        .lean();
     }
 
-    const existingMap = new Set(existingQuestions.map(q => q.text.toLowerCase()));
+    const existingMap = new Map();
+    existingQuestions.forEach(q => existingMap.set(q.text.toLowerCase().trim(), q));
     const localSet = new Set();
     const validQuestionsToInsert = [];
     const followUpsMap = new Map();
+    const questionsToUpdate = [];
 
     for (const row of questions) {
       const validated = await validateAndCheckRow(row, existingMap, localSet);
       if (validated.isValid) {
-        validQuestionsToInsert.push({
-          text: validated.text,
-          description: validated.description,
-          type: validated.type,
-          difficulty: validated.difficulty,
-          companies: validated.companies || [],
-          domains: validated.domains || [],
-          roles: validated.roles || [],
-          expectedPoints: validated.expectedPoints || [],
-          tags: validated.tags || [],
-          status: 'DRAFT',
-          category: 'primary',
-          createdBy: req.user._id,
-          updatedBy: req.user._id
-        });
-        followUpsMap.set(validQuestionsToInsert.length - 1, validated.parsedFollowUps || []);
+        if (validated.isExisting) {
+          questionsToUpdate.push({
+            existingId: validated.existingId,
+            mainQ: existingMap.get(row.text.toLowerCase().trim()),
+            newFollowUpsToAdd: validated.newFollowUpsToAdd || []
+          });
+        } else {
+          validQuestionsToInsert.push({
+            text: validated.text,
+            description: validated.description,
+            type: validated.type,
+            difficulty: validated.difficulty,
+            companies: validated.companies || [],
+            domains: validated.domains || [],
+            roles: validated.roles || [],
+            expectedPoints: validated.expectedPoints || [],
+            tags: validated.tags || [],
+            status: 'DRAFT',
+            category: 'primary',
+            createdBy: req.user._id,
+            updatedBy: req.user._id
+          });
+          followUpsMap.set(validQuestionsToInsert.length - 1, validated.parsedFollowUps || []);
+        }
       }
     }
 
-    if (validQuestionsToInsert.length === 0) {
-      return res.status(400).json({ success: false, message: 'No valid questions to insert after server-side validation' });
+    if (validQuestionsToInsert.length === 0 && questionsToUpdate.length === 0) {
+      return res.status(400).json({ success: false, message: 'No valid questions to insert or update after server-side validation' });
     }
 
-    const inserted = await Question.insertMany(validQuestionsToInsert, { ordered: true });
+    let inserted = [];
+    if (validQuestionsToInsert.length > 0) {
+      inserted = await Question.insertMany(validQuestionsToInsert, { ordered: true });
+    }
     
     let totalFollowUps = 0;
     for (let i = 0; i < inserted.length; i++) {
@@ -186,17 +236,45 @@ const confirmImport = async (req, res, next) => {
       }
     }
 
+    let updatedCount = 0;
+    for (const update of questionsToUpdate) {
+      const { existingId, mainQ, newFollowUpsToAdd } = update;
+      if (newFollowUpsToAdd.length > 0) {
+        const fuDocs = newFollowUpsToAdd.map(fuText => ({
+          text: fuText,
+          type: mainQ.type,
+          difficulty: mainQ.difficulty,
+          domains: mainQ.domains,
+          status: 'DRAFT',
+          category: 'follow-up',
+          createdBy: req.user._id,
+          updatedBy: req.user._id
+        }));
+        
+        try {
+           const insertedFus = await Question.insertMany(fuDocs, { ordered: false });
+           await Question.findByIdAndUpdate(existingId, {
+             $push: { 'followUps.neutral': { $each: insertedFus.map(f => f._id) } }
+           });
+           totalFollowUps += insertedFus.length;
+           updatedCount++;
+        } catch (e) {
+           console.error('Error inserting followups for existing question', existingId, e);
+        }
+      }
+    }
+
     await AuditLog.create({
       admin: req.user._id,
       action: 'BULK_IMPORT_QUESTIONS',
       entityType: 'Question',
       entityId: null, // Bulk
-      metadata: { count: inserted.length, followUpCount: totalFollowUps }
+      metadata: { count: inserted.length, updatedCount, followUpCount: totalFollowUps }
     });
 
     res.json({
       success: true,
-      message: `Successfully imported ${inserted.length} questions and ${totalFollowUps} follow-ups as DRAFT.`,
+      message: `Successfully imported ${inserted.length} new questions, updated ${updatedCount} existing questions, and added ${totalFollowUps} follow-ups.`,
       data: inserted
     });
 

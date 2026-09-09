@@ -144,19 +144,30 @@ export function ImportReviewModal({ onClose, onSuccess }: ImportReviewModalProps
             </div>
           ) : (
             <div className="space-y-6">
-              <div className="grid grid-cols-4 gap-4 mb-6">
+              <div className="grid grid-cols-5 gap-4 mb-6">
                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 text-center">
                   <p className="text-sm text-gray-500 mb-1">Total Rows</p>
                   <p className="text-2xl font-bold text-gray-900">{preview.total}</p>
                 </div>
                 <div className="bg-green-50 p-4 rounded-lg border border-green-200 text-center">
-                  <p className="text-sm text-green-600 mb-1">Valid (Main)</p>
-                  <p className="text-2xl font-bold text-green-700">{preview.validCount}</p>
+                  <p className="text-sm text-green-600 mb-1">New Questions</p>
+                  <p className="text-2xl font-bold text-green-700">
+                    {preview.rows.filter((r: any) => r.isValid && !r.isExisting).length}
+                  </p>
                 </div>
                 <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 text-center">
-                  <p className="text-sm text-blue-600 mb-1">Follow-ups</p>
+                  <p className="text-sm text-blue-600 mb-1">Existing to Update</p>
                   <p className="text-2xl font-bold text-blue-700">
-                    {preview.rows.filter((r: any) => r.isValid).reduce((sum: number, r: any) => sum + (r.parsedFollowUps?.length || 0), 0)}
+                    {preview.rows.filter((r: any) => r.isValid && r.isExisting).length}
+                  </p>
+                </div>
+                <div className="bg-purple-50 p-4 rounded-lg border border-purple-200 text-center">
+                  <p className="text-sm text-purple-600 mb-1">Follow-ups</p>
+                  <p className="text-2xl font-bold text-purple-700">
+                    {preview.rows.filter((r: any) => r.isValid).reduce((sum: number, r: any) => {
+                      if (r.isExisting) return sum + (r.newFollowUpsToAdd?.length || 0);
+                      return sum + (r.parsedFollowUps?.length || 0);
+                    }, 0)}
                   </p>
                 </div>
                 <div className="bg-red-50 p-4 rounded-lg border border-red-200 text-center">
@@ -179,10 +190,14 @@ export function ImportReviewModal({ onClose, onSuccess }: ImportReviewModalProps
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
                       {preview.rows.map((row: any, i: number) => (
-                        <tr key={i} className={row.isValid ? 'bg-white' : 'bg-red-50/30'}>
+                        <tr key={i} className={row.isValid ? (row.isExisting ? 'bg-blue-50/30' : 'bg-white') : 'bg-red-50/30'}>
                           <td className="px-4 py-3 whitespace-nowrap">
                             {row.isValid ? (
-                              <span className="flex items-center text-green-600 text-xs font-bold uppercase"><CheckCircle className="w-3 h-3 mr-1" /> Valid</span>
+                              row.isExisting ? (
+                                <span className="flex items-center text-blue-600 text-xs font-bold uppercase"><CheckCircle className="w-3 h-3 mr-1" /> Update</span>
+                              ) : (
+                                <span className="flex items-center text-green-600 text-xs font-bold uppercase"><CheckCircle className="w-3 h-3 mr-1" /> Valid</span>
+                              )
                             ) : (
                               <div className="flex flex-col">
                                 <span className="flex items-center text-red-600 text-xs font-bold uppercase"><AlertCircle className="w-3 h-3 mr-1" /> Error</span>
@@ -190,8 +205,18 @@ export function ImportReviewModal({ onClose, onSuccess }: ImportReviewModalProps
                               </div>
                             )}
                           </td>
-                          <td className="px-4 py-3 text-sm text-gray-900 max-w-md truncate" title={row.text}>
-                            {row.text || <span className="text-gray-400 italic">Missing Text</span>}
+                          <td className="px-4 py-3 text-sm text-gray-900 max-w-md">
+                            <div className="truncate" title={row.text}>{row.text || <span className="text-gray-400 italic">Missing Text</span>}</div>
+                            {row.isValid && row.isExisting && row.newFollowUpsToAdd?.length > 0 && (
+                              <div className="mt-1 pl-2 border-l-2 border-blue-200">
+                                <p className="text-xs text-blue-600 font-semibold mb-1">Follow-ups to add:</p>
+                                {row.newFollowUpsToAdd.map((fu: string, fIdx: number) => (
+                                  <div key={fIdx} className="text-[10px] text-gray-600 flex items-center gap-1 truncate" title={fu}>
+                                    <CheckCircle className="w-2.5 h-2.5 text-blue-500 flex-shrink-0" /> {fu}
+                                  </div>
+                                ))}
+                              </div>
+                            )}
                           </td>
                           <td className="px-4 py-3 text-xs text-gray-500">
                             {row.type} • {row.difficulty}
