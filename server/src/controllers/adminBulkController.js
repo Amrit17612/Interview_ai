@@ -7,18 +7,26 @@ const AuditLog = require('../models/AuditLog');
  */
 const bulkUpdateStatus = async (req, res, next) => {
   try {
-    const { questionIds, status } = req.body;
-
-    if (!questionIds || !Array.isArray(questionIds) || questionIds.length === 0) {
-      return res.status(400).json({ success: false, message: 'No questions provided' });
-    }
+    const { questionIds, filters, status } = req.body;
 
     if (!['DRAFT', 'ACTIVE', 'ARCHIVED'].includes(status)) {
       return res.status(400).json({ success: false, message: 'Invalid status' });
     }
 
+    let query = {};
+    if (questionIds && Array.isArray(questionIds) && questionIds.length > 0) {
+      query._id = { $in: questionIds };
+    } else if (filters) {
+      if (filters.search) query.text = { $regex: filters.search, $options: 'i' };
+      if (filters.status) query.status = filters.status;
+      if (filters.type) query.type = filters.type;
+      if (filters.difficulty) query.difficulty = filters.difficulty;
+    } else {
+      return res.status(400).json({ success: false, message: 'No questions or filters provided' });
+    }
+
     const result = await Question.updateMany(
-      { _id: { $in: questionIds } },
+      query,
       { $set: { status, updatedBy: req.user._id } }
     );
 
@@ -27,7 +35,7 @@ const bulkUpdateStatus = async (req, res, next) => {
       action: 'BULK_UPDATE_QUESTION_STATUS',
       entityType: 'Question',
       entityId: 'BULK',
-      metadata: { count: result.modifiedCount, status }
+      metadata: { count: result.modifiedCount, status, filters }
     });
 
     res.json({

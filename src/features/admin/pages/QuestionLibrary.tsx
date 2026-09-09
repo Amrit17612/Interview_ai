@@ -145,6 +145,35 @@ export function QuestionLibrary() {
     }
   };
 
+  const handleActivateAll = async () => {
+    if (!window.confirm(`Are you sure you want to activate ALL questions matching the current filters?`)) return;
+    try {
+      setBulkLoading(true);
+      const res = await apiClient.post('/admin/questions/bulk/status', {
+        filters: {
+          search,
+          status: statusFilter,
+          type: typeFilter,
+          difficulty: difficultyFilter
+        },
+        status: 'ACTIVE'
+      });
+      if (res.data.success) {
+        setSelectedIds(new Set());
+        fetchQuestions(page);
+        alert(res.data.message);
+      }
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Bulk status update failed');
+    } finally {
+      setBulkLoading(false);
+    }
+  };
+
+  const handleSelectAllCurrentPage = () => {
+    setSelectedIds(new Set(questions.map(q => q._id)));
+  };
+
   return (
     <div className="space-y-6 pb-12">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -187,49 +216,71 @@ export function QuestionLibrary() {
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-3 bg-white p-4 rounded-xl shadow-sm border border-gray-200">
-        <div className="relative flex-1 min-w-[200px]">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-          <input
-            type="text"
-            placeholder="Search questions or tags..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-md focus:ring-brand-500 focus:border-brand-500 text-sm"
-          />
+      <div className="flex flex-col gap-4 bg-white p-4 rounded-xl shadow-sm border border-gray-200">
+        <div className="flex flex-wrap gap-3">
+          <div className="relative flex-1 min-w-[200px]">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search questions or tags..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-md focus:ring-brand-500 focus:border-brand-500 text-sm"
+            />
+          </div>
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-brand-500 focus:border-brand-500 bg-white"
+          >
+            <option value="">All Statuses</option>
+            <option value="DRAFT">Draft</option>
+            <option value="ACTIVE">Active</option>
+            <option value="ARCHIVED">Archived</option>
+          </select>
+          <select
+            value={typeFilter}
+            onChange={(e) => setTypeFilter(e.target.value)}
+            className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-brand-500 focus:border-brand-500 bg-white"
+          >
+            <option value="">All Types</option>
+            <option value="TECHNICAL">Technical</option>
+            <option value="BEHAVIORAL">Behavioral</option>
+            <option value="SYSTEM_DESIGN">System Design</option>
+            <option value="GENERAL">General</option>
+          </select>
+          <select
+            value={difficultyFilter}
+            onChange={(e) => setDifficultyFilter(e.target.value)}
+            className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-brand-500 focus:border-brand-500 bg-white"
+          >
+            <option value="">All Difficulties</option>
+            <option value="BEGINNER">Beginner</option>
+            <option value="INTERMEDIATE">Intermediate</option>
+            <option value="ADVANCED">Advanced</option>
+            <option value="EXPERT">Expert</option>
+          </select>
         </div>
-        <select
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-brand-500 focus:border-brand-500 bg-white"
-        >
-          <option value="">All Statuses</option>
-          <option value="DRAFT">Draft</option>
-          <option value="ACTIVE">Active</option>
-          <option value="ARCHIVED">Archived</option>
-        </select>
-        <select
-          value={typeFilter}
-          onChange={(e) => setTypeFilter(e.target.value)}
-          className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-brand-500 focus:border-brand-500 bg-white"
-        >
-          <option value="">All Types</option>
-          <option value="TECHNICAL">Technical</option>
-          <option value="BEHAVIORAL">Behavioral</option>
-          <option value="SYSTEM_DESIGN">System Design</option>
-          <option value="GENERAL">General</option>
-        </select>
-        <select
-          value={difficultyFilter}
-          onChange={(e) => setDifficultyFilter(e.target.value)}
-          className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-brand-500 focus:border-brand-500 bg-white"
-        >
-          <option value="">All Difficulties</option>
-          <option value="BEGINNER">Beginner</option>
-          <option value="INTERMEDIATE">Intermediate</option>
-          <option value="ADVANCED">Advanced</option>
-          <option value="EXPERT">Expert</option>
-        </select>
+
+        <div className="flex items-center justify-between border-t border-gray-100 pt-3">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handleSelectAllCurrentPage}
+              disabled={questions.length === 0}
+              className="text-sm font-medium text-brand-600 hover:text-brand-800 disabled:opacity-50"
+            >
+              Select All
+            </button>
+            <button
+              onClick={handleActivateAll}
+              disabled={bulkLoading || questions.length === 0}
+              className="text-sm font-medium text-brand-600 hover:text-brand-800 disabled:opacity-50 flex items-center"
+            >
+              <CheckCircle className="h-4 w-4 mr-1" />
+              Activate All
+            </button>
+          </div>
+        </div>
       </div>
 
       {selectedIds.size > 0 && (
@@ -239,7 +290,7 @@ export function QuestionLibrary() {
           </div>
           <div className="flex items-center gap-2">
             <button onClick={() => handleBulkStatus('ACTIVE')} disabled={bulkLoading} className="text-xs font-semibold bg-white border border-gray-300 text-gray-700 hover:bg-green-50 hover:text-green-700 hover:border-green-300 px-3 py-1.5 rounded flex items-center shadow-sm">
-              <CheckCircle className="h-3 w-3 mr-1" /> Publish Active
+              <CheckCircle className="h-3 w-3 mr-1" /> Activate Selected
             </button>
             <button onClick={() => handleBulkStatus('ARCHIVED')} disabled={bulkLoading} className="text-xs font-semibold bg-white border border-gray-300 text-gray-700 hover:bg-gray-100 px-3 py-1.5 rounded flex items-center shadow-sm">
               <Archive className="h-3 w-3 mr-1" /> Archive
