@@ -5,6 +5,13 @@ const pdfParse = require('pdf-parse');
 // Helper to normalize array fields from a string
 const parseArrayField = (str) => {
   if (!str) return [];
+  if (typeof str !== 'string') {
+    console.error(`[importExportUtils] parseArrayField received non-string: ${typeof str}`, str);
+    // If it's already an array, return it
+    if (Array.isArray(str)) return str;
+    // Otherwise coerce to string
+    str = String(str);
+  }
   // Support both comma and pipe separated
   const delim = str.includes('|') ? '|' : ',';
   return str.split(delim).map(s => s.trim()).filter(Boolean);
