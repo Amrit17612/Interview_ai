@@ -6,7 +6,7 @@ const { GoogleGenAI } = require('@google/genai');
 
 // Model selection is isolated here to prevent scattering across the codebase.
 // For initial foundation, we target a fast, cost-effective standard model.
-const TARGET_MODEL = 'gemini-3.5-flash';
+const TARGET_MODEL = 'gemini-2.5-flash';
 
 // Centralized safe generation config
 const DEFAULT_CONFIG = {
