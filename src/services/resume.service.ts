@@ -8,6 +8,7 @@ export interface Resume {
   parsingStatus?: 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'FAILED';
   parsedText?: string | null;
   analysisStatus?: 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'FAILED';
+  analysisStage?: 'IDLE' | 'PARSING_RESUME' | 'EVALUATING_RESUME' | 'PARSING_JD' | 'MATCHING_ATS' | 'FINALIZING' | 'COMPLETED' | 'FAILED' | null;
   lastAnalyzedAt?: string | null;
   analyzedJobId?: string | null;
   structuredData?: any;

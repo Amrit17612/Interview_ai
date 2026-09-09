@@ -47,6 +47,13 @@ const resumeSchema = new mongoose.Schema(
       enum: ['PENDING', 'PROCESSING', 'COMPLETED', 'FAILED'],
       default: 'PENDING'
     },
+    // Fine-grained stage tracking within PROCESSING so frontend polling can show real progress.
+    // Backward compatible: existing documents without this field will read as null/undefined.
+    analysisStage: {
+      type: String,
+      enum: ['IDLE', 'PARSING_RESUME', 'EVALUATING_RESUME', 'PARSING_JD', 'MATCHING_ATS', 'FINALIZING', 'COMPLETED', 'FAILED', null],
+      default: 'IDLE'
+    },
     lastAnalyzedAt: {
       type: Date,
       default: null

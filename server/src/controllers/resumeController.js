@@ -232,8 +232,9 @@ const analyzeResume = async (req, res, next) => {
       }
     }
 
-    // Set to processing
+    // Set to processing and reset stage
     resume.analysisStatus = 'PROCESSING';
+    resume.analysisStage = 'IDLE';
     await resume.save();
 
     // Start background task
@@ -279,6 +280,7 @@ const getResumeAnalysis = async (req, res, next) => {
       success: true,
       analysis: {
         analysisStatus: resume.analysisStatus,
+        analysisStage: resume.analysisStage || 'IDLE',
         lastAnalyzedAt: resume.lastAnalyzedAt,
         analyzedJobId: resume.analyzedJobId,
         structuredData: resume.structuredData,

@@ -1,170 +1,441 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Container } from '../../../components/ui/Container';
 import { PageHeader } from '../../../components/ui/PageHeader';
 import { Card, CardContent } from '../../../components/ui/Card';
 import { Button } from '../../../components/ui/Button';
 import { Spinner } from '../../../components/ui/Spinner';
-import { AlertCircle, CheckCircle, FileText, BarChart, FileCheck, Target, ArrowRight } from 'lucide-react';
+import {
+  AlertCircle, CheckCircle, FileText, BarChart, FileCheck,
+  Target, ArrowRight, Sparkles, Clock, RefreshCw
+} from 'lucide-react';
 import { resumeService, type Resume } from '../../../services/resume.service';
 import { ROUTES } from '../../../constants/routes';
+
+// ─── Types ──────────────────────────────────────────────────────────────────
+
+type AnalysisStage =
+  | 'IDLE' | 'PARSING_RESUME' | 'EVALUATING_RESUME'
+  | 'PARSING_JD' | 'MATCHING_ATS' | 'FINALIZING'
+  | 'COMPLETED' | 'FAILED' | null | undefined;
+
+type AnalysisStatus = 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'FAILED' | undefined;
+
+// ─── Stage configuration ─────────────────────────────────────────────────────
+
+interface StageInfo {
+  key: AnalysisStage;
+  label: string;
+  description: string;
+}
+
+const RESUME_ONLY_STAGES: StageInfo[] = [
+  { key: 'PARSING_RESUME',    label: 'Resume Parsing',       description: 'Extracting your skills, experience, and education...' },
+  { key: 'EVALUATING_RESUME', label: 'Resume Quality Check', description: 'Checking grammar, action verbs, and weak bullet points...' },
+  { key: 'FINALIZING',        label: 'Finalizing Results',   description: 'Preparing your personalized recommendations...' },
+];
+
+const RESUME_JD_STAGES: StageInfo[] = [
+  { key: 'PARSING_RESUME',    label: 'Resume Parsing',       description: 'Extracting your skills, experience, and education...' },
+  { key: 'EVALUATING_RESUME', label: 'Resume Quality Check', description: 'Checking grammar, action verbs, and weak bullet points...' },
+  { key: 'PARSING_JD',        label: 'Job Description Analysis', description: 'Understanding the requirements of the job description...' },
+  { key: 'MATCHING_ATS',      label: 'ATS Matching',         description: 'Comparing your resume with the job requirements...' },
+  { key: 'FINALIZING',        label: 'Finalizing Results',   description: 'Preparing your personalized recommendations...' },
+];
+
+// ─── Progress percentage per stage ──────────────────────────────────────────
+
+function getProgress(stage: AnalysisStage, hasJD: boolean): number {
+  if (!stage || stage === 'IDLE')       return 5;
+  if (stage === 'COMPLETED')            return 100;
+  if (stage === 'FAILED')               return 0;
+  if (hasJD) {
+    const map: Record<string, number> = {
+      PARSING_RESUME: 20, EVALUATING_RESUME: 42, PARSING_JD: 58, MATCHING_ATS: 76, FINALIZING: 92
+    };
+    return map[stage as string] ?? 5;
+  }
+  const map: Record<string, number> = {
+    PARSING_RESUME: 25, EVALUATING_RESUME: 58, FINALIZING: 85
+  };
+  return map[stage as string] ?? 5;
+}
+
+// Which stages are DONE (i.e., the backend has moved past them)
+function isStageCompleted(stageKey: AnalysisStage, currentStage: AnalysisStage, stages: StageInfo[]): boolean {
+  if (currentStage === 'COMPLETED') return true;
+  const currentIdx = stages.findIndex(s => s.key === currentStage);
+  const checkIdx   = stages.findIndex(s => s.key === stageKey);
+  return checkIdx !== -1 && currentIdx !== -1 && checkIdx < currentIdx;
+}
+
+function isStageActive(stageKey: AnalysisStage, currentStage: AnalysisStage): boolean {
+  return stageKey === currentStage;
+}
+
+function getStageMessage(stage: AnalysisStage, hasJD: boolean): string {
+  const stages = hasJD ? RESUME_JD_STAGES : RESUME_ONLY_STAGES;
+  return stages.find(s => s.key === stage)?.description ?? 'Initializing analysis...';
+}
+
+// ─── Subcomponents ───────────────────────────────────────────────────────────
+
+interface StepRowProps {
+  info: StageInfo;
+  status: 'done' | 'active' | 'pending';
+}
+
+function StepRow({ info, status }: StepRowProps) {
+  return (
+    <div className={`flex items-center gap-4 py-3 px-4 rounded-xl transition-all duration-300 ${
+      status === 'active'  ? 'bg-indigo-50 border border-indigo-200 shadow-sm'  :
+      status === 'done'    ? 'bg-emerald-50 border border-emerald-100 opacity-90' :
+                             'bg-gray-50 border border-gray-100 opacity-50'
+    }`}>
+      <div className="shrink-0 w-8 h-8 flex items-center justify-center rounded-full">
+        {status === 'done'   && <CheckCircle className="h-6 w-6 text-emerald-500" />}
+        {status === 'active' && <Spinner className="h-5 w-5 text-indigo-500" />}
+        {status === 'pending'&& <div className="h-5 w-5 rounded-full border-2 border-gray-300" />}
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className={`text-sm font-semibold truncate ${
+          status === 'done'   ? 'text-emerald-700' :
+          status === 'active' ? 'text-indigo-700'  : 'text-gray-400'
+        }`}>{info.label}</p>
+        {status === 'active' && (
+          <p className="text-xs text-indigo-500 mt-0.5">{info.description}</p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─── Main Component ───────────────────────────────────────────────────────────
+
+const POLL_INTERVAL_MS = 2500;
+const SAFETY_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
 
 export function ResumeAnalysis() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  
-  const [resumeData, setResumeData] = useState<Partial<Resume> | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+
+  // Separate initial-fetch state from analysis-in-progress state
+  const [isFetching, setIsFetching]         = useState(true);   // initial GET request
+  const [resumeData, setResumeData]         = useState<Partial<Resume> | null>(null);
+  const [fetchError, setFetchError]         = useState<string | null>(null);
   const [isStartingAnalysis, setIsStartingAnalysis] = useState(false);
+  const [actionError, setActionError]       = useState<string | null>(null);
+  const [safetyTimedOut, setSafetyTimedOut] = useState(false);
 
-  const fetchAnalysis = async () => {
-    if (!id) return;
-    try {
-      const data = await resumeService.getResumeAnalysis(id);
-      setResumeData(data.analysis);
-      
-      // Keep polling if processing
-      if (data.analysis.analysisStatus === 'PROCESSING' || data.analysis.analysisStatus === 'PENDING') {
-        setTimeout(fetchAnalysis, 3000);
-      } else {
-        setIsLoading(false);
+  // Polling refs (never stale-close over state)
+  const pollTimerRef    = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const safetyTimerRef  = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pollingRef      = useRef(false); // prevent overlapping requests
+
+  const clearTimers = useCallback(() => {
+    if (pollTimerRef.current)   { clearTimeout(pollTimerRef.current);   pollTimerRef.current = null; }
+    if (safetyTimerRef.current) { clearTimeout(safetyTimerRef.current); safetyTimerRef.current = null; }
+  }, []);
+
+  // ── Poll handler ──────────────────────────────────────────────────────────
+  const schedulePoll = useCallback(() => {
+    if (pollTimerRef.current) clearTimeout(pollTimerRef.current);
+    pollTimerRef.current = setTimeout(async () => {
+      if (!id || pollingRef.current) return;
+      pollingRef.current = true;
+      try {
+        const data = await resumeService.getResumeAnalysis(id);
+        setResumeData(data.analysis);
+        const s = data.analysis.analysisStatus;
+        if (s === 'PROCESSING' || s === 'PENDING') {
+          schedulePoll(); // continue polling
+        } else {
+          clearTimers(); // stop on COMPLETED or FAILED
+        }
+      } catch {
+        // If a poll fails, just retry rather than hard-erroring
+        schedulePoll();
+      } finally {
+        pollingRef.current = false;
       }
-    } catch (err: any) {
-      setError(err.message || 'Failed to load resume analysis.');
-      setIsLoading(false);
-    }
-  };
+    }, POLL_INTERVAL_MS);
+  }, [id, clearTimers]);
 
+  // ── Initial data fetch ────────────────────────────────────────────────────
   useEffect(() => {
-    fetchAnalysis();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    if (!id) return;
+    setIsFetching(true);
+    setFetchError(null);
+
+    resumeService.getResumeAnalysis(id)
+      .then(data => {
+        setResumeData(data.analysis);
+        // If already PROCESSING when we first load, start polling immediately
+        if (data.analysis.analysisStatus === 'PROCESSING' || data.analysis.analysisStatus === 'PENDING') {
+          schedulePoll();
+          // Safety timeout: if still running after 5 min, warn but don't cancel the job
+          safetyTimerRef.current = setTimeout(() => {
+            setSafetyTimedOut(true);
+          }, SAFETY_TIMEOUT_MS);
+        }
+      })
+      .catch(err => {
+        setFetchError(err.message || 'Failed to load resume analysis.');
+      })
+      .finally(() => setIsFetching(false));
+
+    return () => clearTimers();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
+  // ── Start analysis ────────────────────────────────────────────────────────
   const startAnalysis = async () => {
     if (!id) return;
     setIsStartingAnalysis(true);
-    setError(null);
+    setActionError(null);
+    setSafetyTimedOut(false);
     try {
-      // Currently not passing jobId from here. Job matching could be added later.
       await resumeService.analyzeResume(id);
-      // Change local state to processing to show loader
-      setResumeData(prev => prev ? { ...prev, analysisStatus: 'PROCESSING' } : { analysisStatus: 'PROCESSING' });
-      // Start polling
-      setTimeout(fetchAnalysis, 2000);
+      // Optimistically show PROCESSING immediately
+      setResumeData(prev => ({
+        ...(prev ?? {}),
+        analysisStatus: 'PROCESSING',
+        analysisStage: 'IDLE'
+      }));
+      schedulePoll();
+      safetyTimerRef.current = setTimeout(() => {
+        setSafetyTimedOut(true);
+      }, SAFETY_TIMEOUT_MS);
     } catch (err: any) {
-      setError(err.message || 'Failed to start analysis.');
+      setActionError(err.message || 'Failed to start analysis.');
     } finally {
       setIsStartingAnalysis(false);
     }
   };
 
-  if (isLoading) {
+  // ─── Derived state ────────────────────────────────────────────────────────
+  const status = resumeData?.analysisStatus as AnalysisStatus;
+  const stage  = resumeData?.analysisStage  as AnalysisStage;
+  const hasJD  = Boolean(resumeData?.analyzedJobId);
+  const stages = hasJD ? RESUME_JD_STAGES : RESUME_ONLY_STAGES;
+  const progress = getProgress(stage, hasJD);
+
+  // ─── Render: Initial fetch loading ───────────────────────────────────────
+  if (isFetching) {
     return (
       <Container className="py-8 flex flex-col items-center justify-center min-h-[60vh]">
-        <Spinner className="h-10 w-10 text-primary mb-4" />
-        <h2 className="text-xl font-semibold text-gray-900 mb-2">Loading Analysis...</h2>
-        <p className="text-gray-500">Retrieving your resume data.</p>
+        <div className="relative mb-6">
+          <div className="absolute inset-0 bg-indigo-200 blur-2xl rounded-full opacity-60" />
+          <Spinner className="h-12 w-12 text-indigo-600 relative" />
+        </div>
+        <h2 className="text-xl font-semibold text-gray-900 mb-2">Retrieving Your Resume...</h2>
+        <p className="text-gray-500 text-sm">Loading your analysis data from our servers.</p>
       </Container>
     );
   }
 
-  if (error) {
+  // ─── Render: Initial fetch error ──────────────────────────────────────────
+  if (fetchError) {
     return (
       <Container className="py-8">
-        <div className="bg-red-50 text-red-700 p-6 rounded-lg flex flex-col items-center text-center max-w-lg mx-auto border border-red-100">
-          <AlertCircle className="h-10 w-10 mb-4 text-red-500" />
-          <h3 className="text-lg font-semibold mb-2">Analysis Error</h3>
-          <p className="mb-6">{error}</p>
+        <div className="bg-red-50 border border-red-100 rounded-2xl p-8 flex flex-col items-center text-center max-w-lg mx-auto">
+          <AlertCircle className="h-12 w-12 mb-4 text-red-400" />
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">Could Not Load Analysis</h3>
+          <p className="text-gray-600 mb-6 text-sm">{fetchError}</p>
           <Button onClick={() => navigate(ROUTES.RESUME)}>Return to Dashboard</Button>
         </div>
       </Container>
     );
   }
 
-  const status = resumeData?.analysisStatus;
-
-  if (status === 'PENDING' || status === 'FAILED' || !status) {
+  // ─── Render: Not started / start screen ──────────────────────────────────
+  if (!status || status === 'PENDING') {
     return (
       <Container className="py-8 max-w-3xl">
-        <PageHeader 
-          title="Resume Intelligence" 
-          description="Analyze your resume using AI to get an ATS compatibility score, grammar checks, and weak bullet improvements." 
+        <PageHeader
+          title="Resume Intelligence"
+          description="Analyze your resume using AI — ATS scoring, grammar, weak bullets, and personalized suggestions."
         />
-        
-        <Card className="mt-8 text-center py-12">
-          <CardContent className="flex flex-col items-center">
-            <div className="h-16 w-16 bg-primary/10 rounded-full flex items-center justify-center mb-6">
-              <BarChart className="h-8 w-8 text-primary" />
+
+        {actionError && (
+          <div className="mt-4 p-3 bg-red-50 border border-red-100 text-red-700 rounded-lg text-sm flex items-center gap-2">
+            <AlertCircle className="h-4 w-4 shrink-0" />
+            {actionError}
+          </div>
+        )}
+
+        <Card className="mt-8">
+          <CardContent className="p-10 flex flex-col items-center text-center">
+            <div className="h-20 w-20 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center mb-6 shadow-lg shadow-indigo-200">
+              <Sparkles className="h-10 w-10 text-white" />
             </div>
-            <h3 className="text-2xl font-semibold text-gray-900 mb-4">Run AI Analysis</h3>
-            <p className="text-gray-600 max-w-md mx-auto mb-8">
-              We'll parse your resume, score its quality, identify formatting issues, and suggest improvements for weak action verbs and bullet points.
+            <h3 className="text-2xl font-bold text-gray-900 mb-3">AI Resume Analysis</h3>
+            <p className="text-gray-500 max-w-md mb-8 leading-relaxed">
+              Our AI will extract your resume structure, score quality, flag grammar and weak bullets, and — if you provide a job description — generate a live ATS compatibility score.
             </p>
-            <Button 
-              size="lg" 
-              onClick={startAnalysis} 
+
+            <div className="grid grid-cols-3 gap-4 w-full max-w-sm mb-10">
+              {[
+                { icon: FileText,  label: 'Parse Resume' },
+                { icon: FileCheck, label: 'Score Quality' },
+                { icon: BarChart,  label: 'ATS Matching' },
+              ].map(({ icon: Icon, label }) => (
+                <div key={label} className="flex flex-col items-center gap-2 p-3 bg-gray-50 rounded-xl border border-gray-100">
+                  <Icon className="h-5 w-5 text-indigo-500" />
+                  <span className="text-xs font-medium text-gray-600 text-center leading-tight">{label}</span>
+                </div>
+              ))}
+            </div>
+
+            <Button
+              size="lg"
+              onClick={startAnalysis}
               disabled={isStartingAnalysis}
-              className="w-full sm:w-auto"
+              className="w-full sm:w-auto min-w-[200px]"
             >
               {isStartingAnalysis ? (
-                <><Spinner className="mr-2 h-5 w-5" /> Starting Analysis...</>
+                <><Spinner className="mr-2 h-5 w-5" /> Starting...</>
               ) : (
                 <>Start Deep Analysis <ArrowRight className="ml-2 h-5 w-5" /></>
               )}
             </Button>
-            {status === 'FAILED' && (
-              <p className="mt-4 text-sm text-red-600 bg-red-50 px-3 py-1 rounded-md">
-                The previous analysis attempt failed. You can try again.
-              </p>
-            )}
+
           </CardContent>
         </Card>
       </Container>
     );
   }
 
+  // ─── Render: AI processing progress screen ────────────────────────────────
   if (status === 'PROCESSING') {
+    const currentStageMessage = getStageMessage(stage, hasJD);
+    const progressClamped = Math.min(Math.max(progress, 5), 99); // never show 100 until done
+
     return (
-      <Container className="py-16 flex flex-col items-center justify-center min-h-[60vh]">
-        <div className="relative mb-8">
-          <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full"></div>
-          <Spinner className="h-16 w-16 text-primary relative" />
+      <Container className="py-12 max-w-2xl">
+        <div className="text-center mb-10">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-50 border border-indigo-200 rounded-full text-indigo-700 text-sm font-medium mb-6">
+            <Sparkles className="h-4 w-4" />
+            AI Analysis in Progress
+          </div>
+          <h2 className="text-3xl font-bold text-gray-900 mb-3">Analyzing Your Resume</h2>
+          <p className="text-gray-500 max-w-md mx-auto leading-relaxed">
+            {currentStageMessage}
+          </p>
         </div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-3">AI is Analyzing Your Resume</h2>
-        <p className="text-gray-500 max-w-md text-center text-lg">
-          This usually takes 10 to 20 seconds. We're extracting structure, scoring quality, and finding improvements.
+
+        {/* Progress bar */}
+        <div className="mb-8">
+          <div className="flex justify-between items-center mb-2">
+            <span className="text-sm font-medium text-gray-500">Progress</span>
+            <span className="text-sm font-semibold text-indigo-600">{progressClamped}%</span>
+          </div>
+          <div className="w-full bg-gray-100 rounded-full h-3 overflow-hidden">
+            <div
+              className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full transition-all duration-700 ease-out"
+              style={{ width: `${progressClamped}%` }}
+            />
+          </div>
+        </div>
+
+        {/* Step list */}
+        <div className="space-y-2 mb-8">
+          {stages.map(info => {
+            const done   = isStageCompleted(info.key, stage, stages);
+            const active = isStageActive(info.key, stage);
+            return (
+              <StepRow
+                key={info.key}
+                info={info}
+                status={done ? 'done' : active ? 'active' : 'pending'}
+              />
+            );
+          })}
+        </div>
+
+        {/* Safety timeout warning */}
+        {safetyTimedOut && (
+          <div className="mt-6 p-4 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-3">
+            <Clock className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-medium text-amber-800">Analysis is taking longer than expected.</p>
+              <p className="text-xs text-amber-600 mt-1">The analysis may still be running in the background. You can refresh to check for updates.</p>
+              <Button
+                variant="outline"
+                size="sm"
+                className="mt-3 border-amber-300 text-amber-700 hover:bg-amber-100"
+                onClick={() => window.location.reload()}
+              >
+                <RefreshCw className="h-3 w-3 mr-2" /> Refresh
+              </Button>
+            </div>
+          </div>
+        )}
+
+        <p className="text-center text-xs text-gray-400 mt-6">
+          This usually takes 15–30 seconds. Do not close this page.
         </p>
-        <div className="mt-12 w-full max-w-md bg-gray-100 rounded-full h-2 overflow-hidden">
-          <div className="bg-primary h-full animate-[pulse_2s_ease-in-out_infinite] w-full origin-left scale-x-50"></div>
+      </Container>
+    );
+  }
+
+  // ─── Render: FAILED screen ────────────────────────────────────────────────
+  if (status === 'FAILED') {
+    return (
+      <Container className="py-8 max-w-2xl">
+        <div className="bg-red-50 border border-red-100 rounded-2xl p-10 flex flex-col items-center text-center">
+          <div className="h-16 w-16 bg-red-100 rounded-2xl flex items-center justify-center mb-6">
+            <AlertCircle className="h-8 w-8 text-red-500" />
+          </div>
+          <h3 className="text-2xl font-bold text-gray-900 mb-2">Analysis Couldn't Complete</h3>
+          <p className="text-gray-600 mb-8 max-w-sm">
+            Something went wrong while analyzing your resume. This can happen if the AI provider is temporarily unavailable.
+          </p>
+          {actionError && (
+            <p className="text-sm text-red-600 bg-red-100 px-4 py-2 rounded-lg mb-6">{actionError}</p>
+          )}
+          <div className="flex gap-3">
+            <Button variant="outline" onClick={() => navigate(ROUTES.RESUME)}>Back to Resumes</Button>
+            <Button onClick={startAnalysis} disabled={isStartingAnalysis}>
+              {isStartingAnalysis ? <><Spinner className="mr-2 h-4 w-4" /> Starting...</> : 'Try Again'}
+            </Button>
+          </div>
         </div>
       </Container>
     );
   }
 
-  // COMPLETED STATE
+  // ─── Render: COMPLETED results ────────────────────────────────────────────
   return (
     <Container className="py-8">
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
-        <PageHeader 
-          title="Analysis Dashboard" 
-          description="Review your AI-generated resume intelligence report." 
-        />
+        <div>
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-50 border border-emerald-200 rounded-full text-emerald-700 text-xs font-medium mb-3">
+            <CheckCircle className="h-3.5 w-3.5" /> Analysis Complete
+          </div>
+          <PageHeader
+            title="Analysis Dashboard"
+            description="Review your AI-generated resume intelligence report."
+          />
+        </div>
         <div className="flex gap-3">
           <Button variant="outline" onClick={() => navigate(ROUTES.RESUME)}>Back to Resumes</Button>
-          <Button onClick={startAnalysis}>Re-analyze</Button>
+          <Button onClick={startAnalysis} disabled={isStartingAnalysis}>
+            {isStartingAnalysis ? <><Spinner className="mr-2 h-4 w-4" /> Starting...</> : 'Re-analyze'}
+          </Button>
         </div>
       </div>
 
+      {/* Score cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <Card className="md:col-span-1 border-l-4 border-l-primary">
+        <Card className="md:col-span-1 border-l-4 border-l-indigo-500">
           <CardContent className="p-6">
             <h3 className="text-sm font-medium text-gray-500 mb-1">Resume Quality Score</h3>
             <div className="flex items-end gap-2">
-              <span className="text-4xl font-bold text-gray-900">{resumeData?.qualityScore || 0}</span>
-              <span className="text-gray-500 mb-1">/ 100</span>
+              <span className="text-5xl font-bold text-gray-900">{resumeData?.qualityScore ?? 0}</span>
+              <span className="text-gray-400 mb-1 text-lg">/ 100</span>
             </div>
-            <p className="text-xs text-gray-500 mt-4">Based on readability, impact, and structure.</p>
+            <p className="text-xs text-gray-400 mt-3">Based on readability, impact, and structure.</p>
           </CardContent>
         </Card>
 
@@ -173,10 +444,10 @@ export function ResumeAnalysis() {
             <CardContent className="p-6">
               <h3 className="text-sm font-medium text-gray-500 mb-1">ATS Compatibility</h3>
               <div className="flex items-end gap-2">
-                <span className="text-4xl font-bold text-gray-900">{resumeData?.atsScore || 0}</span>
-                <span className="text-gray-500 mb-1">/ 100</span>
+                <span className="text-5xl font-bold text-gray-900">{resumeData?.atsScore ?? 0}</span>
+                <span className="text-gray-400 mb-1 text-lg">/ 100</span>
               </div>
-              <p className="text-xs text-emerald-600 mt-4 flex items-center gap-1 font-medium">
+              <p className="text-xs text-emerald-600 mt-3 flex items-center gap-1 font-medium">
                 <CheckCircle className="h-3 w-3" /> Matched against Job Description
               </p>
             </CardContent>
@@ -186,8 +457,7 @@ export function ResumeAnalysis() {
             <CardContent className="p-6 flex flex-col justify-center items-center h-full text-center">
               <Target className="h-6 w-6 text-gray-400 mb-2" />
               <h3 className="text-sm font-medium text-gray-700 mb-1">No JD Selected</h3>
-              <p className="text-xs text-gray-500 mb-3">Compare against a job description for an ATS score.</p>
-              {/* Future feature: open JD selection modal */}
+              <p className="text-xs text-gray-500 mb-3">Add a Job Description for an ATS score.</p>
               <Button variant="outline" size="sm" disabled>Select Job</Button>
             </CardContent>
           </Card>
@@ -197,73 +467,75 @@ export function ResumeAnalysis() {
           <CardContent className="p-6">
             <h3 className="text-sm font-medium text-gray-500 mb-4">Quick Stats</h3>
             <div className="space-y-3">
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">Grammar Issues</span>
-                <span className="inline-flex items-center justify-center px-2 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
-                  {resumeData?.contentAnalysis?.grammarIssues?.length || 0}
-                </span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">Weak Bullets</span>
-                <span className="inline-flex items-center justify-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                  {resumeData?.contentAnalysis?.weakBullets?.length || 0}
-                </span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">Repeated Verbs</span>
-                <span className="inline-flex items-center justify-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                  {resumeData?.contentAnalysis?.repeatedVerbs?.length || 0}
-                </span>
-              </div>
+              {[
+                { label: 'Grammar Issues',  count: resumeData?.contentAnalysis?.grammarIssues?.length,  color: 'bg-amber-100 text-amber-800' },
+                { label: 'Weak Bullets',    count: resumeData?.contentAnalysis?.weakBullets?.length,    color: 'bg-red-100 text-red-800' },
+                { label: 'Repeated Verbs',  count: resumeData?.contentAnalysis?.repeatedVerbs?.length,  color: 'bg-blue-100 text-blue-800' },
+              ].map(({ label, count, color }) => (
+                <div key={label} className="flex justify-between items-center">
+                  <span className="text-sm text-gray-600">{label}</span>
+                  <span className={`inline-flex items-center justify-center px-2 py-1 rounded-full text-xs font-medium ${color}`}>
+                    {count || 0}
+                  </span>
+                </div>
+              ))}
             </div>
           </CardContent>
         </Card>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        
-        {/* WEAK BULLETS */}
+
+        {/* LEFT COLUMN */}
         <div className="space-y-6">
+          {/* Weak Bullets */}
           <div>
             <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
               <AlertCircle className="h-5 w-5 text-red-500" />
               Impact & Bullet Quality
             </h3>
-            {resumeData?.contentAnalysis?.weakBullets?.length > 0 ? (
+            {(resumeData?.contentAnalysis?.weakBullets?.length ?? 0) > 0 ? (
               <div className="space-y-4">
-                {resumeData.contentAnalysis.weakBullets.map((bullet: any, idx: number) => (
+                {resumeData!.contentAnalysis!.weakBullets.map((bullet: any, idx: number) => (
                   <Card key={idx} className="border-red-100 shadow-sm">
-                    <CardContent className="p-4">
-                      <p className="text-sm text-gray-500 mb-2">Original Text:</p>
-                      <p className="text-sm font-medium text-gray-800 bg-red-50 p-2 rounded line-through decoration-red-300 decoration-2 mb-3">"{bullet.original}"</p>
-                      
-                      <p className="text-sm text-red-600 font-medium mb-3">Issue: {bullet.problem}</p>
-                      
-                      <p className="text-sm text-gray-500 mb-2">Suggested Rewrite:</p>
-                      <p className="text-sm font-medium text-emerald-800 bg-emerald-50 p-2 border border-emerald-100 rounded">"{bullet.suggestion}"</p>
+                    <CardContent className="p-4 space-y-3">
+                      <div>
+                        <p className="text-xs text-gray-400 uppercase font-medium mb-1">Original</p>
+                        <p className="text-sm text-gray-700 bg-red-50 p-2.5 rounded-lg line-through decoration-red-300 decoration-2">
+                          "{bullet.original}"
+                        </p>
+                      </div>
+                      <p className="text-xs font-semibold text-red-600">Issue: {bullet.problem}</p>
+                      <div>
+                        <p className="text-xs text-gray-400 uppercase font-medium mb-1">Suggested Rewrite</p>
+                        <p className="text-sm text-emerald-800 bg-emerald-50 p-2.5 border border-emerald-100 rounded-lg">
+                          "{bullet.suggestion}"
+                        </p>
+                      </div>
                     </CardContent>
                   </Card>
                 ))}
               </div>
             ) : (
               <Card className="bg-emerald-50 border-emerald-100">
-                <CardContent className="p-4 text-emerald-800 text-sm flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4" /> No weak bullets detected. Great job quantifying your impact!
+                <CardContent className="p-4 text-emerald-700 text-sm flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4 shrink-0" />
+                  No weak bullets detected. Great job quantifying your impact!
                 </CardContent>
               </Card>
             )}
           </div>
 
-          {/* GRAMMAR */}
+          {/* Grammar */}
           <div>
             <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
               <FileCheck className="h-5 w-5 text-amber-500" />
               Grammar & Spelling
             </h3>
-            {resumeData?.contentAnalysis?.grammarIssues?.length > 0 ? (
+            {(resumeData?.contentAnalysis?.grammarIssues?.length ?? 0) > 0 ? (
               <div className="space-y-3">
-                {resumeData.contentAnalysis.grammarIssues.map((issue: any, idx: number) => (
-                  <div key={idx} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                {resumeData!.contentAnalysis!.grammarIssues.map((issue: any, idx: number) => (
+                  <div key={idx} className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
                     <div className="flex gap-4">
                       <div className="flex-1">
                         <p className="text-xs text-red-500 line-through mb-1">{issue.original}</p>
@@ -278,8 +550,9 @@ export function ResumeAnalysis() {
               </div>
             ) : (
               <Card className="bg-emerald-50 border-emerald-100">
-                <CardContent className="p-4 text-emerald-800 text-sm flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4" /> No grammar or spelling issues detected.
+                <CardContent className="p-4 text-emerald-700 text-sm flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4 shrink-0" />
+                  No grammar or spelling issues detected.
                 </CardContent>
               </Card>
             )}
@@ -288,7 +561,7 @@ export function ResumeAnalysis() {
 
         {/* RIGHT COLUMN */}
         <div className="space-y-6">
-          {/* STRUCTURED EXTRACTION PREVIEW */}
+          {/* Parsed Structure */}
           <div>
             <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
               <FileText className="h-5 w-5 text-blue-500" />
@@ -296,28 +569,34 @@ export function ResumeAnalysis() {
             </h3>
             <Card>
               <CardContent className="p-4">
-                <p className="text-sm text-gray-600 mb-4">Here is how the ATS reads your resume data:</p>
-                <div className="space-y-3">
+                <p className="text-sm text-gray-500 mb-4">How an ATS parser reads your resume:</p>
+                <div className="space-y-4">
                   <div>
-                    <span className="text-xs font-semibold text-gray-500 uppercase">Name</span>
-                    <p className="font-medium">{resumeData?.structuredData?.personal?.name || 'Not Found'}</p>
+                    <span className="text-xs font-semibold text-gray-400 uppercase">Name</span>
+                    <p className="font-semibold text-gray-900 mt-0.5">
+                      {resumeData?.structuredData?.personal?.name || 'Not Found'}
+                    </p>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <span className="text-xs font-semibold text-gray-500 uppercase">Email</span>
-                      <p className="text-sm">{resumeData?.structuredData?.personal?.email || 'Not Found'}</p>
+                      <span className="text-xs font-semibold text-gray-400 uppercase">Email</span>
+                      <p className="text-sm text-gray-700 mt-0.5 truncate">
+                        {resumeData?.structuredData?.personal?.email || '—'}
+                      </p>
                     </div>
                     <div>
-                      <span className="text-xs font-semibold text-gray-500 uppercase">Phone</span>
-                      <p className="text-sm">{resumeData?.structuredData?.personal?.phone || 'Not Found'}</p>
+                      <span className="text-xs font-semibold text-gray-400 uppercase">Phone</span>
+                      <p className="text-sm text-gray-700 mt-0.5">
+                        {resumeData?.structuredData?.personal?.phone || '—'}
+                      </p>
                     </div>
                   </div>
                   <div>
-                    <span className="text-xs font-semibold text-gray-500 uppercase">Technical Skills</span>
-                    <div className="flex flex-wrap gap-1 mt-1">
-                      {resumeData?.structuredData?.skills?.technical?.length > 0 ? (
-                        resumeData.structuredData.skills.technical.map((skill: string, i: number) => (
-                          <span key={i} className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
+                    <span className="text-xs font-semibold text-gray-400 uppercase">Technical Skills</span>
+                    <div className="flex flex-wrap gap-1 mt-2">
+                      {(resumeData?.structuredData?.skills?.technical?.length ?? 0) > 0 ? (
+                        resumeData!.structuredData!.skills!.technical.map((skill: string, i: number) => (
+                          <span key={i} className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium bg-indigo-50 text-indigo-700 border border-indigo-100">
                             {skill}
                           </span>
                         ))
@@ -327,11 +606,14 @@ export function ResumeAnalysis() {
                     </div>
                   </div>
                   <div>
-                    <span className="text-xs font-semibold text-gray-500 uppercase">Experience ({resumeData?.structuredData?.experience?.length || 0} roles)</span>
-                    <ul className="mt-1 space-y-2">
+                    <span className="text-xs font-semibold text-gray-400 uppercase">
+                      Experience ({resumeData?.structuredData?.experience?.length || 0} roles)
+                    </span>
+                    <ul className="mt-2 space-y-1.5">
                       {resumeData?.structuredData?.experience?.map((exp: any, i: number) => (
                         <li key={i} className="text-sm">
-                          <span className="font-medium text-gray-900">{exp.title}</span> at <span className="text-gray-600">{exp.company}</span>
+                          <span className="font-medium text-gray-900">{exp.title}</span>
+                          {exp.company && <span className="text-gray-500"> at {exp.company}</span>}
                         </li>
                       ))}
                     </ul>
@@ -341,24 +623,28 @@ export function ResumeAnalysis() {
             </Card>
           </div>
 
-          {/* REPEATED VERBS */}
+          {/* Repeated Verbs */}
           <div>
             <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
               <BarChart className="h-5 w-5 text-purple-500" />
               Repeated Action Verbs
             </h3>
-            {resumeData?.contentAnalysis?.repeatedVerbs?.length > 0 ? (
+            {(resumeData?.contentAnalysis?.repeatedVerbs?.length ?? 0) > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {resumeData.contentAnalysis.repeatedVerbs.map((verbItem: any, idx: number) => (
-                  <div key={idx} className="bg-white border border-gray-200 rounded-lg p-3 shadow-sm">
+                {resumeData!.contentAnalysis!.repeatedVerbs.map((verbItem: any, idx: number) => (
+                  <div key={idx} className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
                     <div className="flex justify-between items-center mb-2">
-                      <span className="font-semibold text-gray-900">"{verbItem.verb}"</span>
-                      <span className="text-xs font-medium bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full">{verbItem.count} uses</span>
+                      <span className="font-bold text-gray-900">"{verbItem.verb}"</span>
+                      <span className="text-xs font-medium bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full">
+                        {verbItem.count}×
+                      </span>
                     </div>
-                    <p className="text-xs text-gray-500 mb-1">Try instead:</p>
+                    <p className="text-xs text-gray-400 mb-1.5">Try instead:</p>
                     <div className="flex flex-wrap gap-1">
                       {verbItem.alternatives?.slice(0, 3).map((alt: string, i: number) => (
-                        <span key={i} className="text-[11px] bg-gray-100 text-gray-700 px-1.5 py-0.5 rounded border border-gray-200">{alt}</span>
+                        <span key={i} className="text-[11px] bg-gray-100 text-gray-700 px-2 py-0.5 rounded-md border border-gray-200">
+                          {alt}
+                        </span>
                       ))}
                     </div>
                   </div>
@@ -366,8 +652,9 @@ export function ResumeAnalysis() {
               </div>
             ) : (
               <Card className="bg-emerald-50 border-emerald-100">
-                <CardContent className="p-4 text-emerald-800 text-sm flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4" /> Good vocabulary! No overly repeated action verbs.
+                <CardContent className="p-4 text-emerald-700 text-sm flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4 shrink-0" />
+                  Good vocabulary! No overly repeated action verbs.
                 </CardContent>
               </Card>
             )}
