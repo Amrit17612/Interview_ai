@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Question = require('../models/Question');
 const AuditLog = require('../models/AuditLog');
 const { parseCSV, parseXLSX, parsePDFDeterministic } = require('../utils/importExportUtils');
@@ -204,73 +205,74 @@ const confirmImport = async (req, res, next) => {
     }
 
     let inserted = [];
-    if (validQuestionsToInsert.length > 0) {
-      inserted = await Question.insertMany(validQuestionsToInsert, { ordered: true });
-    }
-    
     let totalFollowUps = 0;
-    for (let i = 0; i < inserted.length; i++) {
-      const mainQ = inserted[i];
-      const fus = followUpsMap.get(i);
-      if (fus && fus.length > 0) {
-        const fuDocs = fus.map(fuText => ({
-          text: fuText,
-          type: mainQ.type,
-          difficulty: mainQ.difficulty,
-          domains: mainQ.domains,
-          status: 'DRAFT',
-          category: 'follow-up',
-          createdBy: req.user._id,
-          updatedBy: req.user._id
-        }));
-        
-        try {
-           const insertedFus = await Question.insertMany(fuDocs, { ordered: false });
-           await Question.findByIdAndUpdate(mainQ._id, {
-             $push: { 'followUps.neutral': { $each: insertedFus.map(f => f._id) } }
-           });
-           totalFollowUps += insertedFus.length;
-        } catch (e) {
-           console.error('Error inserting followups for main question', mainQ._id, e);
-        }
-      }
-    }
-
     let updatedCount = 0;
-    for (const update of questionsToUpdate) {
-      const { existingId, mainQ, newFollowUpsToAdd } = update;
-      if (newFollowUpsToAdd.length > 0) {
-        const fuDocs = newFollowUpsToAdd.map(fuText => ({
-          text: fuText,
-          type: mainQ.type,
-          difficulty: mainQ.difficulty,
-          domains: mainQ.domains,
-          status: 'DRAFT',
-          category: 'follow-up',
-          createdBy: req.user._id,
-          updatedBy: req.user._id
-        }));
-        
-        try {
-           const insertedFus = await Question.insertMany(fuDocs, { ordered: false });
-           await Question.findByIdAndUpdate(existingId, {
-             $push: { 'followUps.neutral': { $each: insertedFus.map(f => f._id) } }
-           });
-           totalFollowUps += insertedFus.length;
-           updatedCount++;
-        } catch (e) {
-           console.error('Error inserting followups for existing question', existingId, e);
-        }
-      }
-    }
 
-    await AuditLog.create({
-      admin: req.user._id,
-      action: 'BULK_IMPORT_QUESTIONS',
-      entityType: 'Question',
-      entityId: null, // Bulk
-      metadata: { count: inserted.length, updatedCount, followUpCount: totalFollowUps }
-    });
+    const session = await mongoose.startSession();
+    try {
+      await session.withTransaction(async () => {
+        if (validQuestionsToInsert.length > 0) {
+          inserted = await Question.insertMany(validQuestionsToInsert, { ordered: true, session });
+        }
+        
+        for (let i = 0; i < inserted.length; i++) {
+          const mainQ = inserted[i];
+          const fus = followUpsMap.get(i);
+          if (fus && fus.length > 0) {
+            const fuDocs = fus.map(fuText => ({
+              text: fuText,
+              type: mainQ.type,
+              difficulty: mainQ.difficulty,
+              domains: mainQ.domains,
+              status: 'DRAFT',
+              category: 'follow-up',
+              createdBy: req.user._id,
+              updatedBy: req.user._id
+            }));
+            
+            const insertedFus = await Question.insertMany(fuDocs, { ordered: false, session });
+            await Question.findByIdAndUpdate(mainQ._id, {
+              $push: { 'followUps.neutral': { $each: insertedFus.map(f => f._id) } }
+            }, { session });
+            totalFollowUps += insertedFus.length;
+          }
+        }
+
+        for (const update of questionsToUpdate) {
+          const { existingId, mainQ, newFollowUpsToAdd } = update;
+          if (newFollowUpsToAdd.length > 0) {
+            const fuDocs = newFollowUpsToAdd.map(fuText => ({
+              text: fuText,
+              type: mainQ.type,
+              difficulty: mainQ.difficulty,
+              domains: mainQ.domains,
+              status: 'DRAFT',
+              category: 'follow-up',
+              createdBy: req.user._id,
+              updatedBy: req.user._id
+            }));
+            
+            const insertedFus = await Question.insertMany(fuDocs, { ordered: false, session });
+            await Question.findByIdAndUpdate(existingId, {
+              $push: { 'followUps.neutral': { $each: insertedFus.map(f => f._id) } }
+            }, { session });
+            totalFollowUps += insertedFus.length;
+            updatedCount++;
+          }
+        }
+
+        const auditDocs = [{
+          admin: req.user._id,
+          action: 'BULK_IMPORT_QUESTIONS',
+          entityType: 'Question',
+          entityId: 'BULK', // Fixed from null
+          metadata: { count: inserted.length, updatedCount, followUpCount: totalFollowUps }
+        }];
+        await AuditLog.create(auditDocs, { session });
+      });
+    } finally {
+      await session.endSession();
+    }
 
     res.json({
       success: true,
