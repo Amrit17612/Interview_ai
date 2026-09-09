@@ -25,7 +25,7 @@ interface FeedbackDetail {
     status: string;
     overallScore: number | null;
     createdAt: string;
-  };
+  } | null;
   overallExperience: number;
   questionQuality: number;
   skillTesting: number;
@@ -83,6 +83,7 @@ export function AdminFeedbackDetail() {
   };
 
   const getReportStatus = () => {
+    if (!feedback.session) return 'Unavailable';
     if (feedback.session.status !== 'COMPLETED') return 'Incomplete';
     if (feedback.session.overallScore === null) return 'Generating';
     return 'Generated';
@@ -143,42 +144,54 @@ export function AdminFeedbackDetail() {
             <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider flex items-center mb-4">
               <FileText className="w-4 h-4 mr-2" /> Interview Info
             </h3>
-            <div className="space-y-3">
-              <div>
-                <p className="text-sm text-gray-500">Domain</p>
-                <p className="font-medium text-gray-900">{feedback.session.configuration?.domain || 'N/A'}</p>
+            {!feedback.session ? (
+              <p className="text-sm text-gray-500 italic p-3 bg-gray-50 rounded-lg border border-gray-100">
+                Interview session details are unavailable for this feedback.
+              </p>
+            ) : (
+              <div className="space-y-3">
+                <div>
+                  <p className="text-sm text-gray-500">Domain</p>
+                  <p className="font-medium text-gray-900">{feedback.session?.configuration?.domain || 'N/A'}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Difficulty</p>
+                  <p className="text-gray-900">{feedback.session?.configuration?.difficulty || 'N/A'}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Started At</p>
+                  <p className="text-gray-900">{new Date(feedback.session.createdAt).toLocaleDateString()}</p>
+                </div>
               </div>
-              <div>
-                <p className="text-sm text-gray-500">Difficulty</p>
-                <p className="text-gray-900">{feedback.session.configuration?.difficulty || 'N/A'}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">Started At</p>
-                <p className="text-gray-900">{new Date(feedback.session.createdAt).toLocaleDateString()}</p>
-              </div>
-            </div>
+            )}
           </div>
 
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider flex items-center mb-4">
               <Activity className="w-4 h-4 mr-2" /> System Status
             </h3>
-            <div className="space-y-3">
-              <div>
-                <p className="text-sm text-gray-500 mb-1">Report Status</p>
-                <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                  getReportStatus() === 'Generated' ? 'bg-green-100 text-green-800' :
-                  getReportStatus() === 'Generating' ? 'bg-yellow-100 text-yellow-800' :
-                  'bg-red-100 text-red-800'
-                }`}>
-                  {getReportStatus()}
-                </span>
+            {!feedback.session ? (
+              <p className="text-sm text-gray-500 italic p-3 bg-gray-50 rounded-lg border border-gray-100">
+                System status is unavailable.
+              </p>
+            ) : (
+              <div className="space-y-3">
+                <div>
+                  <p className="text-sm text-gray-500 mb-1">Report Status</p>
+                  <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                    getReportStatus() === 'Generated' ? 'bg-green-100 text-green-800' :
+                    getReportStatus() === 'Generating' ? 'bg-yellow-100 text-yellow-800' :
+                    'bg-red-100 text-red-800'
+                  }`}>
+                    {getReportStatus()}
+                  </span>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Session ID</p>
+                  <p className="text-xs text-gray-400 truncate">{feedback.session._id}</p>
+                </div>
               </div>
-              <div>
-                <p className="text-sm text-gray-500">Session ID</p>
-                <p className="text-xs text-gray-400 truncate">{feedback.session._id}</p>
-              </div>
-            </div>
+            )}
           </div>
         </div>
 
