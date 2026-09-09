@@ -218,16 +218,7 @@ export const router = createBrowserRouter([
       { path: ROUTES.ACHIEVEMENTS_BADGES, element: <ComingSoon /> },
       { path: ROUTES.PROFILE, element: <UserProfile /> },
       { path: ROUTES.PROFILE_EDIT, element: <ComingSoon /> },
-      { path: ROUTES.SETTINGS_GENERAL, element: <ComingSoon /> },
-      { path: ROUTES.SETTINGS_ACCOUNT, element: <ComingSoon /> },
-      { path: ROUTES.SETTINGS_NOTIFICATIONS, element: <ComingSoon /> },
-      { path: ROUTES.SETTINGS_PREFERENCES, element: <ComingSoon /> },
-      { path: ROUTES.PRIVACY_CENTER, element: <ComingSoon /> },
-      { path: ROUTES.SECURITY_SETTINGS, element: <ComingSoon /> },
-      { path: ROUTES.HELP_CENTER, element: <ComingSoon /> },
-      { path: ROUTES.CONTACT_SUPPORT, element: <ComingSoon /> },
-      { path: ROUTES.FEEDBACK, element: <ComingSoon /> },
-      { path: ROUTES.REPORT_BUG, element: <ComingSoon /> },
+
       { path: ROUTES.CREDITS, element: <Wallet /> },
       { path: ROUTES.CREDITS_REFERRAL, element: <ComingSoon /> },
       { path: ROUTES.INTERVIEW_WAITING, element: <ExclusiveWaitingRoom /> }

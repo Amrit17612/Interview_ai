@@ -14,9 +14,6 @@ import {
   Code2,
   History,
   Medal,
-  Settings,
-  Shield,
-  HelpCircle,
   Lock,
   ShoppingBag
 } from 'lucide-react';
@@ -69,9 +66,6 @@ const SIDEBAR_CATEGORIES: SidebarCategory[] = [
     title: 'ACCOUNT',
     items: [
       { name: 'Profile', path: ROUTES.PROFILE, icon: User },
-      { name: 'Settings', path: ROUTES.SETTINGS_GENERAL, icon: Settings },
-      { name: 'Privacy Center', path: ROUTES.PRIVACY_CENTER, icon: Shield },
-      { name: 'Help & Support', path: ROUTES.HELP_CENTER, icon: HelpCircle },
     ]
   }
 ];

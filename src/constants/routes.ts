@@ -111,21 +111,7 @@ export const ROUTES = {
   PROFILE: '/profile',
   PROFILE_EDIT: '/profile/edit',
 
-  // Settings
-  SETTINGS_GENERAL: '/settings/general',
-  SETTINGS_ACCOUNT: '/settings/account',
-  SETTINGS_NOTIFICATIONS: '/settings/notifications',
-  SETTINGS_PREFERENCES: '/settings/preferences',
 
-  // Privacy & Security
-  PRIVACY_CENTER: '/privacy/center',
-  SECURITY_SETTINGS: '/privacy/security-settings',
-
-  // Support
-  HELP_CENTER: '/support/help-center',
-  CONTACT_SUPPORT: '/support/contact',
-  FEEDBACK: '/support/feedback',
-  REPORT_BUG: '/support/report-bug',
 
   // Credits
   CREDITS: '/credits',

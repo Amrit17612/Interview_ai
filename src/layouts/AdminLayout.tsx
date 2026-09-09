@@ -6,10 +6,7 @@ import { ROUTES } from '../constants/routes';
 import { 
   LayoutDashboard, 
   CreditCard, 
-  ShoppingBag, 
-  BarChart, 
   BookOpen,
-  PlusSquare,
   Users,
   ShieldAlert,
   Settings,
@@ -96,8 +93,6 @@ function AdminSidebar({ onClose }: { onClose: () => void }) {
       items: [
         { name: 'Payments', icon: CreditCard, href: '/admin/payments' },
         { name: 'Promos', icon: Tag, href: '/admin/promos' },
-        { name: 'Purchases', icon: ShoppingBag, href: '/admin/purchases', disabled: true },
-        { name: 'Bundle Analytics', icon: BarChart, href: '/admin/bundle-analytics', disabled: true },
       ],
     },
     {
@@ -107,7 +102,6 @@ function AdminSidebar({ onClose }: { onClose: () => void }) {
         { name: 'Domain Bundles', icon: BookOpen, href: ROUTES.ADMIN_DOMAIN_BUNDLES },
         { name: 'Question Library', icon: BookOpen, href: ROUTES.ADMIN_QUESTIONS },
         { name: 'Interview Templates', icon: Settings, href: ROUTES.ADMIN_TEMPLATES },
-        { name: 'Custom Interviews', icon: PlusSquare, href: '/admin/custom-interviews', disabled: true },
       ],
     },
     {
@@ -122,7 +116,6 @@ function AdminSidebar({ onClose }: { onClose: () => void }) {
       title: 'SYSTEM',
       items: [
         { name: 'Audit Logs', icon: ShieldAlert, href: '/admin/audit-logs' },
-        { name: 'Settings', icon: Settings, href: '/admin/settings', disabled: true },
       ],
     },
   ];
@@ -146,19 +139,7 @@ function AdminSidebar({ onClose }: { onClose: () => void }) {
             </h3>
             <div className="space-y-1">
               {section.items.map((item) => {
-                if (item.disabled) {
-                  return (
-                    <div 
-                      key={item.name} 
-                      className="flex items-center px-3 py-2 text-sm font-medium rounded-md text-gray-400 cursor-not-allowed opacity-60"
-                      title="Coming soon in Phase 2+"
-                    >
-                      <item.icon className="mr-3 h-5 w-5 flex-shrink-0" />
-                      {item.name}
-                    </div>
-                  );
-                }
-                
+
                 return (
                   <NavLink
                     key={item.name}
