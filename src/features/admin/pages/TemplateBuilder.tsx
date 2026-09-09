@@ -334,32 +334,61 @@ export function TemplateBuilder() {
                   No questions selected. Add some below.
                 </div>
               ) : (
-                selectedQuestions.map((q, idx) => (
-                  <div key={typeof q === 'string' ? q : q._id} className="flex items-start bg-white border rounded-lg p-3 shadow-sm group">
-                    <div className="flex flex-col items-center mr-3 space-y-1">
-                      <span className="text-xs font-bold text-gray-400">#{idx + 1}</span>
-                      <div className="flex flex-col border border-gray-200 rounded overflow-hidden">
-                        <button onClick={() => moveQuestion(idx, 'up')} disabled={idx === 0} className="p-1 bg-gray-50 hover:bg-gray-100 disabled:opacity-30"><ArrowUp className="h-3 w-3" /></button>
-                        <button onClick={() => moveQuestion(idx, 'down')} disabled={idx === selectedQuestions.length - 1} className="p-1 bg-gray-50 border-t hover:bg-gray-100 disabled:opacity-30"><ArrowDown className="h-3 w-3" /></button>
-                      </div>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <p className="text-sm font-medium text-gray-900 line-clamp-2">{typeof q === 'string' ? `Question ID: ${q}` : q.text}</p>
-                        {q.isTemporary && <span className="text-[10px] bg-yellow-100 text-yellow-800 px-1.5 py-0.5 rounded-full whitespace-nowrap">Extracted (Unsaved)</span>}
-                      </div>
-                      {typeof q !== 'string' && (
-                        <div className="flex gap-2 mt-1">
-                          <span className="text-[10px] bg-gray-100 px-1.5 rounded text-gray-600">{q.type}</span>
-                          <span className="text-[10px] bg-gray-100 px-1.5 rounded text-gray-600">{q.difficulty}</span>
+                selectedQuestions.map((q, idx) => {
+                  const hasFollowUps = typeof q !== 'string' && (
+                    (q.followUps?.neutral && q.followUps.neutral.length > 0) ||
+                    (q.parsedFollowUps && q.parsedFollowUps.length > 0)
+                  );
+                  return (
+                    <div key={typeof q === 'string' ? q : q._id} className="flex flex-col bg-white border rounded-lg p-3 shadow-sm group">
+                      <div className="flex items-start">
+                        <div className="flex flex-col items-center mr-3 space-y-1">
+                          <span className="text-xs font-bold text-gray-400">#{idx + 1}</span>
+                          <div className="flex flex-col border border-gray-200 rounded overflow-hidden">
+                            <button onClick={() => moveQuestion(idx, 'up')} disabled={idx === 0} className="p-1 bg-gray-50 hover:bg-gray-100 disabled:opacity-30"><ArrowUp className="h-3 w-3" /></button>
+                            <button onClick={() => moveQuestion(idx, 'down')} disabled={idx === selectedQuestions.length - 1} className="p-1 bg-gray-50 border-t hover:bg-gray-100 disabled:opacity-30"><ArrowDown className="h-3 w-3" /></button>
+                          </div>
                         </div>
-                      )}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <p className="text-sm font-medium text-gray-900 line-clamp-2">{typeof q === 'string' ? `Question ID: ${q}` : q.text}</p>
+                            {typeof q !== 'string' && q.isTemporary && <span className="text-[10px] bg-yellow-100 text-yellow-800 px-1.5 py-0.5 rounded-full whitespace-nowrap">Extracted (Unsaved)</span>}
+                          </div>
+                          {typeof q !== 'string' && (
+                            <div className="flex gap-2 mt-1 mb-2">
+                              <span className="text-[10px] bg-gray-100 px-1.5 rounded text-gray-600">{q.type}</span>
+                              <span className="text-[10px] bg-gray-100 px-1.5 rounded text-gray-600">{q.difficulty}</span>
+                            </div>
+                          )}
+
+                          {hasFollowUps && (
+                            <div className="mt-3 pl-3 border-l-2 border-brand-200 bg-brand-50/30 rounded p-2">
+                              <p className="text-xs font-semibold text-brand-800 mb-2">Mapped Follow-up Questions:</p>
+                              <ul className="space-y-1.5">
+                                {q.followUps?.neutral?.map((fu: any, fIdx: number) => (
+                                  <li key={fu._id || fIdx} className="text-sm text-gray-700 flex items-start gap-2">
+                                    <span className="text-gray-400 mt-0.5 text-[10px]">↳</span>
+                                    <span>{fu.text}</span>
+                                  </li>
+                                ))}
+                                {q.parsedFollowUps?.map((fuText: string, fIdx: number) => (
+                                  <li key={`parsed-${fIdx}`} className="text-sm text-gray-700 flex items-start gap-2">
+                                    <span className="text-gray-400 mt-0.5 text-[10px]">↳</span>
+                                    <span>{fuText}</span>
+                                    <span className="text-[10px] bg-yellow-100 text-yellow-800 px-1.5 rounded">Will be mapped</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                        </div>
+                        <button onClick={() => removeQuestion(idx)} className="ml-2 p-1.5 text-red-400 hover:bg-red-50 hover:text-red-600 rounded">
+                          <X className="h-4 w-4" />
+                        </button>
+                      </div>
                     </div>
-                    <button onClick={() => removeQuestion(idx)} className="ml-2 p-1.5 text-red-400 hover:bg-red-50 hover:text-red-600 rounded">
-                      <X className="h-4 w-4" />
-                    </button>
-                  </div>
-                ))
+                  );
+                })
               )}
             </div>
 

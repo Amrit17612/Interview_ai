@@ -144,17 +144,23 @@ export function ImportReviewModal({ onClose, onSuccess }: ImportReviewModalProps
             </div>
           ) : (
             <div className="space-y-6">
-              <div className="grid grid-cols-3 gap-4 mb-6">
+              <div className="grid grid-cols-4 gap-4 mb-6">
                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 text-center">
                   <p className="text-sm text-gray-500 mb-1">Total Rows</p>
                   <p className="text-2xl font-bold text-gray-900">{preview.total}</p>
                 </div>
                 <div className="bg-green-50 p-4 rounded-lg border border-green-200 text-center">
-                  <p className="text-sm text-green-600 mb-1">Valid (Will Import)</p>
+                  <p className="text-sm text-green-600 mb-1">Valid (Main)</p>
                   <p className="text-2xl font-bold text-green-700">{preview.validCount}</p>
                 </div>
+                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 text-center">
+                  <p className="text-sm text-blue-600 mb-1">Follow-ups</p>
+                  <p className="text-2xl font-bold text-blue-700">
+                    {preview.rows.filter((r: any) => r.isValid).reduce((sum: number, r: any) => sum + (r.parsedFollowUps?.length || 0), 0)}
+                  </p>
+                </div>
                 <div className="bg-red-50 p-4 rounded-lg border border-red-200 text-center">
-                  <p className="text-sm text-red-600 mb-1">Errors / Duplicates</p>
+                  <p className="text-sm text-red-600 mb-1">Errors</p>
                   <p className="text-2xl font-bold text-red-700">{preview.errorCount}</p>
                 </div>
               </div>

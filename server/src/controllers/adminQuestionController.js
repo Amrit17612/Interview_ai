@@ -25,6 +25,7 @@ const getQuestions = async (req, res, next) => {
       .skip(skip)
       .limit(limit)
       .populate('createdBy', 'firstName lastName email')
+      .populate('followUps.neutral', 'text type difficulty status')
       .lean();
 
     res.json({

@@ -128,11 +128,11 @@ const confirmImport = async (req, res, next) => {
     const existingMap = new Set(existingQuestions.map(q => q.text.toLowerCase()));
     const localSet = new Set();
     const validQuestionsToInsert = [];
+    const followUpsMap = new Map();
 
     for (const row of questions) {
       const validated = await validateAndCheckRow(row, existingMap, localSet);
       if (validated.isValid) {
-        // Enforce safe fields and default DRAFT status
         validQuestionsToInsert.push({
           text: validated.text,
           description: validated.description,
@@ -144,9 +144,11 @@ const confirmImport = async (req, res, next) => {
           expectedPoints: validated.expectedPoints || [],
           tags: validated.tags || [],
           status: 'DRAFT',
+          category: 'primary',
           createdBy: req.user._id,
           updatedBy: req.user._id
         });
+        followUpsMap.set(validQuestionsToInsert.length - 1, validated.parsedFollowUps || []);
       }
     }
 
@@ -154,19 +156,47 @@ const confirmImport = async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'No valid questions to insert after server-side validation' });
     }
 
-    const inserted = await Question.insertMany(validQuestionsToInsert, { ordered: false });
+    const inserted = await Question.insertMany(validQuestionsToInsert, { ordered: true });
+    
+    let totalFollowUps = 0;
+    for (let i = 0; i < inserted.length; i++) {
+      const mainQ = inserted[i];
+      const fus = followUpsMap.get(i);
+      if (fus && fus.length > 0) {
+        const fuDocs = fus.map(fuText => ({
+          text: fuText,
+          type: mainQ.type,
+          difficulty: mainQ.difficulty,
+          domains: mainQ.domains,
+          status: 'DRAFT',
+          category: 'follow-up',
+          createdBy: req.user._id,
+          updatedBy: req.user._id
+        }));
+        
+        try {
+           const insertedFus = await Question.insertMany(fuDocs, { ordered: false });
+           await Question.findByIdAndUpdate(mainQ._id, {
+             $push: { 'followUps.neutral': { $each: insertedFus.map(f => f._id) } }
+           });
+           totalFollowUps += insertedFus.length;
+        } catch (e) {
+           console.error('Error inserting followups for main question', mainQ._id, e);
+        }
+      }
+    }
 
     await AuditLog.create({
       admin: req.user._id,
       action: 'BULK_IMPORT_QUESTIONS',
       entityType: 'Question',
       entityId: null, // Bulk
-      metadata: { count: inserted.length }
+      metadata: { count: inserted.length, followUpCount: totalFollowUps }
     });
 
     res.json({
       success: true,
-      message: `Successfully imported ${inserted.length} questions as DRAFT.`,
+      message: `Successfully imported ${inserted.length} questions and ${totalFollowUps} follow-ups as DRAFT.`,
       data: inserted
     });
 

@@ -56,7 +56,15 @@ const getTemplates = async (req, res, next) => {
 const getTemplateById = async (req, res, next) => {
   try {
     const template = await InterviewTemplate.findById(req.params.id)
-      .populate('questions', 'text type difficulty status')
+      .populate({
+        path: 'questions',
+        select: 'text type difficulty status followUps',
+        populate: [
+          { path: 'followUps.neutral', select: 'text type difficulty status' },
+          { path: 'followUps.weak', select: 'text type difficulty status' },
+          { path: 'followUps.strong', select: 'text type difficulty status' }
+        ]
+      })
       .populate('createdBy', 'firstName lastName email')
       .populate('updatedBy', 'firstName lastName email')
       .lean();
