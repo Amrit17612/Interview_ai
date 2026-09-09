@@ -26,7 +26,7 @@ const bulkUpdateStatus = async (req, res, next) => {
       admin: req.user._id,
       action: 'BULK_UPDATE_QUESTION_STATUS',
       entityType: 'Question',
-      entityId: null,
+      entityId: 'BULK',
       metadata: { count: result.modifiedCount, status }
     });
 
@@ -68,7 +68,7 @@ const bulkAddTags = async (req, res, next) => {
       admin: req.user._id,
       action: 'BULK_ADD_TAGS',
       entityType: 'Question',
-      entityId: null,
+      entityId: 'BULK',
       metadata: { count: result.modifiedCount, tags }
     });
 
