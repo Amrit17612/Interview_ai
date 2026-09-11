@@ -8,7 +8,6 @@ import type { BundleType } from '../../../types/bundle.types';
 import { bundleService } from '../../../services/bundle.service';
 import { BundleFormModal } from '../components/BundleFormModal';
 import { ModuleManagementModal } from '../components/ModuleManagementModal';
-import { LegacyBundleMigrator } from '../components/LegacyBundleMigrator';
 
 interface BundleManagementProps {
   type: BundleType;
@@ -95,8 +94,6 @@ export function BundleManagement({ type, title }: BundleManagementProps) {
           Create Bundle
         </Button>
       </PageHeader>
-
-      <LegacyBundleMigrator onMigrationComplete={fetchBundles} />
 
       {error && (
         <div className="bg-red-50 text-red-600 p-4 rounded-xl border border-red-200 mb-6 flex items-start">
