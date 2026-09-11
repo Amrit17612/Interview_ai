@@ -42,33 +42,45 @@ export interface BundleData {
   updatedAt?: string;
 }
 
-const STORAGE_KEY = 'interview_ai_custom_bundles';
+// Remove localStorage entirely
+// const STORAGE_KEY = 'interview_ai_custom_bundles';
 
-const getLocalBundles = (): BundleData[] => {
+const fetchBackendBundles = async (): Promise<BundleData[]> => {
   try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    return stored ? JSON.parse(stored) : [];
-  } catch {
+    const res = await apiClient.get<{ customBundles: any[] }>('/bundles/custom');
+    return (res.data.customBundles || []).map(b => ({
+      ...b,
+      _id: b.bundleId, // normalize IDs
+      type: (b.type || 'COMPANY').toUpperCase() as BundleType
+    }));
+  } catch (error) {
+    console.error('Failed to fetch backend custom bundles', error);
     return [];
   }
 };
 
-const saveLocalBundles = (bundles: BundleData[]) => {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(bundles));
+const deduplicateBundles = (bundles: BundleData[]): BundleData[] => {
+  const seen = new Set<string>();
+  return bundles.filter(b => {
+    const key = b.bundleId || b._id;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
 };
 
 export const bundleService = {
   // Student Portal
   getPublicBundles: async (): Promise<BundleData[]> => {
     const mocks = [...MOCK_COMPANY_BUNDLES, ...MOCK_DOMAIN_BUNDLES].map(mapToBundleData);
-    const locals = getLocalBundles().filter(b => b.active && b.visibility === 'PUBLIC');
-    return [...mocks, ...locals];
+    const backendBundles = await fetchBackendBundles();
+    return deduplicateBundles([...backendBundles, ...mocks]);
   },
 
   getBundleById: async (id: string): Promise<BundleData> => {
     const mocks = [...MOCK_COMPANY_BUNDLES, ...MOCK_DOMAIN_BUNDLES].map(mapToBundleData);
-    const locals = getLocalBundles();
-    const found = [...locals, ...mocks].find(b => b._id === id || b.bundleId === id);
+    const backendBundles = await fetchBackendBundles();
+    const found = deduplicateBundles([...backendBundles, ...mocks]).find(b => b._id === id || b.bundleId === id);
     if (!found) throw new Error('Bundle not found');
     return found;
   },
@@ -76,8 +88,9 @@ export const bundleService = {
   // Admin Portal
   getAllBundles: async (type?: string): Promise<BundleData[]> => {
     const mocks = [...MOCK_COMPANY_BUNDLES, ...MOCK_DOMAIN_BUNDLES].map(mapToBundleData);
-    const locals = getLocalBundles();
-    let all = [...locals, ...mocks];
+    const backendBundles = await fetchBackendBundles();
+    let all = deduplicateBundles([...backendBundles, ...mocks]);
+    
     if (type) {
       all = all.filter(b => b.type.toUpperCase() === type.toUpperCase());
     }
@@ -90,7 +103,7 @@ export const bundleService = {
       ...data,
       _id: customId,
       bundleId: customId,
-      type: data.type || 'company',
+      type: data.type || 'COMPANY',
       name: data.name || '',
       description: data.description,
       category: data.category,
@@ -101,39 +114,33 @@ export const bundleService = {
       active: data.active ?? true,
       visibility: data.visibility || 'PUBLIC',
       modules: data.modules || [],
+      logo: data.logo,
       createdAt: new Date().toISOString()
     };
 
-    // Sync to backend first for atomicity
-    await bundleService.syncBundlePrice(newBundle.bundleId, newBundle.price, newBundle.active);
-
-    const locals = getLocalBundles();
-    saveLocalBundles([newBundle, ...locals]);
+    // Sync to backend, passing full payload
+    await bundleService.syncBundlePrice(newBundle);
     return newBundle;
   },
 
   updateBundle: async (id: string, data: Partial<BundleData>): Promise<BundleData> => {
-    const locals = getLocalBundles();
-    const idx = locals.findIndex(b => b._id === id || b.bundleId === id);
+    // First, fetch to ensure it exists
+    const backendBundles = await fetchBackendBundles();
+    const existing = backendBundles.find(b => b.bundleId === id || b._id === id);
 
-    if (idx !== -1) {
-      const originalBundle = locals[idx];
+    if (existing) {
       const updatedBundle = {
-        ...originalBundle,
+        ...existing,
         ...data,
-        _id: originalBundle._id,
-        bundleId: originalBundle.bundleId,
+        _id: existing._id,
+        bundleId: existing.bundleId,
         updatedAt: new Date().toISOString()
       };
 
-      // Sync to backend first for atomicity
       if (id.startsWith('custom_')) {
-        await bundleService.syncBundlePrice(updatedBundle.bundleId, updatedBundle.price, updatedBundle.active);
+        await bundleService.syncBundlePrice(updatedBundle);
       }
-
-      locals[idx] = updatedBundle;
-      saveLocalBundles(locals);
-      return locals[idx];
+      return updatedBundle;
     }
     throw new Error('Cannot update mock bundles, or bundle not found');
   },
@@ -142,9 +149,9 @@ export const bundleService = {
     return bundleService.updateBundle(id, { modules: moduleIds.map(m => ({ _id: m })) });
   },
 
-  syncBundlePrice: async (bundleId: string, price: number, active: boolean): Promise<void> => {
+  syncBundlePrice: async (bundleData: BundleData): Promise<void> => {
     try {
-      await apiClient.post('/admin/custom-bundle-prices', { bundleId, price, active });
+      await apiClient.post('/admin/custom-bundle-prices', bundleData);
     } catch (error) {
       console.error('Failed to sync bundle price to backend', error);
       throw error;
@@ -164,19 +171,7 @@ export const bundleService = {
     if (!id.startsWith('custom_')) {
       throw new Error('Cannot delete predefined or mock bundles.');
     }
-
-    const locals = getLocalBundles();
-    const idx = locals.findIndex(b => b._id === id || b.bundleId === id);
-
-    if (idx === -1) {
-      throw new Error('Custom bundle not found.');
-    }
-
-    // Atomicity: Deactivate on backend FIRST
+    // Deactivate on backend (preserves payment history but removes from public view)
     await bundleService.deactivateBundlePrice(id);
-
-    // If backend succeeds, delete from local storage
-    const newLocals = locals.filter((_, i) => i !== idx);
-    saveLocalBundles(newLocals);
   }
 };

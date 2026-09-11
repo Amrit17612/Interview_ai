@@ -15,6 +15,42 @@ const customBundlePriceSchema = new mongoose.Schema({
   active: {
     type: Boolean,
     default: true,
+  },
+  // --- New Optional Metadata Fields ---
+  type: {
+    type: String,
+    enum: ['COMPANY', 'DOMAIN', 'company', 'domain'],
+  },
+  name: {
+    type: String,
+  },
+  description: {
+    type: String,
+  },
+  category: {
+    type: String,
+  },
+  originalPrice: {
+    type: Number,
+  },
+  features: {
+    type: [String],
+    default: [],
+  },
+  iconType: {
+    type: String,
+  },
+  visibility: {
+    type: String,
+    enum: ['PUBLIC', 'PRIVATE'],
+    default: 'PUBLIC',
+  },
+  modules: {
+    type: [mongoose.Schema.Types.Mixed], // array of objects/refs
+    default: [],
+  },
+  logo: {
+    type: String,
   }
 }, { timestamps: true });
 

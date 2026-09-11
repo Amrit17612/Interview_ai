@@ -1,9 +1,28 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { bundleService } from '../../src/services/bundle.service';
 
+let mockBackendBundles: any[] = [];
+
 vi.mock('../../src/services/api.client', () => ({
   apiClient: {
-    post: vi.fn().mockResolvedValue({ data: { success: true } })
+    post: vi.fn().mockImplementation((url, data) => {
+      // Simulate backend storing the bundle
+      if (url === '/admin/custom-bundle-prices') {
+        const existingIdx = mockBackendBundles.findIndex(b => b.bundleId === data.bundleId);
+        if (existingIdx >= 0) {
+          mockBackendBundles[existingIdx] = { ...mockBackendBundles[existingIdx], ...data };
+        } else {
+          mockBackendBundles.push(data);
+        }
+      }
+      return Promise.resolve({ data: { success: true } });
+    }),
+    get: vi.fn().mockImplementation((url) => {
+      if (url === '/bundles/custom') {
+        return Promise.resolve({ data: { customBundles: mockBackendBundles } });
+      }
+      return Promise.resolve({ data: {} });
+    })
   }
 }));
 
@@ -30,6 +49,7 @@ Object.defineProperty(window, 'localStorage', {
 describe('bundleService', () => {
   beforeEach(() => {
     window.localStorage.clear();
+    mockBackendBundles = [];
   });
 
   it('creates and updates a bundle', async () => {
