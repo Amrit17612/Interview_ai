@@ -3,9 +3,13 @@ const InterviewSession = require('./src/models/InterviewSession');
 const User = require('./src/models/User');
 const { getInterviewRoadmap } = require('./src/controllers/interviewController');
 
+const { enforceDestructiveTestSafety } = require('./src/utils/testGuard');
+
 async function runQA() {
   try {
-    await mongoose.connect('mongodb://127.0.0.1:27017/interviu-test-qa');
+    const uri = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/interviu-test-qa';
+    enforceDestructiveTestSafety(uri);
+    await mongoose.connect(uri);
     console.log('Connected to QA DB');
     await InterviewSession.deleteMany({});
     await User.deleteMany({});

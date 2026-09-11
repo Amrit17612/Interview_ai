@@ -3,6 +3,7 @@ const { completeInterview, retryReport, generateQuestion, submitAnswer } = requi
 const InterviewSession = require('./src/models/InterviewSession');
 const User = require('./src/models/User');
 const geminiService = require('./src/services/geminiService');
+const { enforceDestructiveTestSafety } = require('./src/utils/testGuard');
 
 let originalGenerateText;
 let geminiCallCount = 0;
@@ -25,7 +26,9 @@ async function runTests() {
   console.log('--- STARTING SPRINT 13 PHASE 1 TESTS ---\n');
   process.env.GEMINI_API_KEY = 'test_key';
 
-  await mongoose.connect('mongodb://localhost:27017/interviu');
+  const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/interviu';
+  enforceDestructiveTestSafety(uri);
+  await mongoose.connect(uri);
 
   const userA = await User.create({ firstName: 'User', lastName: 'A', email: 'usera13@test.com', passwordHash: 'hash' });
   const userB = await User.create({ firstName: 'User', lastName: 'B', email: 'userb13@test.com', passwordHash: 'hash' });

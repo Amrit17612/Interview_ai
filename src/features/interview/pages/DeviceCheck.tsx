@@ -186,13 +186,15 @@ export function DeviceCheck() {
               if (sustainedFrames > 10 && !detected) {
                 setAudioLevelDetected(true);
               }
-              if (sustainedFrames > 45 && !detected) { // approx 0.75s of sustained volume
+              if (sustainedFrames > 45 && !detected) { // approx 0.75s of accumulated volume
                 detected = true;
                 setMicStatus('success');
               }
             } else {
-              if (sustainedFrames > 0) sustainedFrames--;
-              if (sustainedFrames === 0 && !detected) {
+              // Decay slowly to tolerate natural pauses between words (approx 0.3 frames per silent frame)
+              if (sustainedFrames > 0) sustainedFrames -= 0.3;
+              if (sustainedFrames <= 0 && !detected) {
+                sustainedFrames = 0;
                 setAudioLevelDetected(false);
               }
             }

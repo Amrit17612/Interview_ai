@@ -19,9 +19,13 @@ const mockRes = () => {
   return res;
 };
 
+const { enforceDestructiveTestSafety } = require('./src/utils/testGuard');
+
 async function runTest() {
   console.log('--- SPRINT 12 PHASE 1 RUNTIME VERIFICATION ---');
-  await mongoose.connect('mongodb://127.0.0.1:27017/interview_ai');
+  const uri = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/interview_ai';
+  enforceDestructiveTestSafety(uri);
+  await mongoose.connect(uri);
   console.log('Connected to DB');
 
   // Create test users
