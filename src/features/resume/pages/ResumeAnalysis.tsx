@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { Container } from '../../../components/ui/Container';
 import { PageHeader } from '../../../components/ui/PageHeader';
 import { Card, CardContent } from '../../../components/ui/Card';
@@ -118,6 +118,8 @@ const SAFETY_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
 export function ResumeAnalysis() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const queryJobId = searchParams.get('jobId');
 
   // Separate initial-fetch state from analysis-in-progress state
   const [isFetching, setIsFetching]         = useState(true);   // initial GET request
@@ -195,7 +197,7 @@ export function ResumeAnalysis() {
     setActionError(null);
     setSafetyTimedOut(false);
     try {
-      await resumeService.analyzeResume(id);
+      await resumeService.analyzeResume(id, queryJobId || undefined);
       // Optimistically show PROCESSING immediately
       setResumeData(prev => ({
         ...(prev ?? {}),
@@ -216,7 +218,7 @@ export function ResumeAnalysis() {
   // ─── Derived state ────────────────────────────────────────────────────────
   const status = resumeData?.analysisStatus as AnalysisStatus;
   const stage  = resumeData?.analysisStage  as AnalysisStage;
-  const hasJD  = Boolean(resumeData?.analyzedJobId);
+  const hasJD  = resumeData?.analysisMode === 'JD_ATS' || Boolean(resumeData?.analyzedJobId);
   const stages = hasJD ? RESUME_JD_STAGES : RESUME_ONLY_STAGES;
   const progress = getProgress(stage, hasJD);
 
@@ -428,6 +430,17 @@ export function ResumeAnalysis() {
 
       {/* Score cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <Card className="md:col-span-1 border-l-4 border-l-blue-500">
+          <CardContent className="p-6">
+            <h3 className="text-sm font-medium text-gray-500 mb-1">General ATS Compatibility</h3>
+            <div className="flex items-end gap-2">
+              <span className="text-5xl font-bold text-gray-900">{resumeData?.generalAtsScore ?? resumeData?.atsScore ?? 0}</span>
+              <span className="text-gray-400 mb-1 text-lg">/ 100</span>
+            </div>
+            <p className="text-xs text-gray-400 mt-3">Based on formatting and general structure.</p>
+          </CardContent>
+        </Card>
+
         <Card className="md:col-span-1 border-l-4 border-l-indigo-500">
           <CardContent className="p-6">
             <h3 className="text-sm font-medium text-gray-500 mb-1">Resume Quality Score</h3>
@@ -439,12 +452,12 @@ export function ResumeAnalysis() {
           </CardContent>
         </Card>
 
-        {resumeData?.analyzedJobId ? (
+        {hasJD ? (
           <Card className="md:col-span-1 border-l-4 border-l-emerald-500">
             <CardContent className="p-6">
-              <h3 className="text-sm font-medium text-gray-500 mb-1">ATS Compatibility</h3>
+              <h3 className="text-sm font-medium text-gray-500 mb-1">Job Description Match</h3>
               <div className="flex items-end gap-2">
-                <span className="text-5xl font-bold text-gray-900">{resumeData?.atsScore ?? 0}</span>
+                <span className="text-5xl font-bold text-gray-900">{resumeData?.jdMatchScore ?? resumeData?.atsScore ?? 0}</span>
                 <span className="text-gray-400 mb-1 text-lg">/ 100</span>
               </div>
               <p className="text-xs text-emerald-600 mt-3 flex items-center gap-1 font-medium">

@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { apiClient } from '../../../services/api.client';
 import { Container } from '../../../components/ui/Container';
 import { PageHeader } from '../../../components/ui/PageHeader';
 import { EmptyState } from '../../../components/ui/EmptyState';
@@ -18,6 +20,10 @@ export function ResumeDashboard() {
   const [uploadError, setUploadError] = useState<string | null>(null);
   
   const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  const [analysisMode, setAnalysisMode] = useState<'GENERAL_ATS' | 'JD_ATS'>('GENERAL_ATS');
+  const [jdText, setJdText] = useState('');
+  const navigate = useNavigate();
 
   const [viewTextModalOpen, setViewTextModalOpen] = useState(false);
   const [selectedResumeText, setSelectedResumeText] = useState<string | null>(null);
@@ -72,10 +78,32 @@ export function ResumeDashboard() {
     setIsUploading(true);
 
     try {
-      await resumeService.uploadResume(file);
+      let createdJobId = null;
+      if (analysisMode === 'JD_ATS') {
+        if (!jdText.trim()) {
+          setUploadError('Job Description is required for JD ATS Check.');
+          setIsUploading(false);
+          if (fileInputRef.current) fileInputRef.current.value = '';
+          return;
+        }
+        const jdRes = await apiClient.post<{ success: boolean; job: { id: string } }>('/ats/jobs', {
+          title: 'JD Analysis - ' + new Date().toLocaleDateString(),
+          company: 'Target Company',
+          content: jdText.trim()
+        });
+        createdJobId = jdRes.data.job.id;
+      }
+
+      const uploadRes = await resumeService.uploadResume(file);
       await loadResumes();
+      
+      if (analysisMode === 'JD_ATS' && createdJobId) {
+        navigate(`/resumes/${uploadRes.id}/analysis?jobId=${createdJobId}`);
+      } else {
+        navigate(`/resumes/${uploadRes.id}/analysis`);
+      }
     } catch (err: any) {
-      setUploadError(err.message || 'Resume upload failed. Please check the file type and size.');
+      setUploadError(err.response?.data?.message || err.message || 'Resume upload failed.');
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
@@ -153,26 +181,71 @@ export function ResumeDashboard() {
 
   return (
     <Container className="py-8">
-      <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+      <div className="mb-8 border-b border-gray-100 pb-8">
         <PageHeader 
-          title="Resume Dashboard" 
-          description="Manage your resumes for ATS analysis and AI mock interviews." 
+          title="Resume Intelligence" 
+          description="Choose an analysis mode to evaluate and improve your resume." 
         />
-        <div>
-          <input 
-            type="file" 
-            ref={fileInputRef} 
-            onChange={handleFileSelect} 
-            accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" 
-            className="hidden" 
-          />
-          <Button 
-            onClick={() => fileInputRef.current?.click()} 
-            disabled={isUploading}
-          >
-            {isUploading ? <Spinner className="mr-2 h-4 w-4 text-current" /> : <Upload className="mr-2 h-4 w-4" />}
-            {isUploading ? 'Uploading & Parsing...' : 'Upload Resume'}
-          </Button>
+        
+        <div className="mt-6">
+          <h3 className="text-lg font-medium text-gray-900 mb-4">Choose Analysis Type</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <button
+              onClick={() => setAnalysisMode('GENERAL_ATS')}
+              className={`text-left p-4 rounded-xl border-2 transition-all ${
+                analysisMode === 'GENERAL_ATS' 
+                  ? 'border-brand-500 bg-brand-50 ring-2 ring-brand-200' 
+                  : 'border-gray-200 bg-white hover:border-brand-300'
+              }`}
+            >
+              <div className="font-semibold text-gray-900 mb-1">Resume ATS Check</div>
+              <div className="text-sm text-gray-500">Analyze your resume independently for quality, grammar, and general ATS compatibility.</div>
+            </button>
+
+            <button
+              onClick={() => setAnalysisMode('JD_ATS')}
+              className={`text-left p-4 rounded-xl border-2 transition-all ${
+                analysisMode === 'JD_ATS' 
+                  ? 'border-brand-500 bg-brand-50 ring-2 ring-brand-200' 
+                  : 'border-gray-200 bg-white hover:border-brand-300'
+              }`}
+            >
+              <div className="font-semibold text-gray-900 mb-1">ATS Check with Job Description</div>
+              <div className="text-sm text-gray-500">Compare your resume against a specific job description for keyword matching and skill gaps.</div>
+            </button>
+          </div>
+
+          {analysisMode === 'JD_ATS' && (
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-2">Job Description Text</label>
+              <textarea
+                rows={6}
+                value={jdText}
+                onChange={(e) => setJdText(e.target.value)}
+                placeholder="Paste the job description here..."
+                className="w-full rounded-lg border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm p-3"
+              />
+            </div>
+          )}
+
+          <div className="flex items-center gap-4">
+            <input 
+              type="file" 
+              ref={fileInputRef} 
+              onChange={handleFileSelect} 
+              accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" 
+              className="hidden" 
+            />
+            <Button 
+              size="lg"
+              onClick={() => fileInputRef.current?.click()} 
+              disabled={isUploading}
+              className="w-full sm:w-auto"
+            >
+              {isUploading ? <Spinner className="mr-2 h-4 w-4 text-current" /> : <Upload className="mr-2 h-4 w-4" />}
+              {isUploading ? 'Uploading & Preparing...' : 'Upload & Analyze Resume'}
+            </Button>
+          </div>
         </div>
       </div>
 

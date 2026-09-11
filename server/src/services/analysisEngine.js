@@ -31,29 +31,44 @@ const runAsyncAnalysis = async (resumeDoc, jdDoc) => {
       throw new Error('Resume has no parsed text to analyze.');
     }
 
+    let structuredData = resumeDoc.structuredData;
+
     // ── Stage 1: Structural Parsing ──────────────────────────────────────────
-    await persistStage(resumeDoc, 'PARSING_RESUME');
-    console.log(`[ANALYSIS ENGINE] Parsing structure for resume ${resumeDoc._id}`);
-    const parsePrompt = prompts.getParseResumePrompt(rawText);
-    const parsedDataResponse = await geminiService.generateText(parsePrompt, { responseMimeType: 'application/json' });
-    const structuredData = geminiService.validateParseResumeResponse(parsedDataResponse);
-    resumeDoc.structuredData = structuredData;
+    if (!structuredData) {
+      await persistStage(resumeDoc, 'PARSING_RESUME');
+      console.log(`[ANALYSIS ENGINE] Parsing structure for resume ${resumeDoc._id}`);
+      const parsePrompt = prompts.getParseResumePrompt(rawText);
+      const parsedDataResponse = await geminiService.generateText(parsePrompt, { responseMimeType: 'application/json' });
+      structuredData = geminiService.validateParseResumeResponse(parsedDataResponse);
+      resumeDoc.structuredData = structuredData;
+    } else {
+      console.log(`[ANALYSIS ENGINE] Skipping parsing, structuredData already exists for resume ${resumeDoc._id}`);
+    }
 
     // ── Stage 2: Quality Evaluation ──────────────────────────────────────────
-    await persistStage(resumeDoc, 'EVALUATING_RESUME');
-    console.log(`[ANALYSIS ENGINE] Evaluating quality for resume ${resumeDoc._id}`);
-    const evaluatePrompt = prompts.getEvaluateResumePrompt(rawText);
-    const evaluateResponse = await geminiService.generateText(evaluatePrompt, { responseMimeType: 'application/json' });
-    const qualityData = geminiService.validateEvaluateResumeResponse(evaluateResponse);
+    if (resumeDoc.qualityScore === null || resumeDoc.qualityScore === undefined) {
+      await persistStage(resumeDoc, 'EVALUATING_RESUME');
+      console.log(`[ANALYSIS ENGINE] Evaluating quality for resume ${resumeDoc._id}`);
+      const evaluatePrompt = prompts.getEvaluateResumePrompt(rawText);
+      const evaluateResponse = await geminiService.generateText(evaluatePrompt, { responseMimeType: 'application/json' });
+      const qualityData = geminiService.validateEvaluateResumeResponse(evaluateResponse);
 
-    resumeDoc.qualityScore = qualityData.qualityScore;
-    resumeDoc.contentAnalysis = {
-      grammarIssues: qualityData.grammarIssues,
-      repeatedVerbs: qualityData.repeatedVerbs,
-      weakBullets: qualityData.weakBullets
-    };
-    resumeDoc.consistencyIssues = qualityData.consistencyIssues || [];
-    resumeDoc.formattingIssues = qualityData.formattingIssues || [];
+      resumeDoc.qualityScore = qualityData.qualityScore;
+      resumeDoc.generalAtsScore = qualityData.generalAtsScore;
+      resumeDoc.contentAnalysis = {
+        grammarIssues: qualityData.grammarIssues,
+        repeatedVerbs: qualityData.repeatedVerbs,
+        weakBullets: qualityData.weakBullets
+      };
+      resumeDoc.consistencyIssues = qualityData.consistencyIssues || [];
+      resumeDoc.formattingIssues = qualityData.formattingIssues || [];
+    } else {
+      console.log(`[ANALYSIS ENGINE] Skipping quality evaluation, data already exists for resume ${resumeDoc._id}`);
+      // Fallback for older resumes without generalAtsScore
+      if (resumeDoc.generalAtsScore == null && resumeDoc.atsScore != null) {
+         resumeDoc.generalAtsScore = resumeDoc.atsScore;
+      }
+    }
 
     // ── Stage 3 & 4: JD Match & ATS Score (only when JD provided) ────────────
     if (jdDoc) {
@@ -69,8 +84,10 @@ const runAsyncAnalysis = async (resumeDoc, jdDoc) => {
       const matchResponse = await geminiService.generateText(matchPrompt, { responseMimeType: 'application/json' });
       const matchData = geminiService.validateMatchATSScoreResponse(matchResponse);
 
-      resumeDoc.atsScore = matchData.atsScore;
+      resumeDoc.atsScore = matchData.atsScore; // Keep for backward compatibility
+      resumeDoc.jdMatchScore = matchData.atsScore;
       resumeDoc.atsBreakdown = matchData.breakdown;
+      resumeDoc.analysisMode = 'JD_ATS';
       resumeDoc.jdAnalysis = {
         role: structuredJD.role,
         seniority: structuredJD.seniority,
@@ -82,10 +99,10 @@ const runAsyncAnalysis = async (resumeDoc, jdDoc) => {
       };
       resumeDoc.analyzedJobId = jdDoc._id;
     } else {
-      resumeDoc.atsScore = null;
-      resumeDoc.atsBreakdown = null;
-      resumeDoc.jdAnalysis = null;
-      resumeDoc.analyzedJobId = null;
+      resumeDoc.analysisMode = 'GENERAL_ATS';
+      // We explicitly do NOT clear existing JD data if they re-run generally, 
+      // but if we are doing a fresh general analysis on an empty doc we don't set it.
+      // If we are doing a general analysis, we don't want to destroy old JD data.
     }
 
     // ── Stage 5: Finalizing ───────────────────────────────────────────────────

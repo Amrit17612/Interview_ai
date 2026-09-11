@@ -13,6 +13,9 @@ export interface Resume {
   analyzedJobId?: string | null;
   structuredData?: any;
   atsScore?: number | null;
+  generalAtsScore?: number | null;
+  jdMatchScore?: number | null;
+  analysisMode?: 'GENERAL_ATS' | 'JD_ATS';
   qualityScore?: number | null;
   atsBreakdown?: any;
   contentAnalysis?: any;

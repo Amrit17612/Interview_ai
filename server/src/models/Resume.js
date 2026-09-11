@@ -71,6 +71,19 @@ const resumeSchema = new mongoose.Schema(
       type: Number,
       default: null
     },
+    generalAtsScore: {
+      type: Number,
+      default: null
+    },
+    jdMatchScore: {
+      type: Number,
+      default: null
+    },
+    analysisMode: {
+      type: String,
+      enum: ['GENERAL_ATS', 'JD_ATS'],
+      default: 'GENERAL_ATS'
+    },
     qualityScore: {
       type: Number,
       default: null

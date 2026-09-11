@@ -181,6 +181,7 @@ Return EXACTLY in this JSON structure:
 const getEvaluateResumePrompt = (rawText) => {
   return `You are an expert technical recruiter and resume reviewer.
 Analyze the following resume text for quality, grammar, weak bullets, and action verbs.
+Calculate a general ATS Compatibility Score (0-100) based on standard parsing best practices, standard headings, clear roles/dates, and standard keywords.
 Do NOT invent metrics. Suggest realistic improvements.
 
 Raw Text:
@@ -188,6 +189,7 @@ ${rawText}
 
 Return EXACTLY in this JSON structure:
 {
+  "generalAtsScore": <numeric_score_0_to_100>,
   "qualityScore": <numeric_score_0_to_100>,
   "grammarIssues": [
     { "original": "text", "issue": "reason", "suggestion": "better text" }

@@ -144,8 +144,8 @@ const validateParseResumeResponse = (data) => {
 };
 
 const validateEvaluateResumeResponse = (data) => {
-  if (!data || typeof data.qualityScore !== 'number' || !Array.isArray(data.grammarIssues)) {
-    throw new Error('PROVIDER_ERROR: AI response missing evaluate fields.');
+  if (!data || typeof data.qualityScore !== 'number' || typeof data.generalAtsScore !== 'number' || !Array.isArray(data.grammarIssues)) {
+    throw new Error('PROVIDER_ERROR: AI response missing evaluate fields (qualityScore, generalAtsScore, or grammarIssues).');
   }
   return data;
 };

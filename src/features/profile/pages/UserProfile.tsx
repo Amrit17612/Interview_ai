@@ -249,7 +249,7 @@ export function UserProfile() {
                     <div className="grid grid-cols-2 gap-4 mt-2">
                       <div className="bg-blue-50 p-3 rounded-lg">
                         <p className="text-xs text-blue-700 mb-1">ATS Score</p>
-                        <p className="text-xl font-semibold text-blue-700">{resume.atsScore !== null && resume.atsScore !== undefined ? resume.atsScore : '-'}</p>
+                        <p className="text-xl font-semibold text-blue-700">{resume.generalAtsScore !== null && resume.generalAtsScore !== undefined ? resume.generalAtsScore : (resume.atsScore !== null && resume.atsScore !== undefined ? resume.atsScore : '-')}</p>
                       </div>
                       <div className="bg-purple-50 p-3 rounded-lg">
                         <p className="text-xs text-purple-700 mb-1">Quality</p>
