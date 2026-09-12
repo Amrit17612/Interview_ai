@@ -15,13 +15,14 @@ import {
   History,
   Medal,
   Lock,
-  ShoppingBag
+  ShoppingBag,
+  LifeBuoy
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '../components/ui/Button';
 import { useAuth } from '../features/auth/hooks/useAuth';
-
+import { NotificationBell } from '../components/ui/NotificationBell';
 
 interface SidebarItem {
   name: string;
@@ -63,9 +64,10 @@ const SIDEBAR_CATEGORIES: SidebarCategory[] = [
     ]
   },
   {
-    title: 'ACCOUNT',
+    title: 'ACCOUNT & SUPPORT',
     items: [
       { name: 'Profile', path: ROUTES.PROFILE, icon: User },
+      { name: 'Support / My Requests', path: '/support', icon: LifeBuoy },
     ]
   }
 ];
@@ -185,6 +187,7 @@ export function DashboardLayout() {
             <div className="md:hidden text-lg font-bold text-brand-600 tracking-tight">IAI</div>
           </div>
           <div className="flex items-center space-x-4">
+            <NotificationBell />
             <Link 
               to={ROUTES.PROFILE}
               className="h-8 w-8 rounded-full bg-brand-100 flex items-center justify-center text-sm font-medium text-brand-700 hover:ring-2 hover:ring-brand-500 hover:ring-offset-2 transition-all focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2"

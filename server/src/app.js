@@ -24,6 +24,7 @@ const envOrigins = process.env.CLIENT_URL
   : [];
 
 const allowedOrigins = [...new Set([...defaultOrigins, ...envOrigins])];
+app.set('allowedOrigins', allowedOrigins);
 
 // Pattern for Vercel deployment URLs specific to this project
 // Matches origins like: https://interview-gupf4hq20-amrit17612s-projects.vercel.app
@@ -81,6 +82,14 @@ app.use('/api/user', userRoutes);
 app.use('/api/feedback', feedbackRoutes);
 app.use('/api/security', securityRoutes);
 app.use('/api/bundles', bundleRoutes);
+
+const supportRoutes = require('./routes/supportRoutes');
+const adminSupportRoutes = require('./routes/adminSupportRoutes');
+const notificationRoutes = require('./routes/notificationRoutes');
+
+app.use('/api/support', supportRoutes);
+app.use('/api/admin/support', adminSupportRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 const mongoose = require('mongoose');
 

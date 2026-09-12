@@ -15,7 +15,8 @@ import {
   X,
   Lock,
   Tag,
-  MessageSquare
+  MessageSquare,
+  LifeBuoy
 } from 'lucide-react';
 import { Container } from '../components/ui/Container';
 
@@ -110,6 +111,7 @@ function AdminSidebar({ onClose }: { onClose: () => void }) {
         { name: 'Users', icon: Users, href: '/admin/users' },
         { name: 'Batches', icon: Users, href: '/admin/batches' },
         { name: 'Feedback', icon: MessageSquare, href: ROUTES.ADMIN_FEEDBACK },
+        { name: 'Support Center', icon: LifeBuoy, href: '/admin/support' },
       ],
     },
     {

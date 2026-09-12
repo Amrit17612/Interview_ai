@@ -119,6 +119,13 @@ const AdminSecurityAudit = Loadable(lazy(() => import('../features/admin/pages/A
 const AdminBatchSecurity = Loadable(lazy(() => import('../features/admin/pages/AdminBatchSecurity').then(m => ({ default: m.AdminBatchSecurity }))));
 const BatchManagement = Loadable(lazy(() => import('../features/admin/pages/BatchManagement').then(m => ({ default: m.BatchManagement }))));
 const BatchDetail = Loadable(lazy(() => import('../features/admin/pages/BatchDetail').then(m => ({ default: m.BatchDetail }))));
+const SupportCenter = Loadable(lazy(() => import('../features/admin/pages/SupportCenter').then(m => ({ default: m.SupportCenter }))));
+const AdminTicketDetail = Loadable(lazy(() => import('../features/admin/pages/AdminTicketDetail').then(m => ({ default: m.AdminTicketDetail }))));
+
+// Support pages
+const CreateTicket = Loadable(lazy(() => import('../features/support/pages/CreateTicket').then(m => ({ default: m.CreateTicket }))));
+const MyRequests = Loadable(lazy(() => import('../features/support/pages/MyRequests').then(m => ({ default: m.MyRequests }))));
+const TicketDetail = Loadable(lazy(() => import('../features/support/pages/TicketDetail').then(m => ({ default: m.TicketDetail }))));
 
 export const router = createBrowserRouter([
   {
@@ -218,6 +225,9 @@ export const router = createBrowserRouter([
       { path: ROUTES.ACHIEVEMENTS_BADGES, element: <ComingSoon /> },
       { path: ROUTES.PROFILE, element: <UserProfile /> },
       { path: ROUTES.PROFILE_EDIT, element: <ComingSoon /> },
+      { path: '/support', element: <MyRequests /> },
+      { path: '/support/new', element: <CreateTicket /> },
+      { path: '/support/:id', element: <TicketDetail /> },
 
       { path: ROUTES.CREDITS, element: <Wallet /> },
       { path: ROUTES.CREDITS_REFERRAL, element: <ComingSoon /> },
@@ -256,7 +266,9 @@ export const router = createBrowserRouter([
           { path: '/admin/security/session/:id', element: <AdminSecurityAudit /> },
           { path: '/admin/security/batch/:id', element: <AdminBatchSecurity /> },
           { path: '/admin/batches', element: <BatchManagement /> },
-          { path: '/admin/batches/:id', element: <BatchDetail /> }
+          { path: '/admin/batches/:id', element: <BatchDetail /> },
+          { path: '/admin/support', element: <SupportCenter /> },
+          { path: '/admin/support/:id', element: <AdminTicketDetail /> }
         ]
       }
     ]
