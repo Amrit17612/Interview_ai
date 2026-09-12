@@ -34,9 +34,7 @@ export function CreateTicket() {
         formData.append('attachment', file);
       }
 
-      const res = await apiClient.post('/support', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
+      const res = await apiClient.post('/support', formData);
 
       if (res.data.success) {
         setSuccessMsg('Successfully submitted!');
