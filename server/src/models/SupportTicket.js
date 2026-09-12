@@ -81,14 +81,12 @@ const SupportTicketSchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
-// Pre-save to generate ticketId if missing
-SupportTicketSchema.pre('validate', async function (next) {
+SupportTicketSchema.pre('validate', async function () {
   if (!this.ticketId) {
     const prefix = this.type === 'BUG' ? 'BUG' : 'SUP';
     const randomSuffix = Math.floor(10000 + Math.random() * 90000);
     this.ticketId = `${prefix}-${randomSuffix}`;
   }
-  next();
 });
 
 module.exports = mongoose.model('SupportTicket', SupportTicketSchema);
